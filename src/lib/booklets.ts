@@ -13,14 +13,20 @@ import {
 import { db } from "./firebase";
 import { Booklet, BookletModule, ModuleType } from "@/types";
 
-// Firestore rejette les `undefined` — on les remplace par deleteField()
-function sanitizeForFirestore(obj: Record<string, unknown>): Record<string, unknown> {
+// Firestore rejette les `undefined`.
+// - Au niveau racine : on utilise deleteField() pour supprimer le champ
+// - Dans les objets imbriqués : on retire simplement la clé (deleteField() n'est pas supporté en nested)
+function sanitizeForFirestore(
+  obj: Record<string, unknown>,
+  isRoot = true
+): Record<string, unknown> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value === undefined) {
-      result[key] = deleteField();
+      if (isRoot) result[key] = deleteField();
+      // sinon on omet simplement la clé
     } else if (value !== null && typeof value === "object" && !Array.isArray(value)) {
-      result[key] = sanitizeForFirestore(value as Record<string, unknown>);
+      result[key] = sanitizeForFirestore(value as Record<string, unknown>, false);
     } else {
       result[key] = value;
     }
