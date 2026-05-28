@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "login": "Connexion",
+    "signup": "Commencer gratuitement"
+  },
+  "hero": {
+    "badge": "Livret d'accueil digital",
+    "title": "Offrez une expérience inoubliable à vos voyageurs",
+    "subtitle": "Créez un livret d'accueil digital élégant pour votre gîte, Airbnb ou location saisonnière. Partagez-le en quelques secondes via QR code ou lien.",
+    "cta": "Créer mon livret gratuitement",
+    "ctaSub": "Sans carte bancaire · Prêt en 5 minutes"
+  },
+  "features": {
+    "title": "Tout ce dont vous avez besoin",
+    "subtitle": "Une solution complète pour accueillir vos voyageurs avec style",
+    "modules": "10 modules configurables",
+    "modulesDesc": "WiFi, règlement, check-in, activités locales et plus encore",
+    "multilang": "Multi-langues",
+    "multilangDesc": "Votre livret traduit automatiquement en 5 langues",
+    "qr": "QR Code & lien de partage",
+    "qrDesc": "Partagez en un clic, vos voyageurs accèdent sans téléchargement",
+    "design": "Design personnalisable",
+    "designDesc": "Couleurs, logo, photos — reflétez l'identité de votre hébergement",
+    "realtime": "Mise à jour en temps réel",
+    "realtimeDesc": "Modifiez votre livret, vos voyageurs voient les changements immédiatement",
+    "mobile": "100% mobile",
+    "mobileDesc": "Optimisé pour tous les écrans, téléphones, tablettes et ordinateurs"
+  },
+  "pricing": {
+    "title": "Un prix simple et transparent",
+    "subtitle": "Commencez gratuitement, passez à l'abonnement quand vous êtes prêt",
+    "free": "Gratuit",
+    "freeDesc": "Pour découvrir la plateforme",
+    "actif": "Actif",
+    "actifDesc": "Pour les hôtes qui accueillent des voyageurs",
+    "monthly": "/ mois",
+    "yearly": "/ an",
+    "yearlyBadge": "Économisez 36%",
+    "perMonth": "soit {price}€/mois",
+    "freePerk1": "Jusqu'à 3 livrets en brouillon",
+    "freePerk2": "Accès à tous les modules",
+    "freePerk3": "Aperçu de votre livret",
+    "actifPerk1": "Livrets illimités",
+    "actifPerk2": "QR code & lien de partage",
+    "actifPerk3": "Multi-langues (5 langues)",
+    "actifPerk4": "Personnalisation complète",
+    "actifPerk5": "Mises à jour en temps réel",
+    "ctaFree": "Commencer gratuitement",
+    "ctaActif": "Choisir ce plan"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Créer un compte",
+    "email": "Adresse email",
+    "password": "Mot de passe",
+    "confirmPassword": "Confirmer le mot de passe",
+    "name": "Nom complet",
+    "loginCta": "Se connecter",
+    "registerCta": "Créer mon compte",
+    "googleCta": "Continuer avec Google",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "forgotPassword": "Mot de passe oublié ?",
+    "errors": {
+      "emailRequired": "L'email est requis",
+      "passwordRequired": "Le mot de passe est requis",
+      "passwordMismatch": "Les mots de passe ne correspondent pas",
+      "nameRequired": "Le nom est requis"
+    }
+  },
+  "dashboard": {
+    "title": "Mes livrets",
+    "newBooklet": "Nouveau livret",
+    "noBooklets": "Vous n'avez pas encore de livret",
+    "noBookletsDesc": "Créez votre premier livret d'accueil en quelques minutes",
+    "create": "Créer un livret",
+    "draft": "Brouillon",
+    "published": "Publié",
+    "edit": "Modifier",
+    "preview": "Aperçu",
+    "share": "Partager",
+    "delete": "Supprimer",
+    "upgradeTitle": "Passez à l'abonnement Actif",
+    "upgradeDesc": "Activez vos livrets et commencez à accueillir vos voyageurs",
+    "upgradeCta": "Voir les tarifs"
+  },
+  "modules": {
+    "welcome": "Bienvenue",
+    "practical": "Infos pratiques",
+    "checkin": "Check-in / Check-out",
+    "rules": "Règlement intérieur",
+    "guide": "Guide de la maison",
+    "contacts": "Contacts",
+    "activities": "Activités locales",
+    "gooddeals": "Bons plans",
+    "transport": "Transport",
+    "faq": "FAQ"
+  },
+  "footer": {
+    "rights": "Tous droits réservés",
+    "privacy": "Confidentialité",
+    "terms": "CGU",
+    "contact": "Contact"
+  }
+}

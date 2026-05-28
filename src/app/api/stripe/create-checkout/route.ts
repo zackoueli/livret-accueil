@@ -1,0 +1,51 @@
+import { NextRequest } from "next/server";
+import { stripe } from "@/lib/stripe";
+import { adminDb } from "@/lib/firebase-admin";
+
+export async function POST(request: NextRequest) {
+  const { userId, email, billingPeriod, locale } = await request.json();
+
+  if (!userId || !email || !billingPeriod) {
+    return Response.json({ error: "Missing parameters" }, { status: 400 });
+  }
+
+  const priceId =
+    billingPeriod === "yearly"
+      ? process.env.STRIPE_PRICE_YEARLY!
+      : process.env.STRIPE_PRICE_MONTHLY!;
+
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+  const localePath = locale ? `/${locale}` : "";
+
+  // Retrieve or create Stripe customer
+  const userDoc = await adminDb.collection("users").doc(userId).get();
+  const userData = userDoc.data();
+  let customerId: string | undefined = userData?.stripeCustomerId;
+
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email,
+      metadata: { firebaseUid: userId },
+    });
+    customerId = customer.id;
+    await adminDb.collection("users").doc(userId).set(
+      { stripeCustomerId: customer.id },
+      { merge: true }
+    );
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    customer: customerId,
+    mode: "subscription",
+    line_items: [{ price: priceId, quantity: 1 }],
+    success_url: `${appUrl}${localePath}/dashboard?checkout=success`,
+    cancel_url: `${appUrl}${localePath}/dashboard?checkout=cancel`,
+    metadata: { firebaseUid: userId },
+    subscription_data: {
+      metadata: { firebaseUid: userId },
+    },
+    allow_promotion_codes: true,
+  });
+
+  return Response.json({ url: session.url });
+}

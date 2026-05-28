@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "login": "Login",
+    "signup": "Get started free"
+  },
+  "hero": {
+    "badge": "Digital welcome booklet",
+    "title": "Give your guests an unforgettable experience",
+    "subtitle": "Create an elegant digital welcome booklet for your gîte, Airbnb or vacation rental. Share it in seconds via QR code or link.",
+    "cta": "Create my booklet for free",
+    "ctaSub": "No credit card · Ready in 5 minutes"
+  },
+  "features": {
+    "title": "Everything you need",
+    "subtitle": "A complete solution to welcome your guests in style",
+    "modules": "10 configurable modules",
+    "modulesDesc": "WiFi, rules, check-in, local activities and more",
+    "multilang": "Multi-language",
+    "multilangDesc": "Your booklet automatically translated into 5 languages",
+    "qr": "QR Code & share link",
+    "qrDesc": "Share in one click, guests access without downloading anything",
+    "design": "Customizable design",
+    "designDesc": "Colors, logo, photos — reflect your property's identity",
+    "realtime": "Real-time updates",
+    "realtimeDesc": "Edit your booklet, guests see changes immediately",
+    "mobile": "100% mobile",
+    "mobileDesc": "Optimized for all screens, phones, tablets and computers"
+  },
+  "pricing": {
+    "title": "Simple, transparent pricing",
+    "subtitle": "Start for free, upgrade when you're ready",
+    "free": "Free",
+    "freeDesc": "To discover the platform",
+    "actif": "Active",
+    "actifDesc": "For hosts welcoming guests",
+    "monthly": "/ month",
+    "yearly": "/ year",
+    "yearlyBadge": "Save 36%",
+    "perMonth": "i.e. €{price}/month",
+    "freePerk1": "Up to 3 draft booklets",
+    "freePerk2": "Access to all modules",
+    "freePerk3": "Preview your booklet",
+    "actifPerk1": "Unlimited booklets",
+    "actifPerk2": "QR code & share link",
+    "actifPerk3": "Multi-language (5 languages)",
+    "actifPerk4": "Full customization",
+    "actifPerk5": "Real-time updates",
+    "ctaFree": "Start for free",
+    "ctaActif": "Choose this plan"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Create an account",
+    "email": "Email address",
+    "password": "Password",
+    "confirmPassword": "Confirm password",
+    "name": "Full name",
+    "loginCta": "Sign in",
+    "registerCta": "Create my account",
+    "googleCta": "Continue with Google",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "forgotPassword": "Forgot password?",
+    "errors": {
+      "emailRequired": "Email is required",
+      "passwordRequired": "Password is required",
+      "passwordMismatch": "Passwords do not match",
+      "nameRequired": "Name is required"
+    }
+  },
+  "dashboard": {
+    "title": "My booklets",
+    "newBooklet": "New booklet",
+    "noBooklets": "You don't have any booklets yet",
+    "noBookletsDesc": "Create your first welcome booklet in minutes",
+    "create": "Create a booklet",
+    "draft": "Draft",
+    "published": "Published",
+    "edit": "Edit",
+    "preview": "Preview",
+    "share": "Share",
+    "delete": "Delete",
+    "upgradeTitle": "Upgrade to Active plan",
+    "upgradeDesc": "Activate your booklets and start welcoming your guests",
+    "upgradeCta": "See pricing"
+  },
+  "modules": {
+    "welcome": "Welcome",
+    "practical": "Practical info",
+    "checkin": "Check-in / Check-out",
+    "rules": "House rules",
+    "guide": "House guide",
+    "contacts": "Contacts",
+    "activities": "Local activities",
+    "gooddeals": "Good deals",
+    "transport": "Transport",
+    "faq": "FAQ"
+  },
+  "footer": {
+    "rights": "All rights reserved",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "contact": "Contact"
+  }
+}

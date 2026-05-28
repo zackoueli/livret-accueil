@@ -1,0 +1,123 @@
+"use client";
+
+import { useEffect, useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { updateBooklet } from "@/lib/booklets";
+import { useAuthStore } from "@/store/authStore";
+import { useEditorStore } from "@/store/editorStore";
+import { Booklet } from "@/types";
+import { EditorSidebar } from "./EditorSidebar";
+import { EditorForm } from "./EditorForm";
+import { EditorPreview } from "./EditorPreview";
+import { EditorHeader } from "./EditorHeader";
+import { LayoutList, PenLine, Eye } from "lucide-react";
+import toast from "react-hot-toast";
+
+type MobileTab = "modules" | "edit" | "preview";
+
+export function EditorPage({ bookletId }: { bookletId: string }) {
+  const router = useRouter();
+  const locale = useLocale();
+  const { user, loading: authLoading } = useAuthStore();
+  const { booklet, setBooklet, isDirty, setIsSaving, setIsDirty } = useEditorStore();
+  const [mobileTab, setMobileTab] = useState<MobileTab>("modules");
+
+  // Load booklet
+  useEffect(() => {
+    if (!user) return;
+    const load = async () => {
+      const snap = await getDoc(doc(db, "booklets", bookletId));
+      if (!snap.exists()) { router.push(`/${locale}/dashboard`); return; }
+      const data = { id: snap.id, ...snap.data() } as Booklet;
+      if (data.userId !== user.uid) { router.push(`/${locale}/dashboard`); return; }
+      setBooklet(data);
+    };
+    load();
+  }, [user, bookletId]);
+
+  // Redirect if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) router.push(`/${locale}/auth`);
+  }, [user, authLoading]);
+
+  // Autosave every 3 seconds when dirty
+  const save = useCallback(async () => {
+    if (!booklet || !isDirty) return;
+    setIsSaving(true);
+    try {
+      await updateBooklet(booklet.id, booklet);
+      setIsDirty(false);
+    } catch {
+      toast.error("Erreur de sauvegarde");
+    } finally {
+      setIsSaving(false);
+    }
+  }, [booklet, isDirty]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => { if (isDirty) save(); }, 3000);
+    return () => clearTimeout(timer);
+  }, [isDirty, save]);
+
+  // Ctrl+S manual save
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [save]);
+
+  if (!booklet) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
+          <p className="text-sm text-gray-400">Chargement du livret...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      <EditorHeader onSave={save} />
+
+      {/* ── Desktop layout ── */}
+      <div className="hidden lg:flex flex-1 overflow-hidden" style={{ height: "calc(100vh - 64px)" }}>
+        <EditorSidebar />
+        <EditorForm />
+        <EditorPreview />
+      </div>
+
+      {/* ── Mobile layout ── */}
+      <div className="lg:hidden flex flex-col flex-1 overflow-hidden" style={{ height: "calc(100vh - 64px - 56px)" }}>
+        {mobileTab === "modules" && <EditorSidebar onModuleSelect={() => setMobileTab("edit")} />}
+        {mobileTab === "edit" && <EditorForm />}
+        {mobileTab === "preview" && <EditorPreview />}
+      </div>
+
+      {/* ── Mobile bottom nav ── */}
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex h-14">
+        {([
+          { tab: "modules", icon: LayoutList, label: "Modules" },
+          { tab: "edit",    icon: PenLine,    label: "Édition" },
+          { tab: "preview", icon: Eye,        label: "Aperçu" },
+        ] as { tab: MobileTab; icon: React.ElementType; label: string }[]).map(({ tab, icon: Icon, label }) => (
+          <button
+            key={tab}
+            onClick={() => setMobileTab(tab)}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-xs font-semibold transition-colors ${
+              mobileTab === tab ? "text-orange-500" : "text-gray-400"
+            }`}>
+            <Icon className="w-5 h-5" />
+            {label}
+          </button>
+        ))}
+      </nav>
+    </div>
+  );
+}
