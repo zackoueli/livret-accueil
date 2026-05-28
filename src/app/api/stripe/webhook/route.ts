@@ -32,11 +32,17 @@ export async function POST(request: NextRequest) {
   const getEndDate = (sub: Stripe.Subscription): number =>
     (sub as unknown as Record<string, number>).billing_cycle_anchor ?? 0;
 
+  console.log(`[webhook] event: ${event.type}`);
+
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
       const uid = getUid(session);
-      if (!uid) break;
+      console.log(`[webhook] checkout.session.completed — uid: ${uid}, session.id: ${session.id}, metadata:`, session.metadata);
+      if (!uid) {
+        console.error("[webhook] No firebaseUid in session metadata — skipping");
+        break;
+      }
 
       const sub = await stripe.subscriptions.retrieve(
         session.subscription as string
@@ -46,6 +52,7 @@ export async function POST(request: NextRequest) {
           ? "yearly"
           : "monthly";
 
+      console.log(`[webhook] updating user ${uid} to actif, period: ${period}`);
       await adminDb.collection("users").doc(uid).set(
         {
           plan: "actif",
@@ -56,6 +63,7 @@ export async function POST(request: NextRequest) {
         },
         { merge: true }
       );
+      console.log(`[webhook] user ${uid} updated to actif ✓`);
       break;
     }
 
