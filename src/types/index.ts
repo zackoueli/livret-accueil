@@ -91,6 +91,7 @@ export interface CheckIn {
 export interface Booklet {
   id: string;
   userId: string;
+  templateId?: string;
   title: string;
   slug: string;
   description?: string;

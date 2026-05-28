@@ -5,6 +5,7 @@ import { Booklet } from "@/types";
 import { MODULE_META, LANGUAGES } from "@/lib/modules";
 import { ArrowLeft, Globe, ChevronRight, MapPin, Phone, FileText, Download, Navigation, ClipboardCheck } from "lucide-react";
 import { CheckInForm } from "./CheckInForm";
+import { getTemplate } from "@/lib/templates";
 
 type Screen = "splash" | "home" | "module" | "nearby";
 
@@ -60,20 +61,30 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
     setScreen("module");
   };
 
-  const accent = booklet.accentColor;
+  const tpl = getTemplate(booklet.templateId);
+  const accent = booklet.accentColor ?? tpl.accentColor;
   const sp = booklet.splashConfig ?? {};
+
+  // Helpers template pour le home screen
+  const cardRadiusMap = { none: "0", sm: "8px", md: "12px", lg: "16px", full: "20px" };
+  const cardBorderRadius = cardRadiusMap[tpl.cardRadius];
+  const fontStyle = tpl.fontFamily === "serif"
+    ? { fontFamily: "Georgia, 'Times New Roman', serif" }
+    : tpl.fontFamily === "mono"
+    ? { fontFamily: "ui-monospace, monospace" }
+    : {};
 
   // Helpers splashConfig
   const overlayMap = { none: "0", light: "0.25", medium: "0.5", dark: "0.75" };
-  const overlayAlpha = overlayMap[sp.overlayOpacity ?? "dark"];
+  const overlayAlpha = overlayMap[sp.overlayOpacity ?? tpl.splashOverlay];
   const fontMap = { sans: "font-sans", serif: "font-serif", mono: "font-mono" };
   const sizeMap = { sm: "text-2xl", md: "text-3xl", lg: "text-4xl", xl: "text-5xl" };
   const weightMap = { normal: "font-normal", semibold: "font-semibold", bold: "font-bold", black: "font-black" };
-  const titleClass = `${fontMap[sp.titleFont ?? "sans"]} ${sizeMap[sp.titleSize ?? "lg"]} ${weightMap[sp.titleWeight ?? "bold"]}`;
-  const titleColor = sp.titleColor ?? "#ffffff";
-  const subtitleColor = sp.subtitleColor ?? "rgba(255,255,255,0.65)";
-  const btnBg = sp.buttonColor ?? "#ffffff";
-  const btnText = sp.buttonTextColor ?? accent;
+  const titleClass = `${fontMap[sp.titleFont ?? tpl.splashTitleFont]} ${sizeMap[sp.titleSize ?? tpl.splashTitleSize]} ${weightMap[sp.titleWeight ?? tpl.splashTitleWeight]}`;
+  const titleColor = sp.titleColor ?? tpl.splashTitleColor;
+  const subtitleColor = sp.subtitleColor ?? tpl.splashSubtitleColor;
+  const btnBg = sp.buttonColor ?? tpl.splashButtonColor;
+  const btnText = sp.buttonTextColor ?? tpl.splashButtonTextColor;
   const hasSplashMedia = !!(sp.mediaUrl || sp.youtubeUrl);
   const bgColor = hasSplashMedia ? "#000" : accent;
 
@@ -180,10 +191,10 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
   if (screen === "home") {
     return (<>
       {showCheckIn && <CheckInForm bookletId={booklet.id} accent={accent} onClose={() => setShowCheckIn(false)} />}
-      <div className="fixed inset-0 flex flex-col bg-gray-50">
+      <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: tpl.moduleBg }}>
 
         {/* Header */}
-        <div className="shrink-0 px-5 pt-10 pb-6" style={{ backgroundColor: accent }}>
+        <div className="shrink-0 px-5 pt-10 pb-6" style={{ backgroundColor: tpl.headerBg, ...fontStyle }}>
           <div className="flex items-center justify-between mb-1">
             <button
               onClick={() => setScreen("splash")}
@@ -231,22 +242,27 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
                 <button
                   key={m.id}
                   onClick={() => openModule(m.id)}
-                  className="bg-white rounded-2xl p-5 text-left shadow-sm border border-gray-100 active:scale-95 transition-all flex flex-col gap-3 group hover:shadow-md">
+                  className="p-4 text-left active:scale-95 transition-all flex flex-col gap-2.5 group"
+                  style={{
+                    backgroundColor: tpl.cardBg,
+                    border: `1px solid ${tpl.cardBorder}`,
+                    borderRadius: cardBorderRadius,
+                    boxShadow: tpl.cardShadow ? "0 2px 8px rgba(0,0,0,0.08)" : "none",
+                    ...fontStyle,
+                  }}>
                   <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center text-xl"
+                    className="w-10 h-10 rounded-xl flex items-center justify-center text-xl"
                     style={{ backgroundColor: accent + "18" }}>
                     {meta.emoji}
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm leading-tight">{meta.label}</p>
-                    <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">{meta.description}</p>
+                    <p className="font-semibold text-sm leading-tight" style={{ color: tpl.cardBg === "#1a1612" ? "#f5e6b2" : "#1f2937" }}>{meta.label}</p>
+                    <p className="text-xs mt-0.5 line-clamp-1" style={{ color: tpl.cardBg === "#1a1612" ? "#a08060" : "#9ca3af" }}>{meta.description}</p>
                   </div>
                   <div className="flex items-center justify-between mt-auto">
-                    <div
-                      className="w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: hasContent ? accent : "#e5e7eb" }}
-                    />
-                    <ChevronRight className="w-4 h-4 text-gray-300 group-hover:text-gray-400 transition-colors" />
+                    <div className="w-1.5 h-1.5 rounded-full"
+                      style={{ backgroundColor: hasContent ? accent : tpl.cardBorder }} />
+                    <ChevronRight className="w-4 h-4 transition-colors" style={{ color: tpl.cardBorder }} />
                   </div>
                 </button>
               );
@@ -357,7 +373,7 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
   if (screen === "module" && activeModule) {
     const meta = MODULE_META[activeModule.type];
     return (
-      <div className="fixed inset-0 flex flex-col bg-gray-50">
+      <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: tpl.moduleBg, ...fontStyle }}>
 
         {/* Header */}
         <div className="shrink-0 px-5 pt-10 pb-5 bg-white border-b border-gray-100">
@@ -385,6 +401,7 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
           <ModuleContent
             module={activeModule}
             accent={accent}
+            tpl={tpl}
             get={(key) => get(activeModule.id, key)}
           />
           <p className="text-center text-xs text-gray-300 mt-10 pb-4">
@@ -403,13 +420,19 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
 
 // ─── MODULE CONTENT ──────────────────────────────────────────────────────────
 
-function ModuleContent({ module, accent, get }: {
+function ModuleContent({ module, accent, tpl, get }: {
   module: Booklet["modules"][0];
   accent: string;
+  tpl: import("@/lib/templates").BookletTemplate;
   get: (key: string) => string;
 }) {
   const photos = module.images ?? [];
   const docs = module.documents ?? [];
+  const IC = ({ emoji, label, highlight, children }: { emoji: string; label: string; highlight?: boolean; children: React.ReactNode }) => (
+    <InfoCard emoji={emoji} label={label} accent={accent} highlight={highlight} infoBg={tpl.infoBg} infoBorder={tpl.infoBorder}>
+      {children}
+    </InfoCard>
+  );
 
   switch (module.type) {
     case "welcome":
@@ -434,7 +457,7 @@ function ModuleContent({ module, accent, get }: {
       return (
         <div className="space-y-3">
           {get("wifi_name") && (
-            <InfoCard emoji="📶" label="WiFi" accent={accent}>
+            <IC emoji="📶" label="WiFi">
               <p className="font-bold text-gray-900 text-base">{get("wifi_name")}</p>
               {get("wifi_password") && (
                 <p className="text-sm text-gray-500 mt-1">
@@ -444,24 +467,24 @@ function ModuleContent({ module, accent, get }: {
                   </span>
                 </p>
               )}
-            </InfoCard>
+            </IC>
           )}
           {get("door_code") && (
-            <InfoCard emoji="🔑" label="Code d'entrée" accent={accent}>
+            <IC emoji="🔑" label="Code d'entrée" >
               <p className="font-mono font-bold text-3xl text-gray-900 tracking-[0.3em]">
                 {get("door_code")}
               </p>
-            </InfoCard>
+            </IC>
           )}
           {get("parking") && (
-            <InfoCard emoji="🅿️" label="Parking" accent={accent}>
+            <IC emoji="🅿️" label="Parking" >
               <p className="text-sm text-gray-600 leading-relaxed">{get("parking")}</p>
-            </InfoCard>
+            </IC>
           )}
           {get("other") && (
-            <InfoCard emoji="ℹ️" label="Autres infos" accent={accent}>
+            <IC emoji="ℹ️" label="Autres infos" >
               <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("other")}</p>
-            </InfoCard>
+            </IC>
           )}
           {!get("wifi_name") && !get("door_code") && !photos.length && <EmptyModule />}
           <DocumentList documents={docs} accent={accent} />
@@ -489,14 +512,14 @@ function ModuleContent({ module, accent, get }: {
             </div>
           )}
           {get("checkin_process") && (
-            <InfoCard emoji="🗝️" label="Procédure d'arrivée" accent={accent}>
+            <IC emoji="🗝️" label="Procédure d'arrivée" >
               <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("checkin_process")}</p>
-            </InfoCard>
+            </IC>
           )}
           {get("checkout_process") && (
-            <InfoCard emoji="👋" label="Procédure de départ" accent={accent}>
+            <IC emoji="👋" label="Procédure de départ" >
               <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("checkout_process")}</p>
-            </InfoCard>
+            </IC>
           )}
           {!get("checkin_time") && !get("checkin_process") && !photos.length && <EmptyModule />}
           <DocumentList documents={docs} accent={accent} />
@@ -518,10 +541,10 @@ function ModuleContent({ module, accent, get }: {
     case "guide":
       return (
         <div className="space-y-3">
-          {get("heating") && <InfoCard emoji="🌡️" label="Chauffage" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("heating")}</p></InfoCard>}
-          {get("appliances") && <InfoCard emoji="🍳" label="Électroménager" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("appliances")}</p></InfoCard>}
-          {get("trash") && <InfoCard emoji="♻️" label="Tri des déchets" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("trash")}</p></InfoCard>}
-          {get("other") && <InfoCard emoji="🏠" label="Autres infos" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("other")}</p></InfoCard>}
+          {get("heating") && <IC emoji="🌡️" label="Chauffage" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("heating")}</p></IC>}
+          {get("appliances") && <IC emoji="🍳" label="Électroménager" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("appliances")}</p></IC>}
+          {get("trash") && <IC emoji="♻️" label="Tri des déchets" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("trash")}</p></IC>}
+          {get("other") && <IC emoji="🏠" label="Autres infos" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("other")}</p></IC>}
           {get("video") && <VideoEmbed url={get("video")} />}
           <DocumentList documents={docs} accent={accent} />
           <PhotoGallery images={photos} />
@@ -533,7 +556,7 @@ function ModuleContent({ module, accent, get }: {
       return (
         <div className="space-y-3">
           {get("owner_name") && (
-            <InfoCard emoji="👤" label={get("owner_name")} accent={accent}>
+            <IC emoji="👤" label={get("owner_name")} >
               {get("owner_phone") && (
                 <a href={`tel:${get("owner_phone")}`}
                   className="inline-flex items-center gap-2 text-sm font-bold py-2 px-4 rounded-xl mt-1 active:scale-95 transition-all"
@@ -541,15 +564,15 @@ function ModuleContent({ module, accent, get }: {
                   <Phone className="w-4 h-4" /> {get("owner_phone")}
                 </a>
               )}
-            </InfoCard>
+            </IC>
           )}
           {get("emergency") && (
-            <InfoCard emoji="🚨" label="Urgences" accent={accent} highlight>
+            <IC emoji="🚨" label="Urgences"  highlight>
               <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-line font-medium">{get("emergency")}</p>
-            </InfoCard>
+            </IC>
           )}
-          {get("doctor") && <InfoCard emoji="⚕️" label="Médecin" accent={accent}><p className="text-sm text-gray-600">{get("doctor")}</p></InfoCard>}
-          {get("neighbors") && <InfoCard emoji="🏘️" label="Voisins" accent={accent}><p className="text-sm text-gray-600 whitespace-pre-line">{get("neighbors")}</p></InfoCard>}
+          {get("doctor") && <IC emoji="⚕️" label="Médecin" ><p className="text-sm text-gray-600">{get("doctor")}</p></IC>}
+          {get("neighbors") && <IC emoji="🏘️" label="Voisins" ><p className="text-sm text-gray-600 whitespace-pre-line">{get("neighbors")}</p></IC>}
           {!get("owner_name") && !get("emergency") && !photos.length && <EmptyModule />}
           <DocumentList documents={docs} accent={accent} />
           <PhotoGallery images={photos} />
@@ -574,9 +597,9 @@ function ModuleContent({ module, accent, get }: {
     case "gooddeals":
       return (
         <div className="space-y-3">
-          {get("restaurants") && <InfoCard emoji="🍽️" label="Restaurants" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("restaurants")}</p></InfoCard>}
-          {get("shops") && <InfoCard emoji="🛒" label="Commerces" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("shops")}</p></InfoCard>}
-          {get("others") && <InfoCard emoji="⭐" label="Autres bons plans" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("others")}</p></InfoCard>}
+          {get("restaurants") && <IC emoji="🍽️" label="Restaurants" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("restaurants")}</p></IC>}
+          {get("shops") && <IC emoji="🛒" label="Commerces" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("shops")}</p></IC>}
+          {get("others") && <IC emoji="⭐" label="Autres bons plans" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("others")}</p></IC>}
           {get("places") && <PlacesList raw={get("places")} accent={accent} />}
           <DocumentList documents={docs} accent={accent} />
           <PhotoGallery images={photos} />
@@ -587,10 +610,10 @@ function ModuleContent({ module, accent, get }: {
     case "transport":
       return (
         <div className="space-y-3">
-          {get("by_car") && <InfoCard emoji="🚗" label="En voiture" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("by_car")}</p></InfoCard>}
-          {get("by_train") && <InfoCard emoji="🚆" label="En train" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("by_train")}</p></InfoCard>}
-          {get("taxi") && <InfoCard emoji="🚕" label="Taxi / VTC" accent={accent}><p className="text-sm text-gray-600">{get("taxi")}</p></InfoCard>}
-          {get("airport") && <InfoCard emoji="✈️" label="Aéroport" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("airport")}</p></InfoCard>}
+          {get("by_car") && <IC emoji="🚗" label="En voiture" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("by_car")}</p></IC>}
+          {get("by_train") && <IC emoji="🚆" label="En train" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("by_train")}</p></IC>}
+          {get("taxi") && <IC emoji="🚕" label="Taxi / VTC" ><p className="text-sm text-gray-600">{get("taxi")}</p></IC>}
+          {get("airport") && <IC emoji="✈️" label="Aéroport" ><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("airport")}</p></IC>}
           <DocumentList documents={docs} accent={accent} />
           <PhotoGallery images={photos} />
           {!get("by_car") && !get("by_train") && !photos.length && <EmptyModule />}
@@ -658,21 +681,27 @@ function ModuleContent({ module, accent, get }: {
 
 // ─── SUB-COMPONENTS ───────────────────────────────────────────────────────────
 
-function InfoCard({ emoji, label, accent, highlight, children }: {
+function InfoCard({ emoji, label, accent, highlight, infoBg, infoBorder, children }: {
   emoji: string;
   label: string;
   accent: string;
   highlight?: boolean;
+  infoBg?: string;
+  infoBorder?: string;
   children: React.ReactNode;
 }) {
   return (
-    <div className={`bg-white rounded-2xl p-4 border shadow-sm ${highlight ? "border-red-100 bg-red-50/30" : "border-gray-100"}`}>
+    <div className="rounded-2xl p-4 border shadow-sm"
+      style={{
+        backgroundColor: highlight ? "#fef2f2" : (infoBg ?? "#ffffff"),
+        borderColor: highlight ? "#fecaca" : (infoBorder ?? "#f3f4f6"),
+      }}>
       <div className="flex items-center gap-2 mb-2.5">
         <div className="w-7 h-7 rounded-lg flex items-center justify-center text-base"
           style={{ backgroundColor: highlight ? "#fee2e2" : accent + "15" }}>
           {emoji}
         </div>
-        <p className="text-xs font-bold text-gray-500 uppercase tracking-wide">{label}</p>
+        <p className="text-xs font-bold uppercase tracking-wide" style={{ color: highlight ? "#ef4444" : "#6b7280" }}>{label}</p>
       </div>
       {children}
     </div>
