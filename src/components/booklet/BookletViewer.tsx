@@ -178,7 +178,8 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
 
   // ─── HOME — tour de contrôle ───────────────────────────────────────────────
   if (screen === "home") {
-    return (
+    return (<>
+      {showCheckIn && <CheckInForm bookletId={booklet.id} accent={accent} onClose={() => setShowCheckIn(false)} />}
       <div className="fixed inset-0 flex flex-col bg-gray-50">
 
         {/* Header */}
@@ -295,7 +296,7 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
           </p>
         </div>
       </div>
-    );
+    </>);
   }
 
   // ─── NEARBY — Autour de moi ─────────────────────────────────────────────────
