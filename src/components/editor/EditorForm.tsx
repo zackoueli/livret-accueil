@@ -5,6 +5,8 @@ import { useEditorStore } from "@/store/editorStore";
 import { MODULE_META, MODULE_FIELDS, LANGUAGES } from "@/lib/modules";
 import { EyeOff, Languages, Loader2 } from "lucide-react";
 import toast from "react-hot-toast";
+import { ModulePhotoUploader } from "./ModulePhotoUploader";
+import { ModuleDocumentUploader } from "./ModuleDocumentUploader";
 
 function toEmbedUrl(url: string): string | null {
   try {
@@ -218,6 +220,20 @@ export function EditorForm() {
             </div>
           ))}
         </div>
+
+        {/* Photos du module */}
+        <ModulePhotoUploader
+          bookletId={booklet.id}
+          moduleId={activeModule.id}
+          images={activeModule.images ?? []}
+        />
+
+        {/* Documents PDF */}
+        <ModuleDocumentUploader
+          bookletId={booklet.id}
+          moduleId={activeModule.id}
+          documents={activeModule.documents ?? []}
+        />
 
         <p className="text-center text-xs text-gray-300 mt-8">
           Sauvegarde automatique · Ctrl+S pour sauvegarder manuellement

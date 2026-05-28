@@ -11,6 +11,8 @@ interface EditorState {
   setActiveModule: (id: string) => void;
   setActiveLanguage: (lang: string) => void;
   updateModule: (moduleId: string, content: Record<string, string>) => void;
+  updateModuleImages: (moduleId: string, images: string[]) => void;
+  updateModuleDocuments: (moduleId: string, documents: import("@/types").BookletDocument[]) => void;
   toggleModule: (moduleId: string) => void;
   reorderModules: (modules: BookletModule[]) => void;
   updateBookletField: (field: keyof Booklet, value: any) => void;
@@ -38,6 +40,34 @@ export const useEditorStore = create<EditorState>((set) => ({
           ...state.booklet,
           modules: state.booklet.modules.map((m) =>
             m.id === moduleId ? { ...m, content: { ...m.content, ...content } } : m
+          ),
+        },
+      };
+    }),
+
+  updateModuleImages: (moduleId, images) =>
+    set((state) => {
+      if (!state.booklet) return {};
+      return {
+        isDirty: true,
+        booklet: {
+          ...state.booklet,
+          modules: state.booklet.modules.map((m) =>
+            m.id === moduleId ? { ...m, images } : m
+          ),
+        },
+      };
+    }),
+
+  updateModuleDocuments: (moduleId, documents) =>
+    set((state) => {
+      if (!state.booklet) return {};
+      return {
+        isDirty: true,
+        booklet: {
+          ...state.booklet,
+          modules: state.booklet.modules.map((m) =>
+            m.id === moduleId ? { ...m, documents } : m
           ),
         },
       };

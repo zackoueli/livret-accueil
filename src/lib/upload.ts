@@ -1,6 +1,27 @@
 import { ref, uploadBytesResumable, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "./firebase";
 
+export async function uploadDocument(
+  file: File,
+  path: string,
+  onProgress?: (pct: number) => void
+): Promise<string> {
+  if (file.type !== "application/pdf") throw new Error("PDF uniquement");
+  if (file.size > 20 * 1024 * 1024) throw new Error("PDF trop lourd (max 20 Mo)");
+
+  const storageRef = ref(storage, path);
+  const task = uploadBytesResumable(storageRef, file);
+
+  return new Promise((resolve, reject) => {
+    task.on(
+      "state_changed",
+      (snap) => onProgress?.(Math.round((snap.bytesTransferred / snap.totalBytes) * 100)),
+      reject,
+      async () => { resolve(await getDownloadURL(task.snapshot.ref)); }
+    );
+  });
+}
+
 export async function uploadMedia(
   file: File,
   path: string,

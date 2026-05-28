@@ -3,15 +3,17 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META, LANGUAGES } from "@/lib/modules";
-import { ArrowLeft, Globe, ChevronRight, MapPin, Phone } from "lucide-react";
+import { ArrowLeft, Globe, ChevronRight, MapPin, Phone, FileText, Download, Navigation, ClipboardCheck } from "lucide-react";
+import { CheckInForm } from "./CheckInForm";
 
-type Screen = "splash" | "home" | "module";
+type Screen = "splash" | "home" | "module" | "nearby";
 
 export function BookletViewer({ booklet }: { booklet: Booklet }) {
   const [screen, setScreen] = useState<Screen>("splash");
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [showCheckIn, setShowCheckIn] = useState(false);
 
   useEffect(() => {
     fetch("/api/booklets/view", {
@@ -39,6 +41,19 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
   };
 
   const activeModule = enabledModules.find((m) => m.id === activeModuleId);
+
+  // Collecte tous les places de tous les modules pour "Autour de moi"
+  const allPlaces = enabledModules.flatMap((m) => {
+    const raw = m.content["places"];
+    if (!raw) return [];
+    const category = MODULE_META[m.type].label;
+    return raw.split("\n")
+      .map((line: string) => {
+        const [name, address] = line.split("|").map((s: string) => s.trim());
+        return name ? { name, address, category } : null;
+      })
+      .filter(Boolean) as { name: string; address: string; category: string }[];
+  });
 
   const openModule = (id: string) => {
     setActiveModuleId(id);
@@ -237,12 +252,100 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
             })}
           </div>
 
+          {/* Bouton Check-in */}
+          <button
+            onClick={() => setShowCheckIn(true)}
+            className="w-full mt-3 flex items-center gap-3 rounded-2xl p-4 border border-gray-100 bg-white shadow-sm active:scale-95 transition-all"
+            style={{ borderColor: accent + "30" }}>
+            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
+              style={{ backgroundColor: accent + "18" }}>
+              <ClipboardCheck className="w-5 h-5" style={{ color: accent }} />
+            </div>
+            <div className="text-left">
+              <p className="font-semibold text-gray-800 text-sm">Check-in en ligne</p>
+              <p className="text-xs text-gray-400">Enregistrez votre arrivée</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-gray-300 ml-auto" />
+          </button>
+
+          {/* Bouton Autour de moi */}
+          {allPlaces.length > 0 && (
+            <button
+              onClick={() => setScreen("nearby")}
+              className="w-full mt-3 flex items-center gap-3 rounded-2xl p-4 border border-gray-100 bg-white shadow-sm active:scale-95 transition-all"
+              style={{ borderColor: accent + "30" }}>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xl shrink-0"
+                style={{ backgroundColor: accent + "18" }}>
+                📍
+              </div>
+              <div className="text-left">
+                <p className="font-semibold text-gray-800 text-sm">Autour de moi</p>
+                <p className="text-xs text-gray-400">{allPlaces.length} lieu{allPlaces.length > 1 ? "x" : ""} recommandé{allPlaces.length > 1 ? "s" : ""}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-gray-300 ml-auto" />
+            </button>
+          )}
+
           {/* Footer */}
           <p className="text-center text-xs text-gray-300 mt-8 pb-4">
             Créé avec{" "}
             <span className="font-semibold" style={{ color: accent }}>
               Livret.
             </span>
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── NEARBY — Autour de moi ─────────────────────────────────────────────────
+  if (screen === "nearby") {
+    return (
+      <div className="fixed inset-0 flex flex-col bg-gray-50">
+        <div className="shrink-0 px-5 pt-10 pb-5 bg-white border-b border-gray-100">
+          <button onClick={() => setScreen("home")}
+            className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-800 transition-colors mb-4">
+            <ArrowLeft className="w-4 h-4" /> Retour
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
+              style={{ backgroundColor: accent + "18" }}>📍</div>
+            <div>
+              <h2 className="font-bold text-gray-900 text-lg">Autour de moi</h2>
+              <p className="text-xs text-gray-400">{allPlaces.length} lieu{allPlaces.length > 1 ? "x" : ""} recommandé{allPlaces.length > 1 ? "s" : ""}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 overflow-y-auto px-5 py-6 space-y-3">
+          {allPlaces.map((place, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 px-4 py-4 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+                    style={{ backgroundColor: accent + "18" }}>
+                    <MapPin className="w-4 h-4" style={{ color: accent }} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">{place.name}</p>
+                    {place.address && <p className="text-xs text-gray-400 mt-0.5">{place.address}</p>}
+                    <p className="text-xs mt-1 font-medium" style={{ color: accent }}>{place.category}</p>
+                  </div>
+                </div>
+                {place.address && (
+                  <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(place.address)}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="shrink-0 flex items-center gap-1 text-xs font-bold px-3 py-2 rounded-xl transition-colors"
+                    style={{ backgroundColor: accent + "15", color: accent }}>
+                    <Navigation className="w-3.5 h-3.5" /> Y aller
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+
+          <p className="text-center text-xs text-gray-300 mt-6 pb-4">
+            Créé avec <span className="font-semibold" style={{ color: accent }}>Livret.</span>
           </p>
         </div>
       </div>
@@ -292,7 +395,9 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
     );
   }
 
-  return null;
+  return showCheckIn ? (
+    <CheckInForm bookletId={booklet.id} accent={accent} onClose={() => setShowCheckIn(false)} />
+  ) : null;
 }
 
 // ─── MODULE CONTENT ──────────────────────────────────────────────────────────
@@ -302,6 +407,9 @@ function ModuleContent({ module, accent, get }: {
   accent: string;
   get: (key: string) => string;
 }) {
+  const photos = module.images ?? [];
+  const docs = module.documents ?? [];
+
   switch (module.type) {
     case "welcome":
       return (
@@ -314,8 +422,10 @@ function ModuleContent({ module, accent, get }: {
               {get("message")}
             </p>
           )}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
           {get("video") && <VideoEmbed url={get("video")} />}
-          {!get("title") && !get("message") && <EmptyModule />}
+          {!get("title") && !get("message") && !photos.length && <EmptyModule />}
         </div>
       );
 
@@ -352,7 +462,9 @@ function ModuleContent({ module, accent, get }: {
               <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("other")}</p>
             </InfoCard>
           )}
-          {!get("wifi_name") && !get("door_code") && <EmptyModule />}
+          {!get("wifi_name") && !get("door_code") && !photos.length && <EmptyModule />}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
         </div>
       );
 
@@ -385,14 +497,22 @@ function ModuleContent({ module, accent, get }: {
               <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("checkout_process")}</p>
             </InfoCard>
           )}
-          {!get("checkin_time") && !get("checkin_process") && <EmptyModule />}
+          {!get("checkin_time") && !get("checkin_process") && !photos.length && <EmptyModule />}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
         </div>
       );
 
     case "rules":
-      return get("rules")
-        ? <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">{get("rules")}</div>
-        : <EmptyModule />;
+      return (
+        <div className="space-y-3">
+          {get("rules")
+            ? <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">{get("rules")}</div>
+            : !photos.length ? <EmptyModule /> : null}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
+        </div>
+      );
 
     case "guide":
       return (
@@ -402,7 +522,9 @@ function ModuleContent({ module, accent, get }: {
           {get("trash") && <InfoCard emoji="♻️" label="Tri des déchets" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("trash")}</p></InfoCard>}
           {get("other") && <InfoCard emoji="🏠" label="Autres infos" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("other")}</p></InfoCard>}
           {get("video") && <VideoEmbed url={get("video")} />}
-          {!get("heating") && !get("appliances") && !get("trash") && !get("video") && <EmptyModule />}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
+          {!get("heating") && !get("appliances") && !get("trash") && !get("video") && !photos.length && <EmptyModule />}
         </div>
       );
 
@@ -412,8 +534,7 @@ function ModuleContent({ module, accent, get }: {
           {get("owner_name") && (
             <InfoCard emoji="👤" label={get("owner_name")} accent={accent}>
               {get("owner_phone") && (
-                <a
-                  href={`tel:${get("owner_phone")}`}
+                <a href={`tel:${get("owner_phone")}`}
                   className="inline-flex items-center gap-2 text-sm font-bold py-2 px-4 rounded-xl mt-1 active:scale-95 transition-all"
                   style={{ backgroundColor: accent + "15", color: accent }}>
                   <Phone className="w-4 h-4" /> {get("owner_phone")}
@@ -428,7 +549,9 @@ function ModuleContent({ module, accent, get }: {
           )}
           {get("doctor") && <InfoCard emoji="⚕️" label="Médecin" accent={accent}><p className="text-sm text-gray-600">{get("doctor")}</p></InfoCard>}
           {get("neighbors") && <InfoCard emoji="🏘️" label="Voisins" accent={accent}><p className="text-sm text-gray-600 whitespace-pre-line">{get("neighbors")}</p></InfoCard>}
-          {!get("owner_name") && !get("emergency") && <EmptyModule />}
+          {!get("owner_name") && !get("emergency") && !photos.length && <EmptyModule />}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
         </div>
       );
 
@@ -441,7 +564,9 @@ function ModuleContent({ module, accent, get }: {
             </div>
           )}
           {get("places") && <PlacesList raw={get("places")} accent={accent} />}
-          {!get("activities") && !get("places") && <EmptyModule />}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
+          {!get("activities") && !get("places") && !photos.length && <EmptyModule />}
         </div>
       );
 
@@ -452,7 +577,9 @@ function ModuleContent({ module, accent, get }: {
           {get("shops") && <InfoCard emoji="🛒" label="Commerces" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("shops")}</p></InfoCard>}
           {get("others") && <InfoCard emoji="⭐" label="Autres bons plans" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("others")}</p></InfoCard>}
           {get("places") && <PlacesList raw={get("places")} accent={accent} />}
-          {!get("restaurants") && !get("shops") && !get("places") && <EmptyModule />}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
+          {!get("restaurants") && !get("shops") && !get("places") && !photos.length && <EmptyModule />}
         </div>
       );
 
@@ -463,17 +590,68 @@ function ModuleContent({ module, accent, get }: {
           {get("by_train") && <InfoCard emoji="🚆" label="En train" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("by_train")}</p></InfoCard>}
           {get("taxi") && <InfoCard emoji="🚕" label="Taxi / VTC" accent={accent}><p className="text-sm text-gray-600">{get("taxi")}</p></InfoCard>}
           {get("airport") && <InfoCard emoji="✈️" label="Aéroport" accent={accent}><p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{get("airport")}</p></InfoCard>}
-          {!get("by_car") && !get("by_train") && <EmptyModule />}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
+          {!get("by_car") && !get("by_train") && !photos.length && <EmptyModule />}
         </div>
       );
 
     case "faq":
-      return get("faq")
-        ? <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">{get("faq")}</div>
-        : <EmptyModule />;
+      return (
+        <div className="space-y-3">
+          {get("faq")
+            ? <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">{get("faq")}</div>
+            : !photos.length ? <EmptyModule /> : null}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
+        </div>
+      );
+
+    case "upselling": {
+      const items = (get("items") || "").split("\n").map((line: string) => {
+        const [name, desc, price, link] = line.split("|").map((s: string) => s.trim());
+        return name ? { name, desc, price, link } : null;
+      }).filter(Boolean) as { name: string; desc: string; price: string; link: string }[];
+
+      return (
+        <div className="space-y-3">
+          {get("intro") && (
+            <p className="text-sm text-gray-600 leading-relaxed">{get("intro")}</p>
+          )}
+          {items.map((item, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 overflow-hidden shadow-sm">
+              <div className="p-4">
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div>
+                    <p className="font-bold text-gray-800 text-base">{item.name}</p>
+                    {item.desc && <p className="text-sm text-gray-500 mt-0.5">{item.desc}</p>}
+                  </div>
+                  {item.price && (
+                    <span className="shrink-0 text-sm font-black px-3 py-1 rounded-xl"
+                      style={{ backgroundColor: accent + "15", color: accent }}>
+                      {item.price}
+                    </span>
+                  )}
+                </div>
+                {item.link && (
+                  <a href={item.link} target="_blank" rel="noopener noreferrer"
+                    className="mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold text-white transition-all active:scale-95"
+                    style={{ backgroundColor: accent }}>
+                    Réserver →
+                  </a>
+                )}
+              </div>
+            </div>
+          ))}
+          <DocumentList documents={docs} accent={accent} />
+          <PhotoGallery images={photos} />
+          {!get("intro") && !items.length && !photos.length && <EmptyModule />}
+        </div>
+      );
+    }
 
     default:
-      return <EmptyModule />;
+      return photos.length ? <PhotoGallery images={photos} /> : <EmptyModule />;
   }
 }
 
@@ -580,6 +758,50 @@ function toEmbedUrl(url: string): string | null {
     }
   } catch { /* invalid url */ }
   return null;
+}
+
+function DocumentList({ documents, accent }: { documents: import("@/types").BookletDocument[]; accent: string }) {
+  if (!documents.length) return null;
+  return (
+    <div className="space-y-2 mt-3">
+      {documents.map((doc, i) => (
+        <a key={i} href={doc.url} target="_blank" rel="noopener noreferrer"
+          className="flex items-center gap-3 bg-white rounded-2xl border border-gray-100 px-4 py-3.5 shadow-sm active:scale-98 transition-all">
+          <div className="w-9 h-9 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center shrink-0">
+            <FileText className="w-4 h-4 text-red-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-gray-800 truncate">{doc.name}</p>
+            <p className="text-xs text-gray-400">PDF · Appuyez pour ouvrir</p>
+          </div>
+          <Download className="w-4 h-4 shrink-0" style={{ color: accent }} />
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function PhotoGallery({ images }: { images: string[] }) {
+  const [active, setActive] = useState<string | null>(null);
+  if (!images.length) return null;
+  return (
+    <>
+      <div className={`grid gap-2 mt-4 ${images.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+        {images.map((url, i) => (
+          <div key={i} onClick={() => setActive(url)}
+            className="aspect-video rounded-2xl overflow-hidden cursor-pointer">
+            <img src={url} alt="" className="w-full h-full object-cover hover:scale-105 transition-transform duration-300" />
+          </div>
+        ))}
+      </div>
+      {active && (
+        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setActive(null)}>
+          <img src={active} alt="" className="max-w-full max-h-full rounded-2xl object-contain" />
+        </div>
+      )}
+    </>
+  );
 }
 
 function EmptyModule() {

@@ -46,6 +46,7 @@ const DEFAULT_MODULES: BookletModule[] = [
   { id: nanoid(), type: "gooddeals", enabled: false, order: 7, content: {} },
   { id: nanoid(), type: "transport", enabled: false, order: 8, content: {} },
   { id: nanoid(), type: "faq", enabled: false, order: 9, content: {} },
+  { id: nanoid(), type: "upselling", enabled: false, order: 10, content: {} },
 ];
 
 export async function createBooklet(userId: string, title: string): Promise<string> {

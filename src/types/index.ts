@@ -25,15 +25,23 @@ export type ModuleType =
   | "activities"
   | "gooddeals"
   | "transport"
-  | "faq";
+  | "faq"
+  | "upselling";
+
+export interface BookletDocument {
+  url: string;
+  name: string;
+  size?: number;
+}
 
 export interface BookletModule {
   id: string;
   type: ModuleType;
   enabled: boolean;
   order: number;
-  content: Record<string, string>; // { fr: "...", en: "...", es: "...", de: "...", it: "..." }
+  content: Record<string, string>;
   images?: string[];
+  documents?: BookletDocument[];
 }
 
 export type SplashMediaType = "image" | "video";
@@ -65,6 +73,19 @@ export interface SplashConfig {
   // Logo
   logoUrl?: string;
   logoSize?: "sm" | "md" | "lg";
+}
+
+export interface CheckIn {
+  id: string;
+  bookletId: string;
+  guestName: string;
+  guestEmail: string;
+  guestCount: number;
+  checkInDate: string;
+  checkOutDate: string;
+  signature: string; // base64 dataURL
+  acceptedRules: boolean;
+  createdAt: number;
 }
 
 export interface Booklet {

@@ -11,6 +11,7 @@ export const MODULE_META: Record<ModuleType, { label: string; emoji: string; des
   gooddeals:  { label: "Bons plans",          emoji: "⭐", description: "Restaurants, commerces, marchés" },
   transport:  { label: "Transport",           emoji: "🚗", description: "Accès, taxi, transports en commun" },
   faq:        { label: "FAQ",                 emoji: "💬", description: "Questions fréquentes des voyageurs" },
+  upselling:  { label: "Services & Boutique", emoji: "🛍️", description: "Proposez des services à vos voyageurs" },
 };
 
 export const LANGUAGES = [
@@ -75,5 +76,9 @@ export const MODULE_FIELDS: Record<ModuleType, { key: string; label: string; pla
   ],
   faq: [
     { key: "faq", label: "Questions fréquentes", placeholder: "Q: Y a-t-il du linge de maison ?\nR: Oui, draps et serviettes sont fournis.\n\nQ: Les animaux sont-ils acceptés ?...", type: "richtext" },
+  ],
+  upselling: [
+    { key: "intro", label: "Introduction", placeholder: "Profitez de nos services pour rendre votre séjour inoubliable...", type: "textarea" },
+    { key: "items", label: "Services (format : Nom | Description | Prix | Lien)", placeholder: "Transfert aéroport | Navette privée | 45€ | https://...\nPetit-déjeuner | Livré chaque matin | 12€/pers | https://...", type: "places" },
   ],
 };
