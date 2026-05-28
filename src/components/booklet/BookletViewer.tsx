@@ -6,10 +6,17 @@ import { MODULE_META, LANGUAGES } from "@/lib/modules";
 import { ArrowLeft, Globe, ChevronRight, MapPin, Phone, FileText, Download, Navigation, ClipboardCheck } from "lucide-react";
 import { CheckInForm } from "./CheckInForm";
 import { getTemplate } from "@/lib/templates";
+import { ViewerNature } from "./ViewerNature";
+import { ViewerMagazine } from "./ViewerMagazine";
+import { ViewerModerne } from "./ViewerModerne";
 
 type Screen = "splash" | "home" | "module" | "nearby";
 
 export function BookletViewer({ booklet }: { booklet: Booklet }) {
+  const templateId = booklet.templateId;
+  if (templateId === "nature") return <ViewerNature booklet={booklet} />;
+  if (templateId === "magazine") return <ViewerMagazine booklet={booklet} />;
+  if (templateId === "moderne") return <ViewerModerne booklet={booklet} />;
   const [screen, setScreen] = useState<Screen>("splash");
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");

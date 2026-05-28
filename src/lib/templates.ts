@@ -5,8 +5,7 @@ export interface BookletTemplate {
   id: string;
   name: string;
   description: string;
-  preview: string; // emoji ou couleur de préview
-  // Splash
+  preview: string;
   splashOverlay: "light" | "medium" | "dark";
   splashTitleFont: TemplateFontFamily;
   splashTitleSize: "sm" | "md" | "lg" | "xl";
@@ -17,47 +16,19 @@ export interface BookletTemplate {
   splashButtonTextColor: string;
   splashBadgeText: string;
   splashButtonText: string;
-  // Accueil (home screen)
   accentColor: string;
-  headerBg: string;           // couleur du header home
-  cardBg: string;             // fond des cartes modules
-  cardBorder: string;         // bordure des cartes
+  headerBg: string;
+  cardBg: string;
+  cardBorder: string;
   cardRadius: TemplateRadius;
   cardShadow: boolean;
-  // Modules (viewer)
-  moduleBg: string;           // fond global du viewer
-  infoBg: string;             // fond des InfoCard
+  moduleBg: string;
+  infoBg: string;
   infoBorder: string;
   fontFamily: TemplateFontFamily;
 }
 
 export const TEMPLATES: BookletTemplate[] = [
-  {
-    id: "minimal",
-    name: "Minimaliste",
-    description: "Épuré, lignes nettes, noir & blanc",
-    preview: "⬜",
-    accentColor: "#1a1a1a",
-    splashOverlay: "dark",
-    splashTitleFont: "sans",
-    splashTitleSize: "xl",
-    splashTitleWeight: "black",
-    splashTitleColor: "#ffffff",
-    splashSubtitleColor: "#cccccc",
-    splashButtonColor: "#ffffff",
-    splashButtonTextColor: "#1a1a1a",
-    splashBadgeText: "Livret d'accueil",
-    splashButtonText: "Entrer →",
-    headerBg: "#1a1a1a",
-    cardBg: "#ffffff",
-    cardBorder: "#e5e7eb",
-    cardRadius: "sm",
-    cardShadow: false,
-    moduleBg: "#f9fafb",
-    infoBg: "#ffffff",
-    infoBorder: "#e5e7eb",
-    fontFamily: "sans",
-  },
   {
     id: "nature",
     name: "Nature",
@@ -85,6 +56,32 @@ export const TEMPLATES: BookletTemplate[] = [
     fontFamily: "serif",
   },
   {
+    id: "magazine",
+    name: "Magazine",
+    description: "Sombre, éditorial, guide de voyage",
+    preview: "📰",
+    accentColor: "#c8e86b",
+    splashOverlay: "dark",
+    splashTitleFont: "serif",
+    splashTitleSize: "xl",
+    splashTitleWeight: "black",
+    splashTitleColor: "#f0f0e8",
+    splashSubtitleColor: "#6b7a60",
+    splashButtonColor: "#c8e86b",
+    splashButtonTextColor: "#0f1a14",
+    splashBadgeText: "Guide d'accueil",
+    splashButtonText: "Explorer →",
+    headerBg: "#0f1a14",
+    cardBg: "#1a2a1e",
+    cardBorder: "#2a3a2e",
+    cardRadius: "none",
+    cardShadow: false,
+    moduleBg: "#0f1a14",
+    infoBg: "#1a2a1e",
+    infoBorder: "#2a3a2e",
+    fontFamily: "serif",
+  },
+  {
     id: "moderne",
     name: "Moderne",
     description: "Orange vif, dynamique, contemporain",
@@ -109,84 +106,6 @@ export const TEMPLATES: BookletTemplate[] = [
     infoBg: "#ffffff",
     infoBorder: "#fed7aa",
     fontFamily: "sans",
-  },
-  {
-    id: "luxe",
-    name: "Luxe",
-    description: "Doré, sombre, élégant et raffiné",
-    preview: "✨",
-    accentColor: "#b8960c",
-    splashOverlay: "dark",
-    splashTitleFont: "serif",
-    splashTitleSize: "xl",
-    splashTitleWeight: "normal",
-    splashTitleColor: "#f5e6b2",
-    splashSubtitleColor: "#d4b896",
-    splashButtonColor: "#b8960c",
-    splashButtonTextColor: "#1a1a1a",
-    splashBadgeText: "Bienvenue",
-    splashButtonText: "Accéder au livret",
-    headerBg: "#1a1612",
-    cardBg: "#1a1612",
-    cardBorder: "#3d3020",
-    cardRadius: "md",
-    cardShadow: true,
-    moduleBg: "#120f0a",
-    infoBg: "#1a1612",
-    infoBorder: "#3d3020",
-    fontFamily: "serif",
-  },
-  {
-    id: "ocean",
-    name: "Océan",
-    description: "Bleu turquoise, frais et estival",
-    preview: "🌊",
-    accentColor: "#0891b2",
-    splashOverlay: "medium",
-    splashTitleFont: "sans",
-    splashTitleSize: "lg",
-    splashTitleWeight: "bold",
-    splashTitleColor: "#ffffff",
-    splashSubtitleColor: "#a5f3fc",
-    splashButtonColor: "#ffffff",
-    splashButtonTextColor: "#0891b2",
-    splashBadgeText: "Livret d'accueil",
-    splashButtonText: "Ouvrir →",
-    headerBg: "#0891b2",
-    cardBg: "#f0fdff",
-    cardBorder: "#a5e7f0",
-    cardRadius: "lg",
-    cardShadow: true,
-    moduleBg: "#f0fdff",
-    infoBg: "#ffffff",
-    infoBorder: "#a5e7f0",
-    fontFamily: "sans",
-  },
-  {
-    id: "provencal",
-    name: "Provençal",
-    description: "Lavande et crème, doux et authentique",
-    preview: "💜",
-    accentColor: "#7c3aed",
-    splashOverlay: "medium",
-    splashTitleFont: "serif",
-    splashTitleSize: "lg",
-    splashTitleWeight: "bold",
-    splashTitleColor: "#ffffff",
-    splashSubtitleColor: "#ddd6fe",
-    splashButtonColor: "#ffffff",
-    splashButtonTextColor: "#7c3aed",
-    splashBadgeText: "Bienvenue chez nous",
-    splashButtonText: "Entrer →",
-    headerBg: "#7c3aed",
-    cardBg: "#faf5ff",
-    cardBorder: "#ddd6fe",
-    cardRadius: "full",
-    cardShadow: true,
-    moduleBg: "#fdf8ff",
-    infoBg: "#faf5ff",
-    infoBorder: "#ddd6fe",
-    fontFamily: "serif",
   },
 ];
 
