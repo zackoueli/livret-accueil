@@ -6,18 +6,19 @@ import { MODULE_META } from "@/lib/modules";
 import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
 import { CheckInForm } from "./CheckInForm";
 import { ArrowLeft, Globe, MapPin, FileText, Download, ClipboardCheck, X } from "lucide-react";
+import { getPalette, patternToCss } from "@/lib/palettes";
 
 type Screen = "splash" | "home" | "module";
 
-const ORANGE = "#f97316";
-const ORANGE_DARK = "#ea6a0a";
-const ORANGE_LIGHT = "#fff7ed";
-const ORANGE_MID = "#fed7aa";
-const TEXT = "#1c0f00";
-const MUTED = "#92400e";
-const WHITE = "#ffffff";
-
 export function ViewerModerne({ booklet }: { booklet: Booklet }) {
+  const _p = { ...getPalette(booklet.paletteId), ...booklet.customPalette };
+  const ORANGE = _p.primary;
+  const ORANGE_LIGHT = _p.secondary;
+  const ORANGE_MID = _p.border;
+  const TEXT = _p.text;
+  const MUTED = _p.muted;
+  const WHITE = _p.surface;
+  const BG_CSS = patternToCss(_p as any);
   const [screen, setScreen] = useState<Screen>("splash");
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
@@ -77,7 +78,7 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
   // ── SPLASH ─────────────────────────────────────────────────────────────────
   if (screen === "splash") {
     return (
-      <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ backgroundColor: ORANGE }}>
+      <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ backgroundColor: ORANGE, background: ORANGE }}>
         {/* Formes décoratives */}
         <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-20" style={{ backgroundColor: WHITE, transform: "translate(30%, -30%)" }} />
         <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10" style={{ backgroundColor: WHITE, transform: "translate(-30%, 30%)" }} />
@@ -134,7 +135,7 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
     return (
       <>
         {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ORANGE} onClose={() => setShowCheckIn(false)} />}
-        <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ backgroundColor: ORANGE_LIGHT, fontFamily: "system-ui, sans-serif" }}>
+        <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG_CSS, fontFamily: "system-ui, sans-serif" }}>
 
           {/* Header */}
           <div className="shrink-0 px-5 pt-12 pb-6 relative overflow-hidden" style={{ backgroundColor: ORANGE }}>
@@ -373,7 +374,7 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
     };
 
     return (
-      <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: ORANGE_LIGHT }}>
+      <div className="fixed inset-0 flex flex-col" style={{ background: BG_CSS }}>
         {/* Header */}
         <div className="shrink-0 pt-10 pb-5 px-5 relative overflow-hidden" style={{ backgroundColor: ORANGE }}>
           <div className="absolute top-0 right-0 w-24 h-24 rounded-full opacity-20" style={{ backgroundColor: WHITE, transform: "translate(20%, -20%)" }} />

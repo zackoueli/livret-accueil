@@ -88,10 +88,23 @@ export interface CheckIn {
   createdAt: number;
 }
 
+export interface CustomPaletteOverride {
+  primary?: string;
+  secondary?: string;
+  surface?: string;
+  text?: string;
+  muted?: string;
+  border?: string;
+  patternColor?: string;
+  patternSize?: number;
+}
+
 export interface Booklet {
   id: string;
   userId: string;
   templateId?: string;
+  paletteId?: string;
+  customPalette?: CustomPaletteOverride;
   title: string;
   slug: string;
   description?: string;

@@ -6,17 +6,19 @@ import { MODULE_META } from "@/lib/modules";
 import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
 import { CheckInForm } from "./CheckInForm";
 import { ArrowLeft, Globe, MapPin, FileText, Download, ClipboardCheck } from "lucide-react";
+import { getPalette, patternToCss } from "@/lib/palettes";
 
 type Screen = "splash" | "home" | "module";
 
-const BG = "#0f1a14";
-const ACCENT = "#c8e86b";
-const TEXT = "#f0f0e8";
-const MUTED = "#6b7a60";
-const CARD = "#1a2a1e";
-const BORDER = "#2a3a2e";
-
 export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
+  const _p = { ...getPalette(booklet.paletteId), ...booklet.customPalette };
+  const BG = _p.secondary;
+  const ACCENT = _p.primary;
+  const TEXT = _p.text;
+  const MUTED = _p.muted;
+  const CARD = _p.surface;
+  const BORDER = _p.border;
+  const BG_CSS = patternToCss(_p as any);
   const [screen, setScreen] = useState<Screen>("splash");
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
@@ -52,15 +54,12 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
   // ── SPLASH ──────────────────────────────────────────────────────────────────
   if (screen === "splash") {
     return (
-      <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ backgroundColor: BG, fontFamily: "'Georgia', serif" }}>
+      <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG_CSS, fontFamily: "'Georgia', serif" }}>
         {bgUrl && (
           <>
             <div className="absolute inset-0" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center" }} />
-            <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(15,26,20,0.2) 0%, rgba(15,26,20,0.7) 50%, rgba(15,26,20,0.97) 100%)" }} />
+            <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, ${BG}30 0%, ${BG}b0 50%, ${BG}f8 100%)` }} />
           </>
-        )}
-        {!bgUrl && (
-          <div className="absolute inset-0" style={{ background: `linear-gradient(160deg, #1a2f1e 0%, ${BG} 60%)` }} />
         )}
 
         {availableLangs.length > 1 && (
@@ -114,17 +113,17 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
     return (
       <>
         {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} onClose={() => setShowCheckIn(false)} />}
-        <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ backgroundColor: BG }}>
+        <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG_CSS }}>
 
           {/* Header avec photo */}
           <div className="shrink-0 relative" style={{ height: 200 }}>
             {bgUrl ? (
               <>
                 <div className="absolute inset-0" style={{ backgroundImage: `url(${bgUrl})`, backgroundSize: "cover", backgroundPosition: "center" }} />
-                <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 20%, rgba(15,26,20,1) 100%)" }} />
+                <div className="absolute inset-0" style={{ background: `linear-gradient(to bottom, transparent 20%, ${BG} 100%)` }} />
               </>
             ) : (
-              <div className="absolute inset-0" style={{ background: `linear-gradient(135deg, #1a3020 0%, ${BG} 100%)` }} />
+              <div className="absolute inset-0" style={{ background: BG_CSS }} />
             )}
             <div className="absolute bottom-0 left-0 right-0 p-5">
               <div className="flex items-end justify-between">
@@ -328,7 +327,7 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
     };
 
     return (
-      <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: BG }}>
+      <div className="fixed inset-0 flex flex-col" style={{ background: BG_CSS }}>
         {/* Hero header */}
         <div className="shrink-0 relative" style={{ height: 140 }}>
           {bgUrl ? (
