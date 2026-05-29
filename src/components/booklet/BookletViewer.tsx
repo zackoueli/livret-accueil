@@ -10,11 +10,13 @@ import { ViewerNature } from "./ViewerNature";
 import { ViewerMagazine } from "./ViewerMagazine";
 import { ViewerModerne } from "./ViewerModerne";
 import { ViewerTempo } from "./ViewerTempo";
+import { ViewerApp } from "./ViewerApp";
 
 type Screen = "splash" | "home" | "module" | "nearby";
 
 export function BookletViewer({ booklet }: { booklet: Booklet }) {
   const templateId = booklet.templateId;
+  if (templateId === "app") return <ViewerApp booklet={booklet} />;
   if (templateId === "tempo") return <ViewerTempo booklet={booklet} />;
   if (templateId === "nature") return <ViewerNature booklet={booklet} />;
   if (templateId === "magazine") return <ViewerMagazine booklet={booklet} />;
