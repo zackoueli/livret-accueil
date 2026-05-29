@@ -112,7 +112,7 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
   if (screen === "home") {
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} onClose={() => setShowCheckIn(false)} />}
+        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} theme="dark" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG_CSS }}>
 
           {/* Header avec photo */}

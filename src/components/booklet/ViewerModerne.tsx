@@ -134,7 +134,7 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
 
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ORANGE} onClose={() => setShowCheckIn(false)} />}
+        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ORANGE} theme="light" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG_CSS, fontFamily: "system-ui, sans-serif" }}>
 
           {/* Header */}

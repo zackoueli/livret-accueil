@@ -120,7 +120,7 @@ export function ViewerNature({ booklet }: { booklet: Booklet }) {
   if (screen === "home") {
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} onClose={() => setShowCheckIn(false)} />}
+        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} theme="light" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG, fontFamily: SERIF }}>
 
           <div className="shrink-0 px-6 pt-12 pb-8" style={{ backgroundColor: SURFACE_ALT, borderBottom: `1px solid ${BORDER}` }}>
