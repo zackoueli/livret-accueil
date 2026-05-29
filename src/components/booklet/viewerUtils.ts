@@ -23,6 +23,14 @@ export function toEmbedUrl(url: string): string | null {
   return null;
 }
 
+/** Formate "14:30" → "14h30", laisse les autres valeurs intactes */
+export function formatTime(val: string): string {
+  if (!val) return val;
+  const m = val.match(/^(\d{1,2}):(\d{2})$/);
+  if (m) return `${m[1]}h${m[2]}`;
+  return val;
+}
+
 export function parsePlaces(raw: string) {
   return raw.split("\n").map((line) => {
     const [name, address] = line.split("|").map((s) => s.trim());

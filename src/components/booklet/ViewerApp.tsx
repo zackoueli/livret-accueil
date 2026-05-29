@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META } from "@/lib/modules";
-import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
-import { CheckInForm } from "./CheckInForm";
+import { getContent, parsePlaces, getAvailableLangs, formatTime } from "./viewerUtils";
+import { CheckInFormInline } from "./CheckInForm";
 import {
   ArrowLeft, Globe, MapPin, Wifi, Key, Car, Train, Plane,
-  Phone, FileText, Download, Check, ClipboardCheck, ChevronRight,
+  Phone, FileText, Download, Check, ChevronRight,
 } from "lucide-react";
 import { getPalette, patternToCss } from "@/lib/palettes";
 
@@ -26,7 +26,6 @@ export function ViewerApp({ booklet }: { booklet: Booklet }) {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCheckIn, setShowCheckIn] = useState(false);
 
   const _p = { ...getPalette(booklet.paletteId ?? "ardoise"), ...booklet.customPalette };
   const ACCENT = _p.primary;
@@ -129,7 +128,6 @@ export function ViewerApp({ booklet }: { booklet: Booklet }) {
   if (screen === "home") {
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} theme="glass" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden">
           <Background />
 
@@ -171,20 +169,6 @@ export function ViewerApp({ booklet }: { booklet: Booklet }) {
                 );
               })}
 
-              {/* Check-in — pleine largeur */}
-              <button onClick={() => setShowCheckIn(true)}
-                className="col-span-2 flex items-center gap-4 p-4 transition-all active:scale-95"
-                style={{ ...gl(0.22), borderColor: `${ACCENT}50` }}>
-                <div className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: ACCENT }}>
-                  <ClipboardCheck className="w-6 h-6 text-white" />
-                </div>
-                <div className="flex-1 text-left">
-                  <p className="font-bold text-white text-sm">Check-in en ligne</p>
-                  <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.5)" }}>Enregistrez votre arrivée</p>
-                </div>
-                <ChevronRight className="w-5 h-5 shrink-0" style={{ color: "rgba(255,255,255,0.4)" }} />
-              </button>
             </div>
           </div>
         </div>
@@ -280,19 +264,20 @@ export function ViewerApp({ booklet }: { booklet: Booklet }) {
                 <div className="p-4 rounded-3xl text-center"
                   style={{ background: `linear-gradient(135deg, ${ACCENT}40, ${ACCENT}20)`, border: `1.5px solid ${ACCENT}50` }}>
                   <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: ACCENT }}>Arrivée</p>
-                  <p className="text-4xl font-black text-white">{g("checkin_time")}</p>
+                  <p className="font-black text-white leading-tight" style={{ fontSize: 36 }}>{formatTime(g("checkin_time"))}</p>
                 </div>
               )}
               {g("checkout_time") && (
                 <div className="p-4 rounded-3xl text-center" style={gl(0.12)}>
                   <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: "rgba(255,255,255,0.5)" }}>Départ</p>
-                  <p className="text-4xl font-black text-white">{g("checkout_time")}</p>
+                  <p className="font-black text-white leading-tight" style={{ fontSize: 36 }}>{formatTime(g("checkout_time"))}</p>
                 </div>
               )}
             </div>
           )}
           {g("checkin_process") && <Row icon={<Key className="w-4 h-4" />} label="Procédure d'arrivée" value={g("checkin_process")} />}
           {g("checkout_process") && <Row icon={<ChevronRight className="w-4 h-4" />} label="Procédure de départ" value={g("checkout_process")} />}
+          <CheckInFormInline bookletId={booklet.id} accent={ACCENT} theme="glass" />
         </>;
 
         case "rules": return g("rules") ? (

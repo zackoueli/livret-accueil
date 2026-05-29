@@ -3,13 +3,13 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META } from "@/lib/modules";
-import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
-import { CheckInForm } from "./CheckInForm";
+import { getContent, parsePlaces, getAvailableLangs, formatTime } from "./viewerUtils";
+import { CheckInFormInline } from "./CheckInForm";
 import {
   Home, Info, Key, MapPin, Wrench, Globe,
   ChevronRight, Wifi, Phone, AlertTriangle,
   Copy, Check, ArrowLeft, FileText, Download,
-  ClipboardCheck, Thermometer, UtensilsCrossed,
+  Thermometer, UtensilsCrossed,
   Recycle, HelpCircle, Flame,
 } from "lucide-react";
 import { getPalette } from "@/lib/palettes";
@@ -66,7 +66,6 @@ export function ViewerHostin({ booklet }: { booklet: Booklet }) {
   const [activeTab, setActiveTab] = useState<TabId>("home");
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCheckIn, setShowCheckIn] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const _p = { ...getPalette(booklet.paletteId ?? "lavande"), ...booklet.customPalette };
@@ -271,7 +270,7 @@ export function ViewerHostin({ booklet }: { booklet: Booklet }) {
                         Arrivée
                       </p>
                       <p style={{ fontSize: 28, fontWeight: 700, color: C.label, letterSpacing: -0.5, lineHeight: "33px" }}>
-                        {checkinTime}
+                        {formatTime(checkinTime)}
                       </p>
                     </div>
                   )}
@@ -281,7 +280,7 @@ export function ViewerHostin({ booklet }: { booklet: Booklet }) {
                         Départ
                       </p>
                       <p style={{ fontSize: 28, fontWeight: 700, color: C.label, letterSpacing: -0.5, lineHeight: "33px" }}>
-                        {checkoutTime}
+                        {formatTime(checkoutTime)}
                       </p>
                     </div>
                   )}
@@ -367,19 +366,6 @@ export function ViewerHostin({ booklet }: { booklet: Booklet }) {
             );
           })()}
 
-          {/* Check-in CTA */}
-          <div className="mx-4 mt-4">
-            <button onClick={() => setShowCheckIn(true)}
-              className="w-full flex items-center gap-3.5 px-4 py-4 rounded-2xl active:opacity-80 transition-opacity"
-              style={{ backgroundColor: A, boxShadow: `0 4px 20px ${A}50` }}>
-              <ClipboardCheck className="w-5 h-5 text-white shrink-0" />
-              <div className="flex-1 text-left">
-                <p style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>Check-in en ligne</p>
-                <p style={{ fontSize: 13, color: "rgba(255,255,255,0.7)", marginTop: 1 }}>Enregistrez votre arrivée</p>
-              </div>
-              <ChevronRight className="w-4 h-4 text-white opacity-60 shrink-0" />
-            </button>
-          </div>
         </div>
       </div>
     );
@@ -566,13 +552,13 @@ export function ViewerHostin({ booklet }: { booklet: Booklet }) {
                   {checkinTime && (
                     <div className="flex-1 px-5 py-4">
                       <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0.6, color: C.label2, textTransform: "uppercase", marginBottom: 4 }}>Arrivée</p>
-                      <p style={{ fontSize: 32, fontWeight: 700, color: C.label, letterSpacing: -1, lineHeight: "38px" }}>{checkinTime}</p>
+                      <p style={{ fontSize: 32, fontWeight: 700, color: C.label, letterSpacing: -1, lineHeight: "38px" }}>{formatTime(checkinTime)}</p>
                     </div>
                   )}
                   {checkoutTime && (
                     <div className="flex-1 px-5 py-4">
                       <p style={{ fontSize: 11, fontWeight: 500, letterSpacing: 0.6, color: C.label2, textTransform: "uppercase", marginBottom: 4 }}>Départ</p>
-                      <p style={{ fontSize: 32, fontWeight: 700, color: C.label, letterSpacing: -1, lineHeight: "38px" }}>{checkoutTime}</p>
+                      <p style={{ fontSize: 32, fontWeight: 700, color: C.label, letterSpacing: -1, lineHeight: "38px" }}>{formatTime(checkoutTime)}</p>
                     </div>
                   )}
                 </div>
@@ -647,6 +633,9 @@ export function ViewerHostin({ booklet }: { booklet: Booklet }) {
               </Card>
             </>
           )}
+
+          {/* Formulaire check-in */}
+          <CheckInFormInline bookletId={booklet.id} accent={A} theme="light" />
         </div>
       </div>
     );
@@ -887,9 +876,6 @@ export function ViewerHostin({ booklet }: { booklet: Booklet }) {
 
   return (
     <>
-      {showCheckIn && (
-        <CheckInForm bookletId={booklet.id} accent={A} theme="light" onClose={() => setShowCheckIn(false)} />
-      )}
       <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: C.bg, fontFamily: FONT }}>
         <NavBar title={titles[activeTab]} />
         {activeTab === "home"         && <TabHome />}

@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META } from "@/lib/modules";
-import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
-import { CheckInForm } from "./CheckInForm";
-import { ArrowLeft, Globe, MapPin, FileText, Download, ClipboardCheck } from "lucide-react";
+import { getContent, parsePlaces, getAvailableLangs, formatTime } from "./viewerUtils";
+import { CheckInFormInline } from "./CheckInForm";
+import { ArrowLeft, Globe, MapPin, FileText, Download } from "lucide-react";
 import { getPalette, patternToCss } from "@/lib/palettes";
 
 type Screen = "splash" | "home" | "module";
@@ -23,7 +23,6 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCheckIn, setShowCheckIn] = useState(false);
 
   useEffect(() => {
     fetch("/api/booklets/view", {
@@ -112,7 +111,6 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
   if (screen === "home") {
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} theme="dark" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG_CSS }}>
 
           {/* Header avec photo */}
@@ -178,15 +176,6 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
 
             {/* Actions */}
             <div className="p-5 space-y-2 border-t" style={{ borderColor: BORDER }}>
-              <button onClick={() => setShowCheckIn(true)}
-                className="w-full flex items-center gap-3 py-3.5 px-4 border transition-all"
-                style={{ borderColor: BORDER, backgroundColor: CARD }}>
-                <ClipboardCheck className="w-4 h-4 shrink-0" style={{ color: ACCENT }} />
-                <div className="text-left">
-                  <p className="text-sm font-bold uppercase tracking-wide" style={{ color: TEXT }}>Check-in</p>
-                  <p className="text-xs" style={{ color: MUTED }}>Enregistrez votre arrivée</p>
-                </div>
-              </button>
               {allPlaces.length > 0 && (
                 <button onClick={() => openModule(enabledModules[0]?.id)}
                   className="w-full flex items-center gap-3 py-3.5 px-4 border transition-all"
@@ -253,15 +242,16 @@ export function ViewerMagazine({ booklet }: { booklet: Booklet }) {
           {(g("checkin_time") || g("checkout_time")) && section("Horaires", <div className="grid grid-cols-2 gap-3">
             {g("checkin_time") && <div className="p-4" style={{ backgroundColor: CARD, border: `1px solid ${ACCENT}40` }}>
               <p className="text-xs uppercase tracking-wide mb-1" style={{ color: ACCENT }}>Arrivée</p>
-              <p className="text-2xl font-black" style={{ color: TEXT }}>{g("checkin_time")}</p>
+              <p className="font-black text-2xl" style={{ color: TEXT }}>{formatTime(g("checkin_time"))}</p>
             </div>}
             {g("checkout_time") && <div className="p-4" style={{ backgroundColor: CARD, border: `1px solid ${BORDER}` }}>
               <p className="text-xs uppercase tracking-wide mb-1" style={{ color: MUTED }}>Départ</p>
-              <p className="text-2xl font-black" style={{ color: TEXT }}>{g("checkout_time")}</p>
+              <p className="font-black text-2xl" style={{ color: TEXT }}>{formatTime(g("checkout_time"))}</p>
             </div>}
           </div>)}
           {g("checkin_process") && section("Procédure d'arrivée", <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: MUTED }}>{g("checkin_process")}</p>)}
           {g("checkout_process") && section("Procédure de départ", <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: MUTED }}>{g("checkout_process")}</p>)}
+          <CheckInFormInline bookletId={booklet.id} accent={ACCENT} theme="dark" />
         </>;
         case "rules": return g("rules") ? section("Règlement", <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: MUTED }}>{g("rules")}</p>) : null;
         case "guide": return <>

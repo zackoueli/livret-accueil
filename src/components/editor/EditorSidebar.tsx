@@ -22,11 +22,16 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEditorStore } from "@/store/editorStore";
 import { MODULE_META } from "@/lib/modules";
 import { BookletModule } from "@/types";
-import { AppearanceEditor } from "./AppearanceEditor";
+import { SplashEditor } from "./SplashEditor";
+import { TemplateSelector } from "./TemplateSelector";
+import { getTemplate } from "@/lib/templates";
+import { Sparkles } from "lucide-react";
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
   const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules } = useEditorStore();
-  const [tab, setTab] = useState<"modules" | "appearance" | "settings">("modules");
+  const [tab, setTab] = useState<"modules" | "splash" | "settings">("modules");
+  const [showTemplates, setShowTemplates] = useState(false);
+  const currentTemplate = getTemplate(booklet?.templateId);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -47,17 +52,30 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
   };
 
   return (
+    <>
+    {showTemplates && <TemplateSelector onClose={() => setShowTemplates(false)} />}
     <aside className="w-full lg:w-64 bg-white border-r border-gray-100 flex flex-col shrink-0 overflow-hidden">
 
+      {/* Bouton template */}
+      <button onClick={() => setShowTemplates(true)}
+        className="mx-3 mt-3 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-orange-200 bg-orange-50 hover:bg-orange-100 transition-colors group">
+        <span className="text-lg">{currentTemplate.preview}</span>
+        <div className="flex-1 text-left">
+          <p className="text-xs font-bold text-orange-600">{currentTemplate.name}</p>
+          <p className="text-xs text-orange-400">Changer de template</p>
+        </div>
+        <Sparkles className="w-3.5 h-3.5 text-orange-400 group-hover:text-orange-600 transition-colors" />
+      </button>
+
       {/* Tabs */}
-      <div className="flex border-b border-gray-100 p-2 gap-1">
+      <div className="flex border-b border-gray-100 p-2 gap-1 mt-2">
         <button onClick={() => setTab("modules")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "modules" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
           Modules
         </button>
-        <button onClick={() => setTab("appearance")}
-          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "appearance" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
-          Apparence
+        <button onClick={() => setTab("splash")}
+          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "splash" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
+          Accueil
         </button>
         <button onClick={() => setTab("settings")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "settings" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
@@ -65,7 +83,7 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
         </button>
       </div>
 
-      {tab === "appearance" && <AppearanceEditor />}
+      {tab === "splash" && <div className="flex-1 overflow-y-auto"><SplashEditor /></div>}
 
       {tab === "modules" ? (
         <div className="flex-1 overflow-y-auto p-3">
@@ -90,6 +108,7 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
         <SidebarSettings />
       ) : null}
     </aside>
+    </>
   );
 }
 

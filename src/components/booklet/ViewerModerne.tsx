@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META } from "@/lib/modules";
-import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
-import { CheckInForm } from "./CheckInForm";
-import { ArrowLeft, Globe, MapPin, FileText, Download, ClipboardCheck, X } from "lucide-react";
+import { getContent, parsePlaces, getAvailableLangs, formatTime } from "./viewerUtils";
+import { CheckInFormInline } from "./CheckInForm";
+import { ArrowLeft, Globe, MapPin, FileText, Download, X } from "lucide-react";
 import { getPalette, patternToCss } from "@/lib/palettes";
 
 type Screen = "splash" | "home" | "module";
@@ -23,7 +23,6 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCheckIn, setShowCheckIn] = useState(false);
 
   useEffect(() => {
     fetch("/api/booklets/view", {
@@ -134,7 +133,6 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
 
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ORANGE} theme="light" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG_CSS, fontFamily: "system-ui, sans-serif" }}>
 
           {/* Header */}
@@ -160,34 +158,22 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
 
           {/* Grille modules */}
           <div className="flex-1 overflow-y-auto px-4 py-5">
-            {/* Check-in + Autour de moi */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <button onClick={() => setShowCheckIn(true)}
-                className="flex flex-col items-center justify-center gap-2 py-5 px-3 rounded-2xl transition-all active:scale-95"
-                style={{ backgroundColor: WHITE, boxShadow: "0 2px 12px rgba(249,115,22,0.15)", border: `2px solid ${ORANGE_MID}` }}>
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: `${ORANGE}15` }}>
-                  <ClipboardCheck className="w-5 h-5" style={{ color: ORANGE }} />
-                </div>
-                <div className="text-center">
-                  <p className="text-xs font-black" style={{ color: TEXT }}>Check-in</p>
-                  <p className="text-xs" style={{ color: MUTED }}>Arrivée en ligne</p>
-                </div>
-              </button>
-
-              {allPlaces.length > 0 && (
+            {/* Autour de moi */}
+            {allPlaces.length > 0 && (
+              <div className="mb-5">
                 <button onClick={() => openModule(enabledModules.find((m) => m.content["places"])?.id || enabledModules[0].id)}
-                  className="flex flex-col items-center justify-center gap-2 py-5 px-3 rounded-2xl transition-all active:scale-95"
+                  className="w-full flex items-center gap-3 py-4 px-4 rounded-2xl transition-all active:scale-95"
                   style={{ backgroundColor: ORANGE, boxShadow: `0 2px 12px ${ORANGE}40` }}>
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ backgroundColor: "rgba(255,255,255,0.2)" }}>
                     <MapPin className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-center">
-                    <p className="text-xs font-black text-white">Autour</p>
-                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.8)" }}>{allPlaces.length} lieux</p>
+                  <div className="text-left">
+                    <p className="text-sm font-black text-white">Autour de moi</p>
+                    <p className="text-xs" style={{ color: "rgba(255,255,255,0.8)" }}>{allPlaces.length} lieux recommandés</p>
                   </div>
                 </button>
-              )}
-            </div>
+              </div>
+            )}
 
             <p className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: MUTED }}>
               Informations
@@ -269,16 +255,17 @@ export function ViewerModerne({ booklet }: { booklet: Booklet }) {
             <div className="grid grid-cols-2 gap-3 mb-3">
               {g("checkin_time") && <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: ORANGE, boxShadow: `0 4px 20px ${ORANGE}30` }}>
                 <p className="text-xs font-bold mb-1 text-white opacity-80 uppercase tracking-wide">Arrivée</p>
-                <p className="text-2xl font-black text-white">{g("checkin_time")}</p>
+                <p className="font-black text-white text-2xl">{formatTime(g("checkin_time"))}</p>
               </div>}
               {g("checkout_time") && <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: WHITE, border: `2px solid ${ORANGE_MID}` }}>
                 <p className="text-xs font-bold mb-1 uppercase tracking-wide" style={{ color: MUTED }}>Départ</p>
-                <p className="text-2xl font-black" style={{ color: TEXT }}>{g("checkout_time")}</p>
+                <p className="font-black text-2xl" style={{ color: TEXT }}>{formatTime(g("checkout_time"))}</p>
               </div>}
             </div>
           )}
           {g("checkin_process") && chip("🗝️ Arrivée", g("checkin_process"), "#10b981")}
           {g("checkout_process") && chip("👋 Départ", g("checkout_process"), "#f59e0b")}
+          <CheckInFormInline bookletId={booklet.id} accent={ORANGE} theme="light" />
         </>;
         case "rules": return g("rules") ? chip("📋 Règlement", g("rules"), "#6366f1") : null;
         case "guide": return <>

@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META } from "@/lib/modules";
-import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
-import { CheckInForm } from "./CheckInForm";
-import { ArrowLeft, Globe, Wifi, Key, Car, Train, Plane, MapPin, Phone, FileText, Download, Check, ClipboardCheck } from "lucide-react";
+import { getContent, parsePlaces, getAvailableLangs, formatTime } from "./viewerUtils";
+import { CheckInFormInline } from "./CheckInForm";
+import { ArrowLeft, Globe, Wifi, Key, Car, Train, Plane, MapPin, Phone, FileText, Download, Check } from "lucide-react";
 import { getPalette, patternToCss } from "@/lib/palettes";
 
 type Screen = "splash" | "home" | "module";
@@ -40,7 +40,6 @@ export function ViewerTempo({ booklet }: { booklet: Booklet }) {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCheckIn, setShowCheckIn] = useState(false);
 
   const _p = { ...getPalette(booklet.paletteId ?? "creme"), ...booklet.customPalette };
   const ACCENT = _p.primary;
@@ -149,7 +148,6 @@ export function ViewerTempo({ booklet }: { booklet: Booklet }) {
   if (screen === "home") {
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} theme="light" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ backgroundColor: "#fff", fontFamily: SANS }}>
 
           {/* Header */}
@@ -197,18 +195,6 @@ export function ViewerTempo({ booklet }: { booklet: Booklet }) {
               );
             })}
 
-            {/* Check-in */}
-            <button onClick={() => setShowCheckIn(true)}
-              className="w-full flex items-center gap-4 py-4 mt-3 rounded-2xl px-4 transition-all active:scale-95"
-              style={{ backgroundColor: BEIGE, border: `1.5px solid ${BEIGE_DARK}` }}>
-              <div className="w-11 h-11 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: ACCENT }}>
-                <ClipboardCheck className="w-5 h-5 text-white" />
-              </div>
-              <div className="text-left">
-                <p className="font-black text-sm uppercase tracking-wide" style={{ color: TEXT }}>Check-in en ligne</p>
-                <p className="text-xs" style={{ color: MUTED }}>Enregistrez votre arrivée</p>
-              </div>
-            </button>
 
             <p className="text-center text-xs py-8" style={{ fontFamily: SCRIPT, color: BEIGE_DARK, fontSize: 16 }}>
               Créé avec Livret. ✦
@@ -394,7 +380,7 @@ export function ViewerTempo({ booklet }: { booklet: Booklet }) {
                     {g("checkin_time") && (
                       <div className="text-right pl-3 border-l" style={{ borderColor: BEIGE_DARK }}>
                         <p className="text-xs uppercase tracking-wide" style={{ color: MUTED }}>À partir de</p>
-                        <p className="font-black text-2xl leading-none" style={{ color: TEXT }}>{g("checkin_time")}</p>
+                        <p className="font-black text-2xl" style={{ color: TEXT }}>{formatTime(g("checkin_time"))}</p>
                       </div>
                     )}
                   </div>
@@ -418,7 +404,7 @@ export function ViewerTempo({ booklet }: { booklet: Booklet }) {
                     {g("checkout_time") && (
                       <div className="text-right pl-3 border-l" style={{ borderColor: BEIGE_DARK }}>
                         <p className="text-xs uppercase tracking-wide" style={{ color: MUTED }}>Au plus tard</p>
-                        <p className="font-black text-2xl leading-none" style={{ color: TEXT }}>{g("checkout_time")}</p>
+                        <p className="font-black text-2xl" style={{ color: TEXT }}>{formatTime(g("checkout_time"))}</p>
                       </div>
                     )}
                   </div>
@@ -444,6 +430,7 @@ export function ViewerTempo({ booklet }: { booklet: Booklet }) {
                 <Download className="w-4 h-4 shrink-0" style={{ color: MUTED }} />
               </a>
             ))}
+            <CheckInFormInline bookletId={booklet.id} accent={ACCENT} theme="light" />
           </div>
         </div>
       );

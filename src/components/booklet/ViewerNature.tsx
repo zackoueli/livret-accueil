@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META } from "@/lib/modules";
-import { getContent, parsePlaces, getAvailableLangs } from "./viewerUtils";
-import { CheckInForm } from "./CheckInForm";
-import { ArrowLeft, Globe, MapPin, FileText, Download, ClipboardCheck, ChevronRight } from "lucide-react";
+import { getContent, parsePlaces, getAvailableLangs, formatTime } from "./viewerUtils";
+import { CheckInFormInline } from "./CheckInForm";
+import { ArrowLeft, Globe, MapPin, FileText, Download, ChevronRight } from "lucide-react";
 import { getPalette, patternToCss, BookletPalette } from "@/lib/palettes";
 
 type Screen = "splash" | "home" | "module";
@@ -23,7 +23,6 @@ export function ViewerNature({ booklet }: { booklet: Booklet }) {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCheckIn, setShowCheckIn] = useState(false);
 
   const p = usePalette(booklet);
   const ACCENT = p.primary;
@@ -120,7 +119,6 @@ export function ViewerNature({ booklet }: { booklet: Booklet }) {
   if (screen === "home") {
     return (
       <>
-        {showCheckIn && <CheckInForm bookletId={booklet.id} accent={ACCENT} theme="light" onClose={() => setShowCheckIn(false)} />}
         <div className="fixed inset-0 flex flex-col overflow-hidden" style={{ background: BG, fontFamily: SERIF }}>
 
           <div className="shrink-0 px-6 pt-12 pb-8" style={{ backgroundColor: SURFACE_ALT, borderBottom: `1px solid ${BORDER}` }}>
@@ -178,16 +176,6 @@ export function ViewerNature({ booklet }: { booklet: Booklet }) {
             })}
 
             <div className="px-6 pt-4 pb-2 space-y-3">
-              <button onClick={() => setShowCheckIn(true)}
-                className="w-full flex items-center gap-4 py-4 px-5 rounded-2xl border transition-all active:scale-95"
-                style={{ backgroundColor: SURFACE_ALT, borderColor: BORDER }}>
-                <ClipboardCheck className="w-5 h-5 shrink-0" style={{ color: ACCENT }} />
-                <div className="text-left">
-                  <p className="font-bold text-sm" style={{ fontFamily: SERIF, color: TEXT }}>Check-in en ligne</p>
-                  <p className="text-xs" style={{ fontStyle: "italic", color: MUTED }}>Enregistrez votre arrivée</p>
-                </div>
-                <ChevronRight className="w-4 h-4 ml-auto" style={{ color: BORDER }} />
-              </button>
               {allPlaces.length > 0 && (
                 <button onClick={() => openModule(enabledModules[0]?.id)}
                   className="w-full flex items-center gap-4 py-4 px-5 rounded-2xl border transition-all active:scale-95"
@@ -250,16 +238,17 @@ export function ViewerNature({ booklet }: { booklet: Booklet }) {
             <div className="grid grid-cols-2 gap-3 mb-3">
               {g("checkin_time") && <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: `${ACCENT}15`, border: `1px solid ${ACCENT}30` }}>
                 <p className="text-xs uppercase tracking-wide mb-1" style={{ color: ACCENT, fontFamily: "system-ui" }}>Arrivée</p>
-                <p className="text-xl font-bold" style={{ fontFamily: SERIF, color: TEXT }}>{g("checkin_time")}</p>
+                <p className="font-bold text-xl" style={{ fontFamily: SERIF, color: TEXT }}>{formatTime(g("checkin_time"))}</p>
               </div>}
               {g("checkout_time") && <div className="rounded-2xl p-4 text-center" style={{ backgroundColor: SURFACE_ALT, border: `1px solid ${BORDER}` }}>
                 <p className="text-xs uppercase tracking-wide mb-1" style={{ color: MUTED, fontFamily: "system-ui" }}>Départ</p>
-                <p className="text-xl font-bold" style={{ fontFamily: SERIF, color: TEXT }}>{g("checkout_time")}</p>
+                <p className="font-bold text-xl" style={{ fontFamily: SERIF, color: TEXT }}>{formatTime(g("checkout_time"))}</p>
               </div>}
             </div>
           )}
           {g("checkin_process") && card("🗝️", "Procédure d'arrivée", <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: MUTED }}>{g("checkin_process")}</p>)}
           {g("checkout_process") && card("👋", "Procédure de départ", <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: MUTED }}>{g("checkout_process")}</p>)}
+          <CheckInFormInline bookletId={booklet.id} accent={ACCENT} theme="light" />
         </>;
         case "rules": return g("rules") ? <div className="rounded-2xl p-5" style={{ backgroundColor: SURFACE, border: `1px solid ${BORDER}` }}>
           <p className="text-sm leading-relaxed whitespace-pre-line" style={{ color: MUTED }}>{g("rules")}</p>

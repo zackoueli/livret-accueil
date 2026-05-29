@@ -3,8 +3,15 @@ import { Booklet } from "@/types";
 import { BookletViewer } from "@/components/booklet/BookletViewer";
 import { notFound } from "next/navigation";
 
-export default async function BookletPage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function BookletPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ templateOverride?: string }>;
+}) {
   const { slug } = await params;
+  const { templateOverride } = await searchParams;
 
   const snap = await adminDb
     .collection("booklets")
@@ -21,5 +28,9 @@ export default async function BookletPage({ params }: { params: Promise<{ slug: 
   const userDoc = await adminDb.collection("users").doc(booklet.userId).get();
   if (userDoc.data()?.plan !== "actif") notFound();
 
-  return <BookletViewer booklet={booklet} />;
+  const effectiveBooklet = templateOverride
+    ? { ...booklet, templateId: templateOverride }
+    : booklet;
+
+  return <BookletViewer booklet={effectiveBooklet} />;
 }

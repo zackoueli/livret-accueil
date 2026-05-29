@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { Booklet } from "@/types";
 import { MODULE_META, LANGUAGES } from "@/lib/modules";
-import { ArrowLeft, Globe, ChevronRight, MapPin, Phone, FileText, Download, Navigation, ClipboardCheck } from "lucide-react";
-import { CheckInForm } from "./CheckInForm";
+import { ArrowLeft, Globe, ChevronRight, MapPin, Phone, FileText, Download, Navigation } from "lucide-react";
+import { CheckInForm, CheckInFormInline } from "./CheckInForm";
 import { getTemplate } from "@/lib/templates";
 import { ViewerNature } from "./ViewerNature";
 import { ViewerMagazine } from "./ViewerMagazine";
@@ -12,11 +12,15 @@ import { ViewerModerne } from "./ViewerModerne";
 import { ViewerTempo } from "./ViewerTempo";
 import { ViewerApp } from "./ViewerApp";
 import { ViewerHostin } from "./ViewerHostin";
+import { ViewerJade } from "./ViewerJade";
+import { ViewerOree } from "./ViewerOree";
 
 type Screen = "splash" | "home" | "module" | "nearby";
 
 export function BookletViewer({ booklet }: { booklet: Booklet }) {
   const templateId = booklet.templateId;
+  if (templateId === "jade")   return <ViewerJade booklet={booklet} />;
+  if (templateId === "oree")   return <ViewerOree booklet={booklet} />;
   if (templateId === "hostin") return <ViewerHostin booklet={booklet} />;
   if (templateId === "app") return <ViewerApp booklet={booklet} />;
   if (templateId === "tempo") return <ViewerTempo booklet={booklet} />;
@@ -27,7 +31,6 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
   const [activeModuleId, setActiveModuleId] = useState<string | null>(null);
   const [lang, setLang] = useState(booklet.defaultLanguage || "fr");
   const [showLangMenu, setShowLangMenu] = useState(false);
-  const [showCheckIn, setShowCheckIn] = useState(false);
 
   useEffect(() => {
     fetch("/api/booklets/view", {
@@ -203,7 +206,6 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
   // ─── HOME — tour de contrôle ───────────────────────────────────────────────
   if (screen === "home") {
     return (<>
-      {showCheckIn && <CheckInForm bookletId={booklet.id} accent={accent} onClose={() => setShowCheckIn(false)} />}
       <div className="fixed inset-0 flex flex-col" style={{ backgroundColor: tpl.moduleBg }}>
 
         {/* Header */}
@@ -282,21 +284,6 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
             })}
           </div>
 
-          {/* Bouton Check-in */}
-          <button
-            onClick={() => setShowCheckIn(true)}
-            className="w-full mt-3 flex items-center gap-3 rounded-2xl p-4 border border-gray-100 bg-white shadow-sm active:scale-95 transition-all"
-            style={{ borderColor: accent + "30" }}>
-            <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0"
-              style={{ backgroundColor: accent + "18" }}>
-              <ClipboardCheck className="w-5 h-5" style={{ color: accent }} />
-            </div>
-            <div className="text-left">
-              <p className="font-semibold text-gray-800 text-sm">Check-in en ligne</p>
-              <p className="text-xs text-gray-400">Enregistrez votre arrivée</p>
-            </div>
-            <ChevronRight className="w-4 h-4 text-gray-300 ml-auto" />
-          </button>
 
           {/* Bouton Autour de moi */}
           {allPlaces.length > 0 && (
@@ -416,6 +403,7 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
             accent={accent}
             tpl={tpl}
             get={(key) => get(activeModule.id, key)}
+            bookletId={booklet.id}
           />
           <p className="text-center text-xs text-gray-300 mt-10 pb-4">
             Créé avec{" "}
@@ -426,18 +414,17 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
     );
   }
 
-  return showCheckIn ? (
-    <CheckInForm bookletId={booklet.id} accent={accent} onClose={() => setShowCheckIn(false)} />
-  ) : null;
+  return null;
 }
 
 // ─── MODULE CONTENT ──────────────────────────────────────────────────────────
 
-function ModuleContent({ module, accent, tpl, get }: {
+function ModuleContent({ module, accent, tpl, get, bookletId }: {
   module: Booklet["modules"][0];
   accent: string;
   tpl: import("@/lib/templates").BookletTemplate;
   get: (key: string) => string;
+  bookletId: string;
 }) {
   const photos = module.images ?? [];
   const docs = module.documents ?? [];
@@ -537,6 +524,7 @@ function ModuleContent({ module, accent, tpl, get }: {
           {!get("checkin_time") && !get("checkin_process") && !photos.length && <EmptyModule />}
           <DocumentList documents={docs} accent={accent} />
           <PhotoGallery images={photos} />
+          <CheckInFormInline bookletId={bookletId} accent={accent} theme="light" />
         </div>
       );
 

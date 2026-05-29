@@ -22,7 +22,7 @@ export const LANGUAGES = [
   { code: "it", label: "Italiano", flag: "🇮🇹" },
 ];
 
-export const MODULE_FIELDS: Record<ModuleType, { key: string; label: string; placeholder: string; type: "text" | "textarea" | "richtext" | "video" | "places" }[]> = {
+export const MODULE_FIELDS: Record<ModuleType, { key: string; label: string; placeholder: string; type: "text" | "textarea" | "richtext" | "video" | "places" | "time" }[]> = {
   welcome: [
     { key: "title",   label: "Titre",          placeholder: "Bienvenue au Gîte des Pins !", type: "text" },
     { key: "message", label: "Message d'accueil", placeholder: "Nous sommes ravis de vous accueillir...", type: "richtext" },
@@ -36,8 +36,8 @@ export const MODULE_FIELDS: Record<ModuleType, { key: string; label: string; pla
     { key: "other",         label: "Autres infos",      placeholder: "Boîte à clés au portail...", type: "textarea" },
   ],
   checkin: [
-    { key: "checkin_time",    label: "Heure d'arrivée",    placeholder: "À partir de 16h00",  type: "text" },
-    { key: "checkout_time",   label: "Heure de départ",    placeholder: "Avant 11h00",        type: "text" },
+    { key: "checkin_time",    label: "Heure d'arrivée",    placeholder: "16:00",  type: "time" },
+    { key: "checkout_time",   label: "Heure de départ",    placeholder: "11:00",  type: "time" },
     { key: "checkin_process", label: "Procédure d'arrivée", placeholder: "Les clés se trouvent dans la boîte à clés...", type: "richtext" },
     { key: "checkout_process",label: "Procédure de départ", placeholder: "Merci de laisser les clés sur la table...", type: "richtext" },
   ],
