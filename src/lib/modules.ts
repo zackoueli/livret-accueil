@@ -1,6 +1,6 @@
 import { ModuleType } from "@/types";
 
-export type FieldType = "text" | "textarea" | "time" | "phone" | "url" | "number" | "places";
+export type FieldType = "text" | "textarea" | "time" | "phone" | "url" | "photo" | "number" | "places" | "activities" | "services";
 
 export interface ModuleField {
   key: string;
@@ -25,7 +25,7 @@ export const MODULE_META: Record<ModuleType, ModuleMeta> = {
   accommodation: { label: "Le logement",            emoji: "🏠", description: "WiFi, équipements, chauffage, climatisation" },
   rules:         { label: "Règles du séjour",       emoji: "📋", description: "Animaux, fumeurs, nuisances, capacité" },
   kitchen:       { label: "Cuisine & Ménage",       emoji: "🍳", description: "Ustensiles, poubelles, linge, produits" },
-  neighborhood:  { label: "Quartier & Activités",   emoji: "📍", description: "Restaurants, commerces, transports, attractions" },
+  neighborhood:  { label: "Activités",               emoji: "📍", description: "Restaurants, commerces, transports, attractions" },
   safety:        { label: "Sécurité & Urgences",    emoji: "🚨", description: "Numéros utiles, extincteur, disjoncteur" },
   contact:       { label: "Contact & Services",     emoji: "📞", description: "Hôte, conciergerie, maintenance" },
   checkout:      { label: "Départ & Avis",          emoji: "⭐", description: "Procédure de départ, laisser un avis" },
@@ -45,22 +45,29 @@ export const MODULE_META: Record<ModuleType, ModuleMeta> = {
 
 export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
   arrival: [
+    { key: "welcome_message", label: "Message de bienvenue",  placeholder: "Bienvenue dans notre maison ! Nous espérons que vous vous y sentirez comme chez vous.", type: "textarea" },
     { key: "checkin_time",    label: "Heure d'arrivée",       placeholder: "16:00",                              type: "time" },
     { key: "checkout_time",   label: "Heure de départ",       placeholder: "11:00",                              type: "time" },
-    { key: "access_code",     label: "Code d'accès / digicode", placeholder: "1234A",                            type: "text" },
-    { key: "key_location",    label: "Localisation des clés", placeholder: "Boîte à clés au portail, code 5678", type: "textarea" },
-    { key: "checkin_process", label: "Procédure d'arrivée",   placeholder: "1. Composer le code...\n2. Monter au 2e étage...", type: "textarea" },
-    { key: "parking",         label: "Stationnement",         placeholder: "Place n°12 dans le parking souterrain", type: "textarea" },
+    { key: "access_code",     label: "Code d'accès / digicode", placeholder: "1234",                             type: "text" },
+    { key: "key_location",    label: "Localisation des clés", placeholder: "Boîte à clés fixée au portail, code 5678. Remettez-la en place après.", type: "textarea" },
+    { key: "checkin_process", label: "Étapes d'arrivée",      placeholder: "Composer le code au portail\nMonter au 2ème étage\nPorte de droite", type: "textarea",
+      hint: "Une étape par ligne — elles seront affichées comme une checklist numérotée" },
+    { key: "parking",         label: "Stationnement",         placeholder: "2 places côté jardin, portail automatique", type: "text" },
+    { key: "early_checkin",   label: "Arrivée anticipée",     placeholder: "Possible avant 16h sur demande (30€). Contactez-nous 48h avant.", type: "textarea" },
+    { key: "late_checkout",   label: "Départ tardif",         placeholder: "Possible jusqu'à 14h sur demande (30€). Sous réserve de disponibilité.", type: "textarea" },
   ],
 
   accommodation: [
-    { key: "wifi_name",     label: "Nom du WiFi",        placeholder: "MonLogement_5G",       type: "text" },
-    { key: "wifi_password", label: "Mot de passe WiFi",  placeholder: "motdepasse123",         type: "text" },
-    { key: "heating",       label: "Chauffage",          placeholder: "Thermostat dans le couloir, régler à 20°C...", type: "textarea" },
-    { key: "ac",            label: "Climatisation",      placeholder: "Télécommande dans le tiroir de la commode...", type: "textarea" },
-    { key: "appliances",    label: "Électroménager",     placeholder: "Machine à laver au sous-sol, programme 40°...", type: "textarea" },
-    { key: "tv",            label: "TV & Divertissements", placeholder: "Netflix inclus, login : ...",            type: "textarea" },
-    { key: "other",         label: "Autres équipements", placeholder: "Lave-vaisselle, aspirateur dans le placard...", type: "textarea" },
+    { key: "wifi_name",     label: "Nom du réseau WiFi",  placeholder: "GuestWifi",            type: "text" },
+    { key: "wifi_password", label: "Mot de passe WiFi",   placeholder: "motdepasse123",         type: "text" },
+    { key: "services_list", label: "Services & équipements inclus", placeholder: "", type: "services",
+      hint: "Ajoutez les services inclus (piscine, parking, BBQ...) avec icône et description courte." },
+    { key: "heating",       label: "Chauffage",           placeholder: "Thermostat dans le couloir, régler à 20°C maximum.", type: "textarea" },
+    { key: "ac",            label: "Climatisation",       placeholder: "Télécommande dans le tiroir de la commode. Mode froid : snowflake.", type: "textarea" },
+    { key: "appliances",    label: "Électroménager",      placeholder: "Machine à laver : placard couloir, programme 40°.\nSèche-linge : idem.", type: "textarea" },
+    { key: "tv",            label: "TV & Divertissements", placeholder: "Netflix inclus — identifiants dans le tiroir.\nTNT : bouton AV sur la télécommande.", type: "textarea" },
+    { key: "checkin_code",  label: "Code boîte aux lettres", placeholder: "A245",              type: "text" },
+    { key: "other",         label: "Autres équipements",  placeholder: "Lave-vaisselle, aspirateur dans le placard couloir...", type: "textarea" },
   ],
 
   rules: [
@@ -81,12 +88,12 @@ export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
   ],
 
   neighborhood: [
-    { key: "restaurants", label: "Restaurants & cafés",   placeholder: "Le Bistrot du Coin (5 min) — notre préféré !\nPizzeria Napoli (10 min)", type: "textarea" },
-    { key: "shops",       label: "Commerces & marchés",   placeholder: "Supermarché Carrefour (2 min à pied)\nMarché le samedi matin place de la mairie", type: "textarea" },
-    { key: "activities",  label: "Activités & attractions", placeholder: "Musée de la ville (15 min)\nPlage à 20 min en voiture", type: "textarea" },
-    { key: "transport",   label: "Transports",             placeholder: "Bus n°5 arrêt à 100m (toutes les 10 min)\nGare à 2km", type: "textarea" },
-    { key: "places",      label: "Lieux avec adresses",   placeholder: "Boulangerie Paul | 12 rue de la Paix\nPharmaceute | 3 avenue du Général", type: "places",
-      hint: "Format : Nom du lieu | Adresse (une ligne par lieu)" },
+    { key: "activities_list", label: "Activités & lieux recommandés", placeholder: "", type: "activities",
+      hint: "Ajoutez vos recommandations : restaurants, activités, commerces... chacune avec photo, description et contact." },
+    { key: "places",      label: "Adresses rapides (carte)", placeholder: "Boulangerie Paul | 12 rue de la Paix\nRestaurant Le Zinc | 5 place du Marché", type: "places",
+      hint: "Format : Nom | Adresse — apparaissent sur la carte. Une ligne par lieu." },
+    { key: "transport",   label: "Transports",             placeholder: "Bus n°5 : arrêt à 100m, toutes les 10 min\nGare SNCF à 2km (taxi ~10€)", type: "textarea" },
+    { key: "hidden_gems", label: "Coup de cœur de l'hôte", placeholder: "La terrasse cachée du Café des Arts — demandez la table du fond !", type: "textarea" },
   ],
 
   safety: [
@@ -99,21 +106,26 @@ export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
   ],
 
   contact: [
-    { key: "host_name",         label: "Nom de l'hôte",          placeholder: "Jean Dupont",          type: "text" },
+    { key: "host_name",         label: "Nom de l'hôte",          placeholder: "Marie & Thomas",       type: "text" },
+    { key: "host_photo",        label: "Photo de l'hôte",         placeholder: "",                      type: "photo" },
     { key: "host_phone",        label: "Téléphone",               placeholder: "+33 6 12 34 56 78",    type: "phone" },
-    { key: "host_email",        label: "Email",                   placeholder: "jean@exemple.fr",      type: "text" },
-    { key: "response_time",     label: "Délai de réponse",        placeholder: "Je réponds en général sous 1h.",   type: "text" },
-    { key: "concierge",         label: "Conciergerie / service",  placeholder: "Conciergerie disponible 24h/24 au...", type: "textarea" },
-    { key: "maintenance",       label: "Maintenance / pannes",    placeholder: "En cas de panne, contacter Michel au 06...", type: "textarea" },
+    { key: "host_email",        label: "Email",                   placeholder: "marie@exemple.fr",     type: "text" },
+    { key: "response_time",     label: "Disponibilité",           placeholder: "Disponible 9h-20h, je réponds en général sous 1h.", type: "text" },
+    { key: "about",             label: "À propos de l'hôte",     placeholder: "Nous habitons à 5 min du logement. N'hésitez pas à nous contacter pour tout !", type: "textarea" },
+    { key: "concierge",         label: "Conciergerie / services", placeholder: "Conciergerie disponible 24h/24 au 05 56 XX XX XX", type: "textarea" },
+    { key: "maintenance",       label: "Urgence / maintenance",   placeholder: "En cas de panne urgente, contactez Michel au 06 XX XX XX XX", type: "textarea" },
   ],
 
   checkout: [
     { key: "checkout_time",    label: "Heure de départ",          placeholder: "11:00",  type: "time" },
-    { key: "process",          label: "Procédure de départ",      placeholder: "1. Sortir les poubelles\n2. Fermer toutes les fenêtres\n3. Déposer les clés...", type: "textarea" },
+    { key: "process",          label: "Checklist de départ",      placeholder: "Sortir les poubelles\nFermer toutes les fenêtres\nÉteindre la climatisation\nVider le réfrigérateur\nLaisser le logement propre\nDéposer les clés", type: "textarea",
+      hint: "Une tâche par ligne — elles apparaîtront comme des cases à cocher interactives" },
     { key: "keys_return",      label: "Retour des clés",          placeholder: "Laisser les clés sur la table de l'entrée.", type: "textarea" },
+    { key: "late_checkout_info", label: "Late checkout possible ?", placeholder: "Oui, jusqu'à 14h sur demande (30€). Contactez-nous la veille.", type: "textarea" },
     { key: "review_airbnb",    label: "Lien avis Airbnb",         placeholder: "https://airbnb.com/...",  type: "url" },
     { key: "review_google",    label: "Lien avis Google",         placeholder: "https://g.page/...",      type: "url" },
-    { key: "thank_you",        label: "Message de remerciement",  placeholder: "Merci pour votre séjour ! Nous espérons vous revoir bientôt.", type: "textarea" },
+    { key: "review_booking",   label: "Lien avis Booking",        placeholder: "https://booking.com/...", type: "url" },
+    { key: "thank_you",        label: "Message de remerciement",  placeholder: "Merci pour votre séjour ! Nous espérons vous revoir bientôt. 🏡", type: "textarea" },
   ],
 
   // ── Optionnels ───────────────────────────────────────────────────────────────
@@ -217,4 +229,47 @@ export function formatTime(val: string): string {
   const m = val.match(/^(\d{1,2}):(\d{2})$/);
   if (m) return `${m[1]}h${m[2]}`;
   return val;
+}
+
+// ── Types structurés pour activités et services ───────────────────────────────
+
+export interface Activity {
+  id: string;
+  category: "restaurant" | "activity" | "shop" | "transport" | "other";
+  name: string;
+  description: string;
+  address: string;
+  distance: string;
+  phone: string;
+  website: string;
+  instagram: string;
+  photo: string;       // URL image
+  openHours: string;
+  priceRange: string;  // "€" | "€€" | "€€€" | ""
+  recommended: boolean;
+}
+
+export interface Service {
+  id: string;
+  emoji: string;
+  name: string;
+  description: string;
+}
+
+export const ACTIVITY_CATEGORIES = [
+  { value: "restaurant", label: "Restaurant & Café", emoji: "🍽️" },
+  { value: "activity",   label: "Activité & Visite",  emoji: "🎯" },
+  { value: "shop",       label: "Commerce & Marché",  emoji: "🛒" },
+  { value: "transport",  label: "Transport",           emoji: "🚌" },
+  { value: "other",      label: "Autre",               emoji: "📍" },
+] as const;
+
+export const SERVICE_EMOJIS = ["🅿️","🏊","☀️","🍳","🌿","🔥","🎾","🚲","🛁","📺","❄️","♨️","🧺","🏋️","🎮","🛶","⛷️","🌊","🐾","🍷"];
+
+export function parseActivities(raw: string): Activity[] {
+  try { return JSON.parse(raw) as Activity[]; } catch { return []; }
+}
+
+export function parseServices(raw: string): Service[] {
+  try { return JSON.parse(raw) as Service[]; } catch { return []; }
 }

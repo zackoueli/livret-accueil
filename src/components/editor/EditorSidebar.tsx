@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { GripVertical, Eye, EyeOff, Check, X, Loader2, Link } from "lucide-react";
+import { GripVertical, Eye, EyeOff, Check, X, Loader2, Link, ImagePlus, Trash2 } from "lucide-react";
+import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
+import { storage } from "@/lib/firebase";
 import {
   DndContext,
   closestCenter,
@@ -25,7 +27,7 @@ import { BookletModule, ModuleType } from "@/types";
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
   const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules, addModule } = useEditorStore();
-  const [tab, setTab] = useState<"modules" | "optional" | "settings">("modules");
+  const [tab, setTab] = useState<"modules" | "optional" | "appearance">("modules");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -60,9 +62,9 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "optional" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
           Options
         </button>
-        <button onClick={() => setTab("settings")}
-          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "settings" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
-          Réglages
+        <button onClick={() => setTab("appearance")}
+          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "appearance" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
+          Apparence
         </button>
       </div>
 
@@ -112,7 +114,7 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
         </div>
       )}
 
-      {tab === "settings" && <SidebarSettings />}
+      {tab === "appearance" && <SidebarAppearance />}
     </aside>
   );
 }
@@ -173,10 +175,12 @@ function SortableModuleItem({
   );
 }
 
-function SidebarSettings() {
+function SidebarAppearance() {
   const { booklet, updateBookletField } = useEditorStore();
   const [slugInput, setSlugInput] = useState("");
   const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken" | "too_short">("idle");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -193,112 +197,165 @@ function SidebarSettings() {
     debounceRef.current = setTimeout(async () => {
       const res = await fetch(`/api/booklets/check-slug?slug=${clean}&excludeId=${booklet?.id}`);
       const data = await res.json();
-      if (data.available) {
-        setSlugStatus("available");
-        updateBookletField("slug", clean);
-      } else {
-        setSlugStatus(data.reason === "too_short" ? "too_short" : "taken");
-      }
+      if (data.available) { setSlugStatus("available"); updateBookletField("slug", clean); }
+      else setSlugStatus(data.reason === "too_short" ? "too_short" : "taken");
     }, 500);
+  };
+
+  const uploadCover = async (file: File) => {
+    if (!booklet) return;
+    setUploading(true);
+    try {
+      const storageRef = ref(storage, `booklets/${booklet.id}/cover-${Date.now()}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      updateBookletField("coverImage", url);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeCover = async () => {
+    if (!booklet?.coverImage) return;
+    try {
+      const storageRef = ref(storage, booklet.coverImage);
+      await deleteObject(storageRef).catch(() => {});
+    } finally {
+      updateBookletField("coverImage", "");
+    }
   };
 
   if (!booklet) return null;
 
-  const COLORS = ["#f97316", "#ef4444", "#8b5cf6", "#3b82f6", "#10b981", "#ec4899", "#1a1a1a"];
+  const COLORS = [
+    { hex: "#007AFF", name: "Bleu iOS" },
+    { hex: "#f97316", name: "Orange" },
+    { hex: "#ef4444", name: "Rouge" },
+    { hex: "#8b5cf6", name: "Violet" },
+    { hex: "#10b981", name: "Vert" },
+    { hex: "#ec4899", name: "Rose" },
+    { hex: "#1a1a1a", name: "Noir" },
+    { hex: "#34C759", name: "Vert iOS" },
+  ];
+
+  const ibase = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent";
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-5">
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Nom du logement
-        </label>
+    <div className="flex-1 overflow-y-auto">
+      {/* ── Photo de couverture ── */}
+      <div className="p-4 border-b border-gray-100">
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Photo de couverture</p>
+
+        {booklet.coverImage ? (
+          <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
+            <img src={booklet.coverImage} alt="Couverture" className="w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="absolute bottom-2 right-2 flex gap-1.5">
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/90 text-gray-700 text-xs font-semibold hover:bg-white transition-colors">
+                <ImagePlus className="w-3.5 h-3.5" /> Changer
+              </button>
+              <button
+                onClick={removeCover}
+                className="p-1.5 rounded-lg bg-white/90 text-red-400 hover:text-red-600 hover:bg-white transition-colors">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-orange-300 hover:text-orange-400 hover:bg-orange-50 transition-all disabled:opacity-50">
+            {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <ImagePlus className="w-6 h-6" />}
+            <span className="text-sm font-medium">{uploading ? "Envoi en cours..." : "Ajouter une photo"}</span>
+            <span className="text-xs text-gray-300">JPG, PNG, WebP · max 5MB</span>
+          </button>
+        )}
+
         <input
-          type="text"
-          value={booklet.propertyName}
-          onChange={(e) => updateBookletField("propertyName", e.target.value)}
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadCover(f); e.target.value = ""; }}
         />
       </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          URL du livret
-        </label>
-        <div className="relative">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2">
-            <Link className="w-3.5 h-3.5 text-gray-300" />
+      <div className="p-4 space-y-4">
+        {/* Nom */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nom du logement</label>
+          <input type="text" value={booklet.propertyName} onChange={(e) => updateBookletField("propertyName", e.target.value)}
+            placeholder="Villa Les Pins" className={ibase} />
+        </div>
+
+        {/* Adresse */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Adresse</label>
+          <input type="text" value={booklet.address || ""} onChange={(e) => updateBookletField("address", e.target.value)}
+            placeholder="5 chemin des Oliviers, 84220 Gordes" className={ibase} />
+        </div>
+
+        {/* Description */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Description courte</label>
+          <textarea value={booklet.description || ""} onChange={(e) => updateBookletField("description", e.target.value)}
+            rows={2} placeholder="Magnifique villa provençale avec piscine..." className={`${ibase} resize-none`} />
+        </div>
+
+        {/* Couleur */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Couleur principale</label>
+          <div className="grid grid-cols-4 gap-2">
+            {COLORS.map((c) => (
+              <button key={c.hex} onClick={() => updateBookletField("accentColor", c.hex)}
+                title={c.name}
+                className={`relative h-8 rounded-xl transition-transform hover:scale-105 ${booklet.accentColor === c.hex ? "ring-2 ring-offset-2 ring-gray-400 scale-105" : ""}`}
+                style={{ backgroundColor: c.hex }}>
+                {booklet.accentColor === c.hex && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Check className="w-4 h-4 text-white drop-shadow" />
+                  </div>
+                )}
+              </button>
+            ))}
           </div>
-          <input
-            type="text"
-            value={slugInput}
-            onChange={(e) => checkSlug(e.target.value)}
-            className={`w-full border rounded-xl pl-8 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
-              slugStatus === "available" ? "border-green-300 focus:ring-green-400" :
-              slugStatus === "taken" || slugStatus === "too_short" ? "border-red-300 focus:ring-red-400" :
-              "border-gray-200 focus:ring-orange-400"
-            }`}
-            placeholder="villa-les-lavandes"
-            spellCheck={false}
-          />
-          <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            {slugStatus === "checking" && <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />}
-            {slugStatus === "available" && <Check className="w-3.5 h-3.5 text-green-500" />}
-            {(slugStatus === "taken" || slugStatus === "too_short") && <X className="w-3.5 h-3.5 text-red-400" />}
+          {/* Couleur personnalisée */}
+          <div className="flex items-center gap-2 mt-2">
+            <input type="color" value={booklet.accentColor || "#007AFF"}
+              onChange={(e) => updateBookletField("accentColor", e.target.value)}
+              className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
+            <span className="text-xs text-gray-400">Couleur personnalisée</span>
+            <span className="text-xs font-mono text-gray-500 ml-auto">{booklet.accentColor}</span>
           </div>
         </div>
-        <p className={`text-xs mt-1.5 ${
-          slugStatus === "available" ? "text-green-500" :
-          slugStatus === "taken" ? "text-red-400" :
-          slugStatus === "too_short" ? "text-red-400" :
-          "text-gray-400"
-        }`}>
-          {slugStatus === "available" ? "URL disponible ✓" :
-           slugStatus === "taken" ? "URL déjà utilisée" :
-           slugStatus === "too_short" ? "Minimum 3 caractères" :
-           `…/b/${slugInput || booklet.slug}`}
-        </p>
-      </div>
 
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Couleur principale
-        </label>
-        <div className="flex gap-2 flex-wrap">
-          {COLORS.map((c) => (
-            <button
-              key={c}
-              onClick={() => updateBookletField("accentColor", c)}
-              className={`w-8 h-8 rounded-lg transition-transform hover:scale-110 ${booklet.accentColor === c ? "ring-2 ring-offset-2 ring-gray-400 scale-110" : ""}`}
-              style={{ backgroundColor: c }}
-            />
-          ))}
+        {/* URL */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">URL du livret</label>
+          <div className="relative">
+            <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
+            <input type="text" value={slugInput} onChange={(e) => checkSlug(e.target.value)}
+              className={`w-full border rounded-xl pl-8 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                slugStatus === "available" ? "border-green-300 focus:ring-green-400" :
+                slugStatus === "taken" || slugStatus === "too_short" ? "border-red-300 focus:ring-red-400" :
+                "border-gray-200 focus:ring-orange-400"
+              }`}
+              placeholder="villa-les-pins" spellCheck={false} />
+            <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              {slugStatus === "checking" && <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />}
+              {slugStatus === "available" && <Check className="w-3.5 h-3.5 text-green-500" />}
+              {(slugStatus === "taken" || slugStatus === "too_short") && <X className="w-3.5 h-3.5 text-red-400" />}
+            </div>
+          </div>
+          <p className={`text-xs mt-1.5 ${slugStatus === "available" ? "text-green-500" : slugStatus === "taken" || slugStatus === "too_short" ? "text-red-400" : "text-gray-400"}`}>
+            {slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : `livret.app/b/${slugInput || booklet.slug}`}
+          </p>
         </div>
-      </div>
-
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Adresse
-        </label>
-        <textarea
-          value={booklet.address || ""}
-          onChange={(e) => updateBookletField("address", e.target.value)}
-          rows={2}
-          placeholder="123 route des Alpilles, 13520 Les Baux"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none"
-        />
-      </div>
-
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-          Description courte
-        </label>
-        <textarea
-          value={booklet.description || ""}
-          onChange={(e) => updateBookletField("description", e.target.value)}
-          rows={3}
-          placeholder="Un gîte au cœur des Alpilles..."
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none"
-        />
       </div>
     </div>
   );
