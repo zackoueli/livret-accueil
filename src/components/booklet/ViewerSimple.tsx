@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Booklet, BookletModule } from "@/types";
-import { MODULE_META, formatTime, parseActivities, parseServices } from "@/lib/modules";
+import { MODULE_META, formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
 
 type Tab = "home" | "stay" | "area" | "safety" | "checkout";
 
@@ -717,7 +717,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
   // Catégories effectivement présentes dans les activités
   const presentCats = new Set(activities.map(a => a.category));
   const catCount = (id: string) => id === "all" ? activities.length : activities.filter(a => a.category === id).length;
-  const visibleCats = CATS.filter(c => c.id === "all" || presentCats.has(c.id));
+  const visibleCats = CATS.filter(c => c.id === "all" || presentCats.has(c.id as Activity["category"]));
 
   const filtered = activeFilter === "all"
     ? activities
