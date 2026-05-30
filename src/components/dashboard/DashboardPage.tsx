@@ -387,7 +387,7 @@ function BookletCard({ booklet, isFree, onEdit, onPreview, onShare, onCheckIns, 
           </span>
           <span className="flex items-center gap-1">
             <Globe className="w-3 h-3" />
-            {booklet.availableLanguages.length} langue{booklet.availableLanguages.length > 1 ? "s" : ""}
+            {booklet.modules.filter((m) => m.enabled).length} modules
           </span>
           {booklet.viewCount !== undefined && booklet.viewCount > 0 && (
             <span className="flex items-center gap-1">

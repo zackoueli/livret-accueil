@@ -20,18 +20,12 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useEditorStore } from "@/store/editorStore";
-import { MODULE_META } from "@/lib/modules";
-import { BookletModule } from "@/types";
-import { SplashEditor } from "./SplashEditor";
-import { TemplateSelector } from "./TemplateSelector";
-import { getTemplate } from "@/lib/templates";
-import { Sparkles } from "lucide-react";
+import { MODULE_META, CORE_MODULES, OPTIONAL_MODULES } from "@/lib/modules";
+import { BookletModule, ModuleType } from "@/types";
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
-  const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules } = useEditorStore();
-  const [tab, setTab] = useState<"modules" | "splash" | "settings">("modules");
-  const [showTemplates, setShowTemplates] = useState(false);
-  const currentTemplate = getTemplate(booklet?.templateId);
+  const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules, addModule } = useEditorStore();
+  const [tab, setTab] = useState<"modules" | "optional" | "settings">("modules");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -51,31 +45,20 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
     reorderModules(reordered);
   };
 
+  const existingTypes = new Set(booklet?.modules.map((m) => m.type) ?? []);
+
   return (
-    <>
-    {showTemplates && <TemplateSelector onClose={() => setShowTemplates(false)} />}
     <aside className="w-full lg:w-64 bg-white border-r border-gray-100 flex flex-col shrink-0 overflow-hidden">
 
-      {/* Bouton template */}
-      <button onClick={() => setShowTemplates(true)}
-        className="mx-3 mt-3 flex items-center gap-2 px-3 py-2.5 rounded-xl border border-dashed border-orange-200 bg-orange-50 hover:bg-orange-100 transition-colors group">
-        <span className="text-lg">{currentTemplate.preview}</span>
-        <div className="flex-1 text-left">
-          <p className="text-xs font-bold text-orange-600">{currentTemplate.name}</p>
-          <p className="text-xs text-orange-400">Changer de template</p>
-        </div>
-        <Sparkles className="w-3.5 h-3.5 text-orange-400 group-hover:text-orange-600 transition-colors" />
-      </button>
-
       {/* Tabs */}
-      <div className="flex border-b border-gray-100 p-2 gap-1 mt-2">
+      <div className="flex border-b border-gray-100 p-2 gap-1">
         <button onClick={() => setTab("modules")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "modules" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
           Modules
         </button>
-        <button onClick={() => setTab("splash")}
-          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "splash" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
-          Accueil
+        <button onClick={() => setTab("optional")}
+          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "optional" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
+          Options
         </button>
         <button onClick={() => setTab("settings")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "settings" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
@@ -83,9 +66,7 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
         </button>
       </div>
 
-      {tab === "splash" && <div className="flex-1 overflow-y-auto"><SplashEditor /></div>}
-
-      {tab === "modules" ? (
+      {tab === "modules" && (
         <div className="flex-1 overflow-y-auto p-3">
           <p className="text-xs text-gray-400 px-2 mb-3">
             Glissez pour réordonner · cliquez pour éditer
@@ -104,11 +85,35 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
             </SortableContext>
           </DndContext>
         </div>
-      ) : tab === "settings" ? (
-        <SidebarSettings />
-      ) : null}
+      )}
+
+      {tab === "optional" && (
+        <div className="flex-1 overflow-y-auto p-3">
+          <p className="text-xs text-gray-400 px-2 mb-3">Modules optionnels à ajouter</p>
+          {OPTIONAL_MODULES.map((type) => {
+            const meta = MODULE_META[type];
+            const already = existingTypes.has(type);
+            return (
+              <div key={type} className="flex items-center gap-2 px-3 py-2.5 rounded-xl mb-1">
+                <span className="text-base leading-none">{meta.emoji}</span>
+                <span className="flex-1 text-sm text-gray-700 truncate">{meta.label}</span>
+                {already ? (
+                  <span className="text-xs text-gray-300 font-medium">Ajouté</span>
+                ) : (
+                  <button
+                    onClick={() => addModule(type)}
+                    className="text-xs font-bold text-orange-500 hover:text-orange-700 transition-colors">
+                    + Ajouter
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {tab === "settings" && <SidebarSettings />}
     </aside>
-    </>
   );
 }
 

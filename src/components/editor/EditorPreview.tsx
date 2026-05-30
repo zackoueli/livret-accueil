@@ -46,10 +46,7 @@ export function EditorPreview() {
     return () => clearTimeout(timer);
   }, [
     booklet?.templateId,
-    booklet?.paletteId,
-    booklet?.customPalette,
     booklet?.coverImage,
-    booklet?.splashConfig,
     booklet?.propertyName,
   ]);
 

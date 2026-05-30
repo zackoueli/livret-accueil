@@ -36,17 +36,14 @@ function sanitizeForFirestore(
 import { nanoid } from "nanoid";
 
 const DEFAULT_MODULES: BookletModule[] = [
-  { id: nanoid(), type: "welcome", enabled: true, order: 0, content: {} },
-  { id: nanoid(), type: "practical", enabled: true, order: 1, content: {} },
-  { id: nanoid(), type: "checkin", enabled: true, order: 2, content: {} },
-  { id: nanoid(), type: "rules", enabled: true, order: 3, content: {} },
-  { id: nanoid(), type: "guide", enabled: true, order: 4, content: {} },
-  { id: nanoid(), type: "contacts", enabled: true, order: 5, content: {} },
-  { id: nanoid(), type: "activities", enabled: false, order: 6, content: {} },
-  { id: nanoid(), type: "gooddeals", enabled: false, order: 7, content: {} },
-  { id: nanoid(), type: "transport", enabled: false, order: 8, content: {} },
-  { id: nanoid(), type: "faq", enabled: false, order: 9, content: {} },
-  { id: nanoid(), type: "upselling", enabled: false, order: 10, content: {} },
+  { id: nanoid(), type: "arrival",       enabled: true,  order: 0, content: {}, images: [], documents: [] },
+  { id: nanoid(), type: "accommodation", enabled: true,  order: 1, content: {}, images: [], documents: [] },
+  { id: nanoid(), type: "rules",         enabled: true,  order: 2, content: {}, images: [], documents: [] },
+  { id: nanoid(), type: "kitchen",       enabled: true,  order: 3, content: {}, images: [], documents: [] },
+  { id: nanoid(), type: "neighborhood",  enabled: true,  order: 4, content: {}, images: [], documents: [] },
+  { id: nanoid(), type: "safety",        enabled: true,  order: 5, content: {}, images: [], documents: [] },
+  { id: nanoid(), type: "contact",       enabled: true,  order: 6, content: {}, images: [], documents: [] },
+  { id: nanoid(), type: "checkout",      enabled: true,  order: 7, content: {}, images: [], documents: [] },
 ];
 
 export async function createBooklet(userId: string, title: string): Promise<string> {
@@ -58,8 +55,6 @@ export async function createBooklet(userId: string, title: string): Promise<stri
     accentColor: "#6366f1",
     propertyName: title,
     modules: DEFAULT_MODULES,
-    defaultLanguage: "fr",
-    availableLanguages: ["fr"],
     isPublished: false,
     createdAt: Date.now(),
     updatedAt: Date.now(),

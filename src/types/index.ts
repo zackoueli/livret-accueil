@@ -15,18 +15,28 @@ export interface UserProfile {
   createdAt: number;
 }
 
+// ── Modules ────────────────────────────────────────────────────────────────────
+
 export type ModuleType =
-  | "welcome"
-  | "practical"
-  | "checkin"
-  | "rules"
-  | "guide"
-  | "contacts"
-  | "activities"
-  | "gooddeals"
-  | "transport"
-  | "faq"
-  | "upselling";
+  // Modules principaux
+  | "arrival"       // 🔑 Arrivée & Départ
+  | "accommodation" // 🏠 Le logement
+  | "rules"         // 📋 Règles du séjour
+  | "kitchen"       // 🍳 Cuisine & Ménage
+  | "neighborhood"  // 📍 Quartier & Activités
+  | "safety"        // 🚨 Sécurité & Urgences
+  | "contact"       // 📞 Contact & Services
+  | "checkout"      // ⭐ Départ & Avis
+  // Modules optionnels
+  | "baby"          // 👶 Bébé & Enfants
+  | "pets"          // 🐾 Animaux acceptés
+  | "pool"          // 🏊 Piscine & Extérieur
+  | "coworking"     // 💻 Télétravail
+  | "transport"     // 🚗 Transport & Parking
+  | "accessibility" // ♿ Accessibilité
+  | "experiences"   // 🗺️ Expériences locales
+  | "eco"           // 🌿 Éco-responsable
+  | "practical";    // ℹ️ Infos pratiques
 
 export interface BookletDocument {
   url: string;
@@ -44,37 +54,6 @@ export interface BookletModule {
   documents?: BookletDocument[];
 }
 
-export type SplashMediaType = "image" | "video";
-export type SplashTitleFont = "sans" | "serif" | "mono";
-export type SplashTitleSize = "sm" | "md" | "lg" | "xl";
-export type SplashTitleWeight = "normal" | "semibold" | "bold" | "black";
-export type SplashOverlay = "none" | "light" | "medium" | "dark";
-
-export interface SplashConfig {
-  // Média de fond
-  mediaType?: SplashMediaType;
-  mediaUrl?: string;
-  youtubeUrl?: string;
-  overlayOpacity?: SplashOverlay;
-  // Contenu texte
-  customTitle?: string;              // surcharge propertyName
-  customSubtitle?: string;           // surcharge description
-  badgeText?: string;                // petit texte au-dessus du titre (ex: "Livret d'accueil")
-  buttonText?: string;               // surcharge "Ouvrir le livret →"
-  // Style titre
-  titleFont?: SplashTitleFont;
-  titleSize?: SplashTitleSize;
-  titleWeight?: SplashTitleWeight;
-  titleColor?: string;
-  subtitleColor?: string;
-  // Style bouton
-  buttonColor?: string;
-  buttonTextColor?: string;
-  // Logo
-  logoUrl?: string;
-  logoSize?: "sm" | "md" | "lg";
-}
-
 export interface CheckIn {
   id: string;
   bookletId: string;
@@ -83,42 +62,25 @@ export interface CheckIn {
   guestCount: number;
   checkInDate: string;
   checkOutDate: string;
-  signature: string; // base64 dataURL
+  signature: string;
   acceptedRules: boolean;
   createdAt: number;
-}
-
-export interface CustomPaletteOverride {
-  primary?: string;
-  secondary?: string;
-  surface?: string;
-  text?: string;
-  muted?: string;
-  border?: string;
-  patternColor?: string;
-  patternSize?: number;
 }
 
 export interface Booklet {
   id: string;
   userId: string;
   templateId?: string;
-  paletteId?: string;
-  customPalette?: CustomPaletteOverride;
   title: string;
   slug: string;
   description?: string;
   coverImage?: string;
   accentColor: string;
-  logoUrl?: string;
   propertyName: string;
   address?: string;
   modules: BookletModule[];
-  defaultLanguage: string;
-  availableLanguages: string[];
   isPublished: boolean;
   viewCount?: number;
-  splashConfig?: SplashConfig;
   createdAt: number;
   updatedAt: number;
 }
