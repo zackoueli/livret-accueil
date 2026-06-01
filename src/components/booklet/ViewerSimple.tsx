@@ -629,7 +629,7 @@ function ActivityCard({ act, accent, catLabel, catColor }: {
   catColor: (cat: string) => string;
 }) {
   return (
-    <div style={{ background: C.card, borderRadius: 18, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 0.5px 2px rgba(0,0,0,0.04)" }}>
+    <div style={{ background: C.card, borderRadius: 18, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.08), 0 0.5px 2px rgba(0,0,0,0.04)", display: "flex", flexDirection: "column", width: "100%" }}>
       {act.photo ? (
         <div style={{ height: 128, backgroundImage: `url(${act.photo})`, backgroundSize: "cover", backgroundPosition: "center", position: "relative" }}>
           <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 60, background: "linear-gradient(to top, rgba(0,0,0,0.5), transparent)" }} />
@@ -649,7 +649,7 @@ function ActivityCard({ act, accent, catLabel, catColor }: {
           </div>
         </div>
       )}
-      <div style={{ padding: "12px 14px" }}>
+      <div style={{ padding: "12px 14px", display: "flex", flexDirection: "column", flex: 1 }}>
         <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: C.label, letterSpacing: -0.2 }}>{act.name}</p>
         {act.description && (
           <p style={{ margin: "0 0 8px", fontSize: 13, color: C.sub, lineHeight: 1.45, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
@@ -664,7 +664,7 @@ function ActivityCard({ act, accent, catLabel, catColor }: {
           </div>
         )}
         {(act.phone || act.address || act.website || act.instagram) && (
-          <div style={{ display: "flex", gap: 6, paddingTop: 10, borderTop: `0.5px solid ${C.sep}` }}>
+          <div style={{ display: "flex", gap: 6, paddingTop: 10, borderTop: `0.5px solid ${C.sep}`, marginTop: "auto" }}>
             {act.phone && (
               <a href={`tel:${act.phone}`} style={{ flex: 1, padding: "8px 0", borderRadius: 12, background: `${accent}12`, color: accent, fontSize: 16, fontWeight: 600, textDecoration: "none", textAlign: "center" }}>📞</a>
             )}
@@ -770,9 +770,9 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
           </div>
           {/* Scroll horizontal si < 8, grille 2 col sinon */}
           {filtered.length < 8 ? (
-            <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 4px" }}>
+            <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 4px", alignItems: "stretch" }}>
               {filtered.map((act, i) => (
-                <div key={i} style={{ flexShrink: 0, width: 210 }}>
+                <div key={i} style={{ flexShrink: 0, width: 210, display: "flex" }}>
                   <ActivityCard act={act} accent={accent} catLabel={catLabel} catColor={catColor} />
                 </div>
               ))}

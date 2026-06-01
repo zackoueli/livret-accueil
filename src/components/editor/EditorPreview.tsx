@@ -93,7 +93,7 @@ export function EditorPreview() {
             width: TARGET.w,
             height: TARGET.h,
             transform: `scale(${scale})`,
-            transformOrigin: "top center",
+            transformOrigin: "center center",
             flexShrink: 0,
           }}>
           {/* Cadre device */}

@@ -34,6 +34,10 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
       const data = { id: snap.id, ...snap.data() } as Booklet;
       if (data.userId !== user.uid) { router.push(`/${locale}/dashboard`); return; }
       setBooklet(data);
+      // Sauvegarde immédiate si livret créé il y a moins de 10s (template prérempli)
+      if (Date.now() - data.createdAt < 10000) {
+        await updateBooklet(data.id, data);
+      }
     };
     load();
   }, [user, bookletId]);
