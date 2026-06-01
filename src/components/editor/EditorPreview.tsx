@@ -1,21 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Smartphone, Monitor, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { useEditorStore } from "@/store/editorStore";
 
 export function EditorPreview() {
   const { booklet } = useEditorStore();
-  const [device, setDevice] = useState<"mobile" | "desktop">("mobile");
   const [key, setKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
-  // Dimensions cibles selon device
-  const TARGET = device === "mobile"
-    ? { w: 390, h: 844 }   // iPhone 14 Pro
-    : { w: 1280, h: 800 };
+  const TARGET = { w: 390, h: 844 };
 
   // Calcule le scale pour que l'iframe rentre dans le conteneur
   useEffect(() => {
@@ -29,7 +25,7 @@ export function EditorPreview() {
     });
     obs.observe(el);
     return () => obs.disconnect();
-  }, [device]);
+  }, []);
 
   // Recharge l'iframe quand le booklet change
   useEffect(() => {
@@ -73,16 +69,6 @@ export function EditorPreview() {
             className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors" title="Rafraîchir">
             <RefreshCw className="w-3.5 h-3.5" />
           </button>
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
-            <button onClick={() => setDevice("mobile")}
-              className={`p-1.5 rounded-md transition-colors ${device === "mobile" ? "bg-white shadow-sm text-orange-500" : "text-gray-400"}`}>
-              <Smartphone className="w-3.5 h-3.5" />
-            </button>
-            <button onClick={() => setDevice("desktop")}
-              className={`p-1.5 rounded-md transition-colors ${device === "desktop" ? "bg-white shadow-sm text-orange-500" : "text-gray-400"}`}>
-              <Monitor className="w-3.5 h-3.5" />
-            </button>
-          </div>
         </div>
       </div>
 
@@ -106,14 +92,10 @@ export function EditorPreview() {
           }}>
           {/* Cadre device */}
           <div className={`w-full h-full overflow-hidden shadow-2xl ${
-            device === "mobile"
-              ? "rounded-[44px] border-[10px] border-gray-800"
-              : "rounded-xl border border-gray-300"
+            rounded-[44px] border-[10px] border-gray-800
           }`}>
             {/* Notch mobile */}
-            {device === "mobile" && (
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-800 rounded-b-2xl z-10" />
-            )}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-800 rounded-b-2xl z-10" />
             <iframe
               key={key}
               ref={iframeRef}
