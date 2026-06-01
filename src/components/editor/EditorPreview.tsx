@@ -63,7 +63,7 @@ export function EditorPreview() {
   const url = `/b/${booklet.slug}`;
 
   return (
-    <aside className="w-full lg:w-80 bg-gray-100 border-l border-gray-200 flex flex-col shrink-0">
+    <aside className="w-full lg:w-80 bg-gray-100 border-l border-gray-200 flex flex-col shrink-0 sticky top-0 h-screen">
 
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shrink-0">
