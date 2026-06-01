@@ -42,7 +42,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
 
       {/* Logo + titre */}
       <div className="flex items-center gap-3 border-l border-gray-100 pl-4">
-        <BunklyLogo size={28} variant="icon" />
+        <BunklyLogo height={28} variant="icon" />
         <span className="hidden sm:block text-sm truncate max-w-[180px] font-semibold text-gray-700">
           {booklet.title}
         </span>
