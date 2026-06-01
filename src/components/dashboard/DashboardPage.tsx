@@ -308,9 +308,9 @@ function BookletCard({ booklet, isFree, onEdit, onPreview, onShare, onCheckIns, 
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden group">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200 group">
       {/* Color bar top */}
-      <div className="h-2 w-full" style={{ backgroundColor: booklet.accentColor }} />
+      <div className="h-2 w-full rounded-t-2xl" style={{ backgroundColor: booklet.accentColor }} />
 
       <div className="p-5">
         <div className="flex items-start justify-between mb-4">
