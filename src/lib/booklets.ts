@@ -46,6 +46,7 @@ export async function createBooklet(userId: string, title: string, templateId = 
     accentColor: tpl.accentColor,
     propertyName: tpl.propertyName || title,
     address: tpl.address || "",
+    coverImage: tpl.coverImage || "",
     modules: tpl.modules(),
     isPublished: false,
     createdAt: Date.now(),
