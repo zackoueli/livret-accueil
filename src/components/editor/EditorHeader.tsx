@@ -71,7 +71,13 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       </button>
 
       <button
-        onClick={() => window.open(bookletUrl(booklet.slug), "_blank")}
+        onClick={() => {
+          if (!booklet.isPublished) {
+            toast("Publiez d'abord votre livret pour le voir en ligne.", { icon: "🔒" });
+            return;
+          }
+          window.open(bookletUrl(booklet.slug), "_blank");
+        }}
         className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors">
         <Eye className="w-4 h-4" />
         <span className="hidden sm:inline">Aperçu</span>

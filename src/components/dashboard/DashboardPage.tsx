@@ -199,7 +199,13 @@ function DashboardPageInner() {
                 booklet={booklet}
                 isFree={isFree}
                 onEdit={() => router.push(`/${locale}/editor/${booklet.id}`)}
-                onPreview={() => window.open(bookletUrl(booklet.slug), "_blank")}
+                onPreview={() => {
+                  if (!booklet.isPublished) {
+                    toast("Publiez ce livret pour le voir en ligne.", { icon: "🔒" });
+                    return;
+                  }
+                  window.open(bookletUrl(booklet.slug), "_blank");
+                }}
                 onShare={() => setShareBooklet(booklet)}
                 onCheckIns={() => setCheckInsBooklet(booklet)}
                 onDuplicate={() => handleDuplicate(booklet)}
