@@ -24,6 +24,7 @@ import { CSS } from "@dnd-kit/utilities";
 import { useEditorStore } from "@/store/editorStore";
 import { MODULE_META, CORE_MODULES, OPTIONAL_MODULES } from "@/lib/modules";
 import { BookletModule, ModuleType } from "@/types";
+import { bookletUrl } from "@/lib/url";
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
   const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules, addModule } = useEditorStore();
@@ -353,7 +354,7 @@ function SidebarAppearance() {
             </div>
           </div>
           <p className={`text-xs mt-1.5 ${slugStatus === "available" ? "text-green-500" : slugStatus === "taken" || slugStatus === "too_short" ? "text-red-400" : "text-gray-400"}`}>
-            {slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : `app.bunkly.co/b/${slugInput || booklet.slug}`}
+            {slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : bookletUrl(slugInput || booklet.slug)}
           </p>
         </div>
       </div>

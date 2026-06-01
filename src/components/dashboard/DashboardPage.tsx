@@ -15,6 +15,7 @@ import { signOut } from "@/lib/auth";
 import { Booklet } from "@/types";
 import { ShareModal } from "./ShareModal";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
+import { bookletUrl } from "@/lib/url";
 import { CheckInsModal } from "./CheckInsModal";
 import { CreateBookletModal } from "./CreateBookletModal";
 
@@ -198,7 +199,7 @@ function DashboardPageInner() {
                 booklet={booklet}
                 isFree={isFree}
                 onEdit={() => router.push(`/${locale}/editor/${booklet.id}`)}
-                onPreview={() => window.open(`/b/${booklet.slug}`, "_blank")}
+                onPreview={() => window.open(bookletUrl(booklet.slug), "_blank")}
                 onShare={() => setShareBooklet(booklet)}
                 onCheckIns={() => setCheckInsBooklet(booklet)}
                 onDuplicate={() => handleDuplicate(booklet)}

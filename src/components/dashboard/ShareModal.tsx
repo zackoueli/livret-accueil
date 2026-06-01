@@ -5,6 +5,7 @@ import { X, Copy, Check, ExternalLink, Download } from "lucide-react";
 import QRCodeStyling, { DotType, CornerSquareType, CornerDotType } from "qr-code-styling";
 import { Booklet } from "@/types";
 import toast from "react-hot-toast";
+import { bookletUrl } from "@/lib/url";
 
 const PRESET_COLORS = [
   { dark: "#1a1a1a", light: "#ffffff" },
@@ -39,7 +40,7 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
   const [customDark, setCustomDark] = useState(booklet.accentColor);
   const [customLight, setCustomLight] = useState("#ffffff");
   const [activeStyle, setActiveStyle] = useState<QRStyle>(QR_STYLES[1]); // Arrondi par défaut
-  const url = `${process.env.NEXT_PUBLIC_APP_URL}/b/${booklet.slug}`;
+  const url = bookletUrl(booklet.slug);
 
   // Init QRCodeStyling
   useEffect(() => {

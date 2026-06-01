@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Search, Eye, Trash2, ExternalLink } from "lucide-react";
+import { bookletUrl } from "@/lib/url";
 
 interface BookletRow {
   id: string;
@@ -113,7 +114,7 @@ export function AdminBooklets() {
             </span>
             <div className="flex items-center gap-1">
               {b.slug && (
-                <a href={`/b/${b.slug}`} target="_blank" rel="noopener noreferrer"
+                <a href={bookletUrl(b.slug)} target="_blank" rel="noopener noreferrer"
                   className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-colors">
                   <ExternalLink className="w-3.5 h-3.5 text-gray-400" />
                 </a>
