@@ -34,15 +34,18 @@ export async function loginWithGoogle() {
   const provider = new GoogleAuthProvider();
   try {
     const result = await signInWithPopup(auth, provider);
-    const profile: UserProfile = {
+    // Ne jamais écraser plan — on écrit seulement les champs de profil de base
+    // et on initialise plan à "free" uniquement si le document n'existe pas encore
+    const userRef = doc(db, "users", result.user.uid);
+    const existing = await import("firebase/firestore").then(({ getDoc }) => getDoc(userRef));
+    const profile = {
       uid: result.user.uid,
       email: result.user.email!,
       displayName: result.user.displayName,
       photoURL: result.user.photoURL,
-      plan: "free",
-      createdAt: Date.now(),
+      ...(existing.exists() ? {} : { plan: "free", createdAt: Date.now() }),
     };
-    await setDoc(doc(db, "users", result.user.uid), profile, { merge: true });
+    await setDoc(userRef, profile, { merge: true });
     return result.user;
   } catch (err: any) {
     // COOP warning : la popup s'est fermée mais l'auth a quand même réussi
