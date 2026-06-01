@@ -8,8 +8,9 @@ import { Toaster } from "react-hot-toast";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Livret d'accueil — Créez votre livret digital",
+  title: "Bunkly — Créez votre livret d'accueil digital",
   description: "Créez un livret d'accueil digital élégant pour votre gîte, Airbnb ou location saisonnière.",
+  robots: { index: false, follow: false },
 };
 
 export default async function LocaleLayout({

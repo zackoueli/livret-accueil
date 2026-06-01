@@ -3,6 +3,7 @@ import "../globals.css";
 
 export const metadata: Metadata = {
   title: "Livret d'accueil",
+  robots: { index: false, follow: false },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
