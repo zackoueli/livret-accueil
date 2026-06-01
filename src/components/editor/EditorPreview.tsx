@@ -91,9 +91,7 @@ export function EditorPreview() {
             left: 0,
           }}>
           {/* Cadre device */}
-          <div className={`w-full h-full overflow-hidden shadow-2xl ${
-            rounded-[44px] border-[10px] border-gray-800
-          }`}>
+          <div className="w-full h-full overflow-hidden shadow-2xl rounded-[44px] border-[10px] border-gray-800">
             {/* Notch mobile */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-6 bg-gray-800 rounded-b-2xl z-10" />
             <iframe
