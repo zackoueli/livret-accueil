@@ -4,6 +4,7 @@ import "../globals.css";
 export const metadata: Metadata = {
   title: "Bunkly",
   robots: { index: false, follow: false },
+  icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
