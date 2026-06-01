@@ -35,7 +35,7 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <AuthProvider>
             {children}
-            <Toaster position="top-right" />
+            <Toaster position="bottom-center" toastOptions={{ style: { marginBottom: "24px" } }} />
           </AuthProvider>
         </NextIntlClientProvider>
       </body>
