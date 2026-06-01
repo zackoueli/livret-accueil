@@ -1243,12 +1243,12 @@ function TabBar({ active, onSelect, accent }: { active: Tab; onSelect: (t: Tab) 
 
 // ─── Viewer ───────────────────────────────────────────────────────────────────
 
-export function ViewerSimple({ booklet }: { booklet: Booklet }) {
+function ViewerContent({ booklet }: { booklet: Booklet }) {
   const [tab, setTab] = useState<Tab>("home");
   const accent = booklet.accentColor || C.blue;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100vh", maxHeight: "100dvh", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
 
       {/* HERO */}
       <div style={{ position: "relative", height: 210, flexShrink: 0, overflow: "hidden", background: "#1A1A1C" }}>
@@ -1296,5 +1296,94 @@ export function ViewerSimple({ booklet }: { booklet: Booklet }) {
 
       <TabBar active={tab} onSelect={setTab} accent={accent} />
     </div>
+  );
+}
+
+export function ViewerSimple({ booklet }: { booklet: Booklet }) {
+  return (
+    <>
+      {/* Mobile : plein écran */}
+      <div className="md:hidden" style={{ height: "100vh", maxHeight: "100dvh" }}>
+        <ViewerContent booklet={booklet} />
+      </div>
+
+      {/* Desktop : mockup téléphone centré */}
+      <div className="hidden md:flex" style={{
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "40px 20px",
+        fontFamily: FONT,
+      }}>
+        {/* Texte à gauche */}
+        <div style={{ color: "#fff", maxWidth: 340, marginRight: 60, flexShrink: 0 }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.1)", borderRadius: 20, padding: "6px 14px", marginBottom: 24, backdropFilter: "blur(10px)" }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>📱 Expérience mobile</span>
+          </div>
+          <h1 style={{ margin: "0 0 16px", fontSize: 36, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5 }}>
+            {booklet.propertyName || booklet.title}
+          </h1>
+          {booklet.address && (
+            <p style={{ margin: "0 0 24px", fontSize: 15, color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 6 }}>
+              <span>📍</span> {booklet.address}
+            </p>
+          )}
+          <p style={{ margin: "0 0 32px", fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.7 }}>
+            Ce livret est optimisé pour mobile. Scannez le QR code ou ouvrez ce lien depuis votre téléphone pour la meilleure expérience.
+          </p>
+          {/* QR code hint */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.08)", borderRadius: 16, padding: "14px 18px", backdropFilter: "blur(10px)" }}>
+            <span style={{ fontSize: 28 }}>📲</span>
+            <div>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff" }}>Ouvrir sur mobile</p>
+              <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.45)" }}>app.bunkly.co/b/{booklet.slug}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Mockup iPhone */}
+        <div style={{ position: "relative", flexShrink: 0 }}>
+          {/* Reflet */}
+          <div style={{
+            position: "absolute", inset: -2,
+            borderRadius: 54,
+            background: "linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%)",
+            zIndex: 2, pointerEvents: "none",
+          }} />
+          {/* Boîtier */}
+          <div style={{
+            width: 390,
+            height: 760,
+            borderRadius: 52,
+            background: "#1a1a1a",
+            padding: "12px 10px",
+            boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08), inset 0 0 0 2px rgba(255,255,255,0.06)",
+            position: "relative",
+          }}>
+            {/* Notch Dynamic Island */}
+            <div style={{
+              position: "absolute", top: 20, left: "50%", transform: "translateX(-50%)",
+              width: 120, height: 34, background: "#000",
+              borderRadius: 20, zIndex: 10,
+            }} />
+            {/* Écran */}
+            <div style={{
+              width: "100%", height: "100%",
+              borderRadius: 42,
+              overflow: "hidden",
+              background: C.bg,
+            }}>
+              <ViewerContent booklet={booklet} />
+            </div>
+          </div>
+          {/* Boutons latéraux */}
+          <div style={{ position: "absolute", left: -3, top: 120, width: 3, height: 32, background: "#333", borderRadius: "2px 0 0 2px" }} />
+          <div style={{ position: "absolute", left: -3, top: 162, width: 3, height: 64, background: "#333", borderRadius: "2px 0 0 2px" }} />
+          <div style={{ position: "absolute", left: -3, top: 236, width: 3, height: 64, background: "#333", borderRadius: "2px 0 0 2px" }} />
+          <div style={{ position: "absolute", right: -3, top: 160, width: 3, height: 80, background: "#333", borderRadius: "0 2px 2px 0" }} />
+        </div>
+      </div>
+    </>
   );
 }
