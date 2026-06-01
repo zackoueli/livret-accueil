@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   title: "Bunkly — Créez votre livret d'accueil digital",
   description: "Créez un livret d'accueil digital élégant pour votre gîte, Airbnb ou location saisonnière.",
   robots: { index: false, follow: false },
-  icons: { icon: "/icon.png", shortcut: "/icon.png", apple: "/icon.png" },
 };
 
 export default async function LocaleLayout({
