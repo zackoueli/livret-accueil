@@ -87,14 +87,22 @@ export function EditorPreview() {
       </div>
 
       {/* Conteneur du preview */}
-      <div ref={containerRef} className="flex-1 flex items-center justify-center overflow-hidden p-4">
+      <div ref={containerRef} className="flex-1 overflow-hidden p-4" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <div style={{
+          width: TARGET.w * scale,
+          height: TARGET.h * scale,
+          flexShrink: 0,
+          position: "relative",
+        }}>
         <div
           style={{
             width: TARGET.w,
             height: TARGET.h,
             transform: `scale(${scale})`,
-            transformOrigin: "center center",
-            flexShrink: 0,
+            transformOrigin: "top left",
+            position: "absolute",
+            top: 0,
+            left: 0,
           }}>
           {/* Cadre device */}
           <div className={`w-full h-full overflow-hidden shadow-2xl ${
@@ -115,6 +123,7 @@ export function EditorPreview() {
               title="Aperçu du livret"
             />
           </div>
+        </div>
         </div>
       </div>
     </aside>
