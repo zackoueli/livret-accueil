@@ -2,7 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { BookOpen, ArrowLeft, Save, Eye, CheckCircle, Loader2, Globe, Lock } from "lucide-react";
+import { ArrowLeft, Save, Eye, CheckCircle, Loader2, Globe, Lock } from "lucide-react";
+import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { useEditorStore } from "@/store/editorStore";
 import { useAuthStore } from "@/store/authStore";
 import { updateBooklet } from "@/lib/booklets";
@@ -38,11 +39,9 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
         <span className="hidden sm:inline">Mes livrets</span>
       </button>
 
-      {/* Logo */}
-      <div className="flex items-center gap-2 font-bold text-gray-900 border-l border-gray-100 pl-4">
-        <div className="w-7 h-7 rounded-lg bg-orange-500 flex items-center justify-center">
-          <BookOpen className="w-3.5 h-3.5 text-white" />
-        </div>
+      {/* Logo + titre */}
+      <div className="flex items-center gap-3 border-l border-gray-100 pl-4">
+        <BunklyLogo size={28} variant="icon" />
         <span className="hidden sm:block text-sm truncate max-w-[180px] font-semibold text-gray-700">
           {booklet.title}
         </span>

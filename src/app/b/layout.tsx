@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "../globals.css";
 
 export const metadata: Metadata = {
-  title: "Livret d'accueil",
+  title: "Bunkly",
   robots: { index: false, follow: false },
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Livret.",
+    title: "Bunkly",
   },
 };
 

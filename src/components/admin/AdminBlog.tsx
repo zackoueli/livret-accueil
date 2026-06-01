@@ -176,7 +176,7 @@ export function AdminBlog() {
                 <div className="mt-4 p-3 rounded-lg bg-gray-950 border border-gray-800">
                   <p className="text-xs text-gray-600 mb-2">Aperçu Google</p>
                   <p className="text-blue-400 text-sm font-medium truncate">{editing.metaTitle || editing.title}</p>
-                  <p className="text-green-700 text-xs">livret.app/blog/{editing.slug || "slug"}</p>
+                  <p className="text-green-700 text-xs">bunkly.co/blog/{editing.slug || "slug"}</p>
                   <p className="text-gray-400 text-xs mt-0.5 line-clamp-2">{editing.metaDesc || editing.excerpt || "Description…"}</p>
                 </div>
               )}

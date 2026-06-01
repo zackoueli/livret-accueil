@@ -56,7 +56,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
             </div>
             <div>
               <p className="font-bold text-white text-lg">Admin</p>
-              <p className="text-xs text-gray-500">Livret d'accueil</p>
+              <p className="text-xs text-gray-500">Bunkly</p>
             </div>
           </div>
           <form onSubmit={login} className="space-y-4">

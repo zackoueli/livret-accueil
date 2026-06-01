@@ -285,7 +285,7 @@ export function LandingPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-black/10" />
                   <div className="absolute bottom-0 left-0 right-0 p-6">
-                    <p className="text-white/50 text-[9px] uppercase tracking-widest font-semibold mb-1">Livret d'accueil</p>
+                    <p className="text-white/50 text-[9px] uppercase tracking-widest font-semibold mb-1">Bunkly</p>
                     <p className="text-white font-bold text-lg leading-tight mb-1">Villa Les Lavandes</p>
                     <p className="text-white/50 text-[10px] mb-5 flex items-center gap-1">
                       <MapPin className="w-2.5 h-2.5" /> Maussane-les-Alpilles
@@ -337,7 +337,7 @@ export function LandingPage() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">Démo</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Voyez Livret. en action</h2>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Voyez Bunkly en action</h2>
             <p className="text-white/50 text-lg">Créez un livret complet en moins de 5 minutes</p>
           </div>
 
@@ -548,9 +548,9 @@ export function LandingPage() {
             <div className="w-6 h-6 rounded-lg bg-orange-500 flex items-center justify-center">
               <BookOpen className="w-3.5 h-3.5 text-white" />
             </div>
-            Livret<span className="text-orange-500">.</span>
+            Bunkly
           </div>
-          <p>© {new Date().getFullYear()} Livret. — Tous droits réservés</p>
+          <p>© {new Date().getFullYear()} Bunkly — Tous droits réservés</p>
           <div className="flex gap-5">
             <a href="#" className="hover:text-white/70 transition-colors">Confidentialité</a>
             <a href="#" className="hover:text-white/70 transition-colors">CGU</a>

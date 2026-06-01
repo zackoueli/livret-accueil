@@ -353,7 +353,7 @@ function SidebarAppearance() {
             </div>
           </div>
           <p className={`text-xs mt-1.5 ${slugStatus === "available" ? "text-green-500" : slugStatus === "taken" || slugStatus === "too_short" ? "text-red-400" : "text-gray-400"}`}>
-            {slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : `livret.app/b/${slugInput || booklet.slug}`}
+            {slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : `app.bunkly.co/b/${slugInput || booklet.slug}`}
           </p>
         </div>
       </div>

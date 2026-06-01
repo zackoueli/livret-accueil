@@ -14,6 +14,7 @@ import { getUserBooklets, createBooklet, deleteBooklet, duplicateBooklet } from 
 import { signOut } from "@/lib/auth";
 import { Booklet } from "@/types";
 import { ShareModal } from "./ShareModal";
+import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { CheckInsModal } from "./CheckInsModal";
 import { CreateBookletModal } from "./CreateBookletModal";
 
@@ -99,11 +100,8 @@ function DashboardPageInner() {
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
-          <a href={`/${locale}`} className="flex items-center gap-2 font-bold text-xl text-gray-900">
-            <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" />
-            </div>
-            Livret<span className="text-orange-500">.</span>
+          <a href={`/${locale}`}>
+            <BunklyLogo size={32} className="text-xl" />
           </a>
 
           <div className="flex items-center gap-3">

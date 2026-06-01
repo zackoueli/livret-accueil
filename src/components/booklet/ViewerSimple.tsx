@@ -1151,7 +1151,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
       {g(checkout, "thank_you") && (
         <div style={{ textAlign: "center", padding: "28px 16px 8px" }}>
           <p style={{ margin: 0, fontSize: 15, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
-          <p style={{ margin: "20px 0 0", fontSize: 12, color: "#C7C7CC" }}>Créé avec <span style={{ fontWeight: 700, color: accent }}>Livret.</span></p>
+          <p style={{ margin: "20px 0 0", fontSize: 12, color: "#C7C7CC" }}>Créé avec <span style={{ fontWeight: 700, color: accent }}>Bunkly</span></p>
         </div>
       )}
     </div>

@@ -31,7 +31,7 @@ const FAQ = [
     a: "Depuis Paramètres → Gérer la facturation (Stripe), vous pouvez annuler votre abonnement à tout moment. Vous gardez l'accès jusqu'à la fin de la période payée.",
   },
   {
-    q: "Puis-je utiliser Livret. sur plusieurs logements ?",
+    q: "Puis-je utiliser Bunkly sur plusieurs logements ?",
     a: "Oui, le plan Actif permet de créer des livrets illimités. Vous pouvez aussi dupliquer un livret existant depuis le menu contextuel de chaque carte.",
   },
 ];
@@ -82,14 +82,14 @@ export function SupportPage() {
 
         {/* Canaux de contact */}
         <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <a href="mailto:support@livret.co"
+          <a href="mailto:support@bunkly.co"
             className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center gap-4 group">
             <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center shrink-0">
               <Mail className="w-6 h-6 text-blue-500" />
             </div>
             <div>
               <p className="font-semibold text-gray-800">Email</p>
-              <p className="text-sm text-gray-400 mt-0.5">support@livret.co</p>
+              <p className="text-sm text-gray-400 mt-0.5">support@bunkly.co</p>
               <p className="text-xs text-blue-500 mt-1 font-medium group-hover:underline">Envoyer un email →</p>
             </div>
           </a>
