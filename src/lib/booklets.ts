@@ -34,27 +34,19 @@ function sanitizeForFirestore(
   return result;
 }
 import { nanoid } from "nanoid";
+import { getTemplate } from "./templates";
 
-const DEFAULT_MODULES: BookletModule[] = [
-  { id: nanoid(), type: "arrival",       enabled: true,  order: 0, content: {}, images: [], documents: [] },
-  { id: nanoid(), type: "accommodation", enabled: true,  order: 1, content: {}, images: [], documents: [] },
-  { id: nanoid(), type: "rules",         enabled: true,  order: 2, content: {}, images: [], documents: [] },
-  { id: nanoid(), type: "kitchen",       enabled: true,  order: 3, content: {}, images: [], documents: [] },
-  { id: nanoid(), type: "neighborhood",  enabled: true,  order: 4, content: {}, images: [], documents: [] },
-  { id: nanoid(), type: "safety",        enabled: true,  order: 5, content: {}, images: [], documents: [] },
-  { id: nanoid(), type: "contact",       enabled: true,  order: 6, content: {}, images: [], documents: [] },
-  { id: nanoid(), type: "checkout",      enabled: true,  order: 7, content: {}, images: [], documents: [] },
-];
-
-export async function createBooklet(userId: string, title: string): Promise<string> {
+export async function createBooklet(userId: string, title: string, templateId = "blank"): Promise<string> {
   const slug = nanoid(10);
+  const tpl = getTemplate(templateId);
   const booklet: Omit<Booklet, "id"> = {
     userId,
     title,
     slug,
-    accentColor: "#6366f1",
-    propertyName: title,
-    modules: DEFAULT_MODULES,
+    accentColor: tpl.accentColor,
+    propertyName: tpl.propertyName || title,
+    address: tpl.address || "",
+    modules: tpl.modules(),
     isPublished: false,
     createdAt: Date.now(),
     updatedAt: Date.now(),

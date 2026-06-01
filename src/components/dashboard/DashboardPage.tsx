@@ -15,6 +15,7 @@ import { signOut } from "@/lib/auth";
 import { Booklet } from "@/types";
 import { ShareModal } from "./ShareModal";
 import { CheckInsModal } from "./CheckInsModal";
+import { CreateBookletModal } from "./CreateBookletModal";
 
 function DashboardPageInner() {
   const router = useRouter();
@@ -25,7 +26,6 @@ function DashboardPageInner() {
   const [loadingBooklets, setLoadingBooklets] = useState(true);
   const [creating, setCreating] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
   const [shareBooklet, setShareBooklet] = useState<Booklet | null>(null);
   const [checkInsBooklet, setCheckInsBooklet] = useState<Booklet | null>(null);
 
@@ -55,15 +55,14 @@ function DashboardPageInner() {
     }
   }, [searchParams, locale, router]);
 
-  const handleCreate = async () => {
-    if (!newTitle.trim() || !user) return;
+  const handleCreate = async (title: string, templateId: string) => {
+    if (!user) return;
     setCreating(true);
     try {
-      const id = await createBooklet(user.uid, newTitle.trim());
+      const id = await createBooklet(user.uid, title, templateId);
       router.push(`/${locale}/editor/${id}`);
     } catch {
       toast.error("Erreur lors de la création");
-    } finally {
       setCreating(false);
     }
   };
@@ -236,33 +235,10 @@ function DashboardPageInner() {
 
       {/* New booklet modal */}
       {showNewModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl">
-            <h2 className="text-xl font-bold text-gray-900 mb-1">Nouveau livret</h2>
-            <p className="text-sm text-gray-400 mb-6">Donnez un nom à votre hébergement</p>
-            <input
-              autoFocus
-              type="text"
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-              placeholder="Ex: Gîte Les Lavandes"
-              className="w-full border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent mb-5 placeholder-gray-300"
-            />
-            <div className="flex gap-3">
-              <button onClick={() => { setShowNewModal(false); setNewTitle(""); }}
-                className="flex-1 py-3 rounded-2xl text-sm font-medium text-gray-500 hover:bg-gray-50 border border-gray-200 transition-colors">
-                Annuler
-              </button>
-              <button
-                onClick={handleCreate}
-                disabled={creating || !newTitle.trim()}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-2xl text-sm transition-colors disabled:opacity-40">
-                {creating ? "Création..." : "Créer"}
-              </button>
-            </div>
-          </div>
-        </div>
+        <CreateBookletModal
+          onClose={() => setShowNewModal(false)}
+          onCreate={handleCreate}
+        />
       )}
     </div>
   );
