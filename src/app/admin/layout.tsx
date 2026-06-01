@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "../globals.css";
 import { AdminShell } from "@/components/admin/AdminShell";
 
-export const metadata: Metadata = { title: "Admin — Bunkly", robots: { index: false, follow: false }, icons: { icon: "/favicon.svg" } };
+export const metadata: Metadata = { title: "Admin — Bunkly", robots: { index: false, follow: false }, icons: { icon: "/icon.png" } };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   return (

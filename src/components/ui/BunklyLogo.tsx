@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import Image from "next/image";
 
 interface Props {
   size?: number;
@@ -10,25 +10,14 @@ interface Props {
 
 export function BunklyLogo({ size = 32, variant = "full", className = "" }: Props) {
   const icon = (
-    <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Fond arrondi orange */}
-      <rect width="32" height="32" rx="9" fill="#f97316" />
-      {/* Lettre B stylisée comme un livret ouvert */}
-      <path d="M9 7h7.5c2.5 0 4.5 1.8 4.5 4s-2 4-4.5 4H9V7z" fill="white" opacity="0.95"/>
-      <path d="M9 15h8c2.8 0 5 2 5 4.5S19.8 24 17 24H9V15z" fill="white"/>
-      {/* Spine / reliure */}
-      <rect x="9" y="7" width="2" height="17" rx="1" fill="white" opacity="0.5"/>
-    </svg>
+    <Image src="/icon.png" alt="Bunkly" width={size} height={size} style={{ borderRadius: 8 }} />
   );
 
   if (variant === "icon") return <span className={className}>{icon}</span>;
 
   return (
     <span className={`inline-flex items-center gap-2 font-bold text-gray-900 ${className}`}>
-      {icon}
-      <span style={{ letterSpacing: "-0.03em" }}>
-        Bunkly
-      </span>
+      <Image src="/Logo.png" alt="Bunkly" width={size * 3.5} height={size} style={{ objectFit: "contain" }} />
     </span>
   );
 }
