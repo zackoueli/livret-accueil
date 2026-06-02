@@ -359,10 +359,12 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
     { key: "heating",      icon: "🌡️", bg: "#FF6B6B18", label: "Chauffage" },
     { key: "ac",           icon: "❄️", bg: "#5AC8FA18", label: "Climatisation" },
     { key: "appliances",   icon: "🫧", bg: "#34C75918", label: "Électroménager" },
-    { key: "tv",           icon: "📺", bg: "#5856D618", label: "TV & Netflix" },
+    { key: "tv",           icon: "📺", bg: "#5856D618", label: "TV & Divertissements" },
     { key: "checkin_code", icon: "📬", bg: "#FF950018", label: "Boîte aux lettres" },
     { key: "other",        icon: "ℹ️", bg: "#8E8E9318", label: "Autres" },
   ].filter(r => accommodation && g(accommodation, r.key));
+
+  const [expandedEquip, setExpandedEquip] = useState<string | null>(null);
 
   return (
     <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 40px" }}>
@@ -404,20 +406,33 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <>
           <SecLabel>Dans votre logement</SecLabel>
           <Card>
-            {equipRows.map((r, i) => (
-              <div key={r.key} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderBottom: i < equipRows.length - 1 ? `0.5px solid ${C.sep}` : "none" }}>
-                <AppIcon bg={r.bg} size={34}>{r.icon}</AppIcon>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: 15, color: C.label, fontWeight: 400 }}>{r.label}</p>
-                  {accommodation && g(accommodation, r.key).length < 55 && (
-                    <p style={{ margin: "1px 0 0", fontSize: 12, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                      {g(accommodation, r.key)}
-                    </p>
+            {equipRows.map((r, i) => {
+              const isOpen = expandedEquip === r.key;
+              const content = accommodation ? g(accommodation, r.key) : "";
+              return (
+                <div key={r.key}>
+                  <button
+                    onClick={() => setExpandedEquip(isOpen ? null : r.key)}
+                    style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderBottom: (!isOpen && i < equipRows.length - 1) ? `0.5px solid ${C.sep}` : "none", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+                    <AppIcon bg={r.bg} size={34}>{r.icon}</AppIcon>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <p style={{ margin: 0, fontSize: 15, color: C.label, fontWeight: 400 }}>{r.label}</p>
+                      {!isOpen && content.length < 55 && (
+                        <p style={{ margin: "1px 0 0", fontSize: 12, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{content}</p>
+                      )}
+                    </div>
+                    <svg width="7" height="13" viewBox="0 0 7 13" fill="none" style={{ transform: isOpen ? "rotate(90deg)" : "none", transition: "transform 0.2s", flexShrink: 0 }}>
+                      <path d="M1 1L6 6.5L1 12" stroke="#C7C7CC" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  {isOpen && (
+                    <div style={{ padding: "12px 16px 14px", borderBottom: i < equipRows.length - 1 ? `0.5px solid ${C.sep}` : "none", background: `${C.bg}` }}>
+                      <p style={{ margin: 0, fontSize: 14, color: C.label, lineHeight: 1.7, whiteSpace: "pre-line" }}>{content}</p>
+                    </div>
                   )}
                 </div>
-                <svg width="7" height="13" viewBox="0 0 7 13" fill="none"><path d="M1 1L6 6.5L1 12" stroke="#C7C7CC" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              </div>
-            ))}
+              );
+            })}
           </Card>
         </>
       )}
