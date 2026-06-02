@@ -174,7 +174,36 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const services     = parseServices(g(accommodation, "services_list"));
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", padding: "0 16px 40px" }}>
+    <div style={{ flex: 1, overflowY: "auto" }}>
+
+      {/* HERO */}
+      <div style={{ position: "relative", height: 220, overflow: "hidden", background: "#1A1A1C", flexShrink: 0 }}>
+        {booklet.coverImage && (
+          <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.52) saturate(1.15)" }} />
+        )}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.7) 100%)" }} />
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 20px 20px" }}>
+          <div style={{
+            display: "inline-flex", alignItems: "center", gap: 5,
+            background: "rgba(255,255,255,0.13)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            border: "1px solid rgba(255,255,255,0.18)",
+            borderRadius: 20, padding: "4px 11px", marginBottom: 10,
+          }}>
+            <span style={{ fontSize: 11 }}>🏠</span>
+            <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.92)", letterSpacing: 0.2 }}>Votre séjour</span>
+          </div>
+          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: -0.6, lineHeight: 1.1 }}>
+            {booklet.propertyName || booklet.title}
+          </h1>
+          {booklet.address && (
+            <p style={{ margin: "5px 0 0", fontSize: 12.5, color: "rgba(255,255,255,0.65)", display: "flex", alignItems: "center", gap: 4 }}>
+              <span>📍</span> {booklet.address}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div style={{ padding: "0 16px 40px" }}>
 
       {/* Bienvenue */}
       {(welcomeMsg || hostName) && (
@@ -380,6 +409,8 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           <PhotoGallery images={arrival!.images!} />
         </>
       )}
+
+      </div>{/* fin padding */}
     </div>
   );
 }
@@ -1311,42 +1342,9 @@ function ViewerContent({ booklet }: { booklet: Booklet }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
 
-      {/* HERO */}
-      <div style={{ position: "relative", height: 210, flexShrink: 0, overflow: "hidden", background: "#1A1A1C" }}>
-        {booklet.coverImage && (
-          <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.52) saturate(1.15)" }} />
-        )}
-        {/* Gradient double couche pour plus de profondeur */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.0) 30%, rgba(0,0,0,0.7) 100%)" }} />
-
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 20px 20px" }}>
-          {/* Badge */}
-          <div style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            background: "rgba(255,255,255,0.13)",
-            backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
-            border: "1px solid rgba(255,255,255,0.18)",
-            borderRadius: 20, padding: "4px 11px", marginBottom: 10,
-          }}>
-            <span style={{ fontSize: 11 }}>🏠</span>
-            <span style={{ fontSize: 11, fontWeight: 600, color: "rgba(255,255,255,0.92)", letterSpacing: 0.2 }}>Votre séjour</span>
-          </div>
-
-          <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: -0.6, lineHeight: 1.1 }}>
-            {booklet.propertyName || booklet.title}
-          </h1>
-
-          {booklet.address && (
-            <p style={{ margin: "5px 0 0", fontSize: 12.5, color: "rgba(255,255,255,0.65)", display: "flex", alignItems: "center", gap: 4 }}>
-              <span>📍</span> {booklet.address}
-            </p>
-          )}
-        </div>
-      </div>
-
       {/* CONTENU */}
       <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", paddingTop: 8 }}>
+        <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
           {tab === "home"     && <TabHome     booklet={booklet} accent={accent} />}
           {tab === "stay"     && <TabStay     booklet={booklet} accent={accent} />}
           {tab === "area"     && <TabArea     booklet={booklet} accent={accent} />}
