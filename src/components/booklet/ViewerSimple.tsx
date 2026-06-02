@@ -328,6 +328,52 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </>
       )}
 
+      {/* Localisation */}
+      {booklet.address && (
+        <>
+          <SecLabel>Localisation</SecLabel>
+          <Card>
+            {/* Carte Google Maps embed */}
+            <div style={{ borderRadius: "18px 18px 0 0", overflow: "hidden", height: 160 }}>
+              <iframe
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(booklet.address)}&output=embed&z=15`}
+                width="100%" height="160"
+                style={{ border: 0, display: "block" }}
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Localisation"
+              />
+            </div>
+            {/* Adresse + boutons */}
+            <div style={{ padding: "14px 16px" }}>
+              <p style={{ margin: "0 0 12px", fontSize: 13, color: C.sub, lineHeight: 1.5 }}>
+                📍 {booklet.address}
+              </p>
+              <div style={{ display: "flex", gap: 10 }}>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "11px 0", borderRadius: 14, background: "#4285F418", textDecoration: "none" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#4285F4">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  </svg>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#4285F4" }}>Google Maps</span>
+                </a>
+                <a
+                  href={`https://waze.com/ul?q=${encodeURIComponent(booklet.address)}&navigate=yes`}
+                  target="_blank" rel="noopener noreferrer"
+                  style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "11px 0", borderRadius: 14, background: "#33CCFF18", textDecoration: "none" }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#33CCFF">
+                    <path d="M20.54 6.29C19.07 3.66 16.28 2 13.22 2 8.73 2 5.05 5.54 5 10.03c-.01.82.13 1.62.38 2.38L3.1 19.35c-.17.51.3.99.82.85l6.98-1.98c.77.26 1.58.4 2.41.4 4.51 0 8.18-3.57 8.18-7.97 0-1.56-.46-3.07-1.28-4.27l.33-.09z"/>
+                  </svg>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#33AADD" }}>Waze</span>
+                </a>
+              </div>
+            </div>
+          </Card>
+        </>
+      )}
+
       {(arrival?.images?.length ?? 0) > 0 && (
         <>
           <SecLabel>Photos</SecLabel>
