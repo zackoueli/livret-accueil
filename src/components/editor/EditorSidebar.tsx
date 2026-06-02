@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { GripVertical, Eye, EyeOff, Check, X, Loader2, Link, ImagePlus, Trash2 } from "lucide-react";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "@/lib/firebase";
@@ -176,6 +176,57 @@ function SortableModuleItem({
   );
 }
 
+function AddressForm({ address, onChange, ibase }: { address: string; onChange: (full: string) => void; ibase: string }) {
+  // Parse l'adresse existante en champs séparés (format : "rue, CP ville, pays")
+  const parse = (addr: string) => {
+    const parts = addr.split(",").map(s => s.trim());
+    const street = parts[0] ?? "";
+    const cpCity = parts[1] ?? "";
+    const country = parts[2] ?? "France";
+    const cpMatch = cpCity.match(/^(\d{4,5})\s+(.+)$/);
+    return {
+      street,
+      zip: cpMatch ? cpMatch[1] : "",
+      city: cpMatch ? cpMatch[2] : cpCity,
+      country,
+    };
+  };
+
+  const parsed = parse(address);
+  const [street, setStreet] = useState(parsed.street);
+  const [zip, setZip] = useState(parsed.zip);
+  const [city, setCity] = useState(parsed.city);
+  const [country, setCountry] = useState(parsed.country || "France");
+
+  const rebuild = (s: string, z: string, ci: string, co: string) => {
+    const parts = [s, [z, ci].filter(Boolean).join(" "), co].filter(Boolean);
+    onChange(parts.join(", "));
+  };
+
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Adresse</label>
+      <div className="space-y-2">
+        <input type="text" value={street} placeholder="Rue, numéro" className={ibase}
+          onChange={e => { setStreet(e.target.value); rebuild(e.target.value, zip, city, country); }} />
+        <div className="grid grid-cols-2 gap-2">
+          <input type="text" value={zip} placeholder="Code postal" className={ibase}
+            onChange={e => { setZip(e.target.value); rebuild(street, e.target.value, city, country); }} />
+          <input type="text" value={city} placeholder="Ville" className={ibase}
+            onChange={e => { setCity(e.target.value); rebuild(street, zip, e.target.value, country); }} />
+        </div>
+        <input type="text" value={country} placeholder="Pays" className={ibase}
+          onChange={e => { setCountry(e.target.value); rebuild(street, zip, city, e.target.value); }} />
+        {address && (
+          <p className="text-xs text-gray-400 flex items-center gap-1">
+            <span>📍</span> {address}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function SidebarAppearance() {
   const { booklet, updateBookletField } = useEditorStore();
   const [slugInput, setSlugInput] = useState("");
@@ -294,12 +345,12 @@ function SidebarAppearance() {
             placeholder="Villa Les Pins" className={ibase} />
         </div>
 
-        {/* Adresse */}
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Adresse</label>
-          <input type="text" value={booklet.address || ""} onChange={(e) => updateBookletField("address", e.target.value)}
-            placeholder="5 chemin des Oliviers, 84220 Gordes" className={ibase} />
-        </div>
+        {/* Adresse structurée */}
+        <AddressForm
+          address={booklet.address || ""}
+          onChange={(full) => updateBookletField("address", full)}
+          ibase={ibase}
+        />
 
         {/* Description */}
         <div>
