@@ -189,7 +189,7 @@ function BookletHero({ booklet }: { booklet: Booklet }) {
 function TabWithHero({ booklet, children }: { booklet: Booklet; children: React.ReactNode }) {
   return (
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-      <div style={{ overflowY: "auto", flex: 1 }}>
+      <div style={{ overflowY: "auto", flex: 1, touchAction: "pan-y" }}>
         <BookletHero booklet={booklet} />
         {children}
       </div>
@@ -217,7 +217,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const services     = parseServices(g(accommodation, "services_list"));
 
   return (
-    <div style={{ flex: 1, overflowY: "auto" }}>
+    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
       <BookletHero booklet={booklet} />
       <div style={{ padding: "0 16px 40px" }}>
 
@@ -839,7 +839,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <>
           {/* Filtres catégories */}
           {visibleCats.length > 2 && (
-            <div style={{ display: "flex", gap: 7, overflowX: "auto", scrollbarWidth: "none", padding: "8px 16px 0", marginBottom: 2 }}>
+            <div style={{ display: "flex", gap: 7, overflowX: "auto", scrollbarWidth: "none", padding: "8px 16px 0", marginBottom: 2, touchAction: "pan-x" }}>
               {visibleCats.map(cat => {
                 const isActive = activeFilter === cat.id;
                 const count = catCount(cat.id);
@@ -878,7 +878,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
           </div>
           {/* Scroll horizontal si < 8, grille 2 col sinon */}
           {filtered.length < 8 ? (
-            <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 4px", alignItems: "stretch" }}>
+            <div style={{ display: "flex", gap: 12, overflowX: "auto", scrollbarWidth: "none", padding: "0 16px 4px", alignItems: "stretch", touchAction: "pan-x" }}>
               {filtered.map((act, i) => (
                 <div key={i} style={{ flexShrink: 0, width: 210, display: "flex" }}>
                   <ActivityCard act={act} accent={accent} catLabel={catLabel} catColor={catColor} />
