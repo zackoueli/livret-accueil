@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Booklet, BookletModule } from "@/types";
 import { MODULE_META, formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
 
@@ -1360,6 +1360,17 @@ function ViewerContent({ booklet }: { booklet: Booklet }) {
   );
 }
 
+function useQrCode(url: string) {
+  const [dataUrl, setDataUrl] = useState("");
+  useEffect(() => {
+    import("qrcode").then(QRCode => {
+      QRCode.toDataURL(url, { width: 200, margin: 1, color: { dark: "#1a1a2e", light: "#ffffff" } })
+        .then(setDataUrl);
+    });
+  }, [url]);
+  return dataUrl;
+}
+
 export function ViewerSimple({ booklet }: { booklet: Booklet }) {
   return (
     <>
@@ -1369,6 +1380,17 @@ export function ViewerSimple({ booklet }: { booklet: Booklet }) {
       </div>
 
       {/* Desktop : mockup téléphone centré */}
+      <DesktopViewer booklet={booklet} />
+    </>
+  );
+}
+
+function DesktopViewer({ booklet }: { booklet: Booklet }) {
+  const url = `https://app.bunkly.co/b/${booklet.slug}`;
+  const qrDataUrl = useQrCode(url);
+  const accent = booklet.accentColor || C.blue;
+
+  return (
       <div className="hidden md:flex" style={{
         minHeight: "100vh",
         background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)",
@@ -1377,29 +1399,32 @@ export function ViewerSimple({ booklet }: { booklet: Booklet }) {
         padding: "40px 20px",
         fontFamily: FONT,
       }}>
-        {/* Texte à gauche */}
-        <div style={{ color: "#fff", maxWidth: 340, marginRight: 60, flexShrink: 0 }}>
+        {/* Texte + QR à gauche */}
+        <div style={{ color: "#fff", maxWidth: 300, marginRight: 60, flexShrink: 0 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.1)", borderRadius: 20, padding: "6px 14px", marginBottom: 24, backdropFilter: "blur(10px)" }}>
             <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.8)" }}>📱 Expérience mobile</span>
           </div>
-          <h1 style={{ margin: "0 0 16px", fontSize: 36, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5 }}>
+          <h1 style={{ margin: "0 0 16px", fontSize: 32, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5 }}>
             {booklet.propertyName || booklet.title}
           </h1>
           {booklet.address && (
-            <p style={{ margin: "0 0 24px", fontSize: 15, color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 6 }}>
+            <p style={{ margin: "0 0 20px", fontSize: 14, color: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", gap: 6 }}>
               <span>📍</span> {booklet.address}
             </p>
           )}
-          <p style={{ margin: "0 0 32px", fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.7 }}>
-            Ce livret est optimisé pour mobile. Scannez le QR code ou ouvrez ce lien depuis votre téléphone pour la meilleure expérience.
+          <p style={{ margin: "0 0 28px", fontSize: 14, color: "rgba(255,255,255,0.4)", lineHeight: 1.7 }}>
+            Scannez ce QR code avec votre téléphone pour accéder au livret.
           </p>
-          {/* QR code hint */}
-          <div style={{ display: "flex", alignItems: "center", gap: 12, background: "rgba(255,255,255,0.08)", borderRadius: 16, padding: "14px 18px", backdropFilter: "blur(10px)" }}>
-            <span style={{ fontSize: 28 }}>📲</span>
-            <div>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff" }}>Ouvrir sur mobile</p>
-              <p style={{ margin: "2px 0 0", fontSize: 12, color: "rgba(255,255,255,0.45)" }}>app.bunkly.co/b/{booklet.slug}</p>
-            </div>
+
+          {/* QR code */}
+          <div style={{ background: "#fff", borderRadius: 20, padding: 16, display: "inline-block", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+            {qrDataUrl
+              ? <img src={qrDataUrl} alt="QR code" style={{ width: 160, height: 160, display: "block", borderRadius: 8 }} />
+              : <div style={{ width: 160, height: 160, display: "flex", alignItems: "center", justifyContent: "center", color: "#ccc", fontSize: 12 }}>Chargement...</div>
+            }
+            <p style={{ margin: "10px 0 0", fontSize: 11, color: "#999", textAlign: "center", fontFamily: "ui-monospace,monospace" }}>
+              app.bunkly.co/b/{booklet.slug}
+            </p>
           </div>
         </div>
 
@@ -1445,6 +1470,5 @@ export function ViewerSimple({ booklet }: { booklet: Booklet }) {
           <div style={{ position: "absolute", right: -3, top: 160, width: 3, height: 80, background: "#333", borderRadius: "0 2px 2px 0" }} />
         </div>
       </div>
-    </>
   );
 }
