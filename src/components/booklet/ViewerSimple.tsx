@@ -1342,6 +1342,21 @@ function ViewerContent({ booklet }: { booklet: Booklet }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
 
+      {/* HERO — affiché sur tous les onglets sauf home (qui l'a dans son scroll) */}
+      {tab !== "home" && (
+        <div style={{ position: "relative", height: 100, overflow: "hidden", background: "#1A1A1C", flexShrink: 0 }}>
+          {booklet.coverImage && (
+            <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.1)" }} />
+          )}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.0) 20%, rgba(0,0,0,0.65) 100%)" }} />
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 20px 14px" }}>
+            <p style={{ margin: 0, fontSize: 17, fontWeight: 800, color: "#fff", letterSpacing: -0.4, lineHeight: 1.15 }}>
+              {booklet.propertyName || booklet.title}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* CONTENU */}
       <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
