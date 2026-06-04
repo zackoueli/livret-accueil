@@ -236,7 +236,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const buttons = [
     { id: "wifi",      label: "WiFi",          icon: <Wifi size={22} color="#fff" />,            color: MODULE_COLORS.wifi,      photo: MODULE_PHOTOS.wifi,      show: !!(wifiName || wifiPass) },
     { id: "access",    label: "Accès & Clés",  icon: <Key size={22} color="#fff" />,             color: MODULE_COLORS.access,    photo: MODULE_PHOTOS.access,    show: !!accessCode },
-    { id: "checkin",   label: "Arrivée",        icon: <Clock size={22} color="#fff" />,           color: C.green,                photo: "",                      show: !!checkinTime },
+    { id: "horaires",  label: "Horaires",       icon: <Clock size={22} color="#fff" />,           color: C.green,                photo: "",                      show: !!(checkinTime || checkoutTime) },
     { id: "rules",     label: "Règles",         icon: <ScrollText size={22} color="#fff" />,      color: MODULE_COLORS.rules,     photo: MODULE_PHOTOS.rules,     show: !!rules },
     { id: "heating",   label: "Chauffage",      icon: <Thermometer size={22} color="#fff" />,     color: MODULE_COLORS.heating,   photo: MODULE_PHOTOS.heating,   show: !!(accommodation && g(accommodation, "heating")) },
     { id: "ac",        label: "Climatisation",  icon: <Wind size={22} color="#fff" />,            color: MODULE_COLORS.ac,        photo: MODULE_PHOTOS.ac,        show: !!(accommodation && g(accommodation, "ac")) },
@@ -289,45 +289,23 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           )}
         </div>
 
-        {/* Card glassmorphism — horaires + adresse */}
-        <div style={{ margin: "0 16px 16px", borderRadius: 20, background: "rgba(255,255,255,0.13)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.22)", overflow: "hidden" }}>
-
-          {/* Horaires */}
-          {(checkinTime || checkoutTime) && (
-            <div style={{ display: "flex" }}>
-              {checkinTime && (
-                <div style={{ flex: 1, padding: "14px 16px", textAlign: "center", borderRight: checkoutTime ? "1px solid rgba(255,255,255,0.15)" : "none" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.8 }}>Arrivée</p>
-                  <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkinTime)}</p>
-                </div>
-              )}
-              {checkoutTime && (
-                <div style={{ flex: 1, padding: "14px 16px", textAlign: "center" }}>
-                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.8 }}>Départ</p>
-                  <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkoutTime)}</p>
-                </div>
-              )}
+        {/* Card glassmorphism — adresse uniquement */}
+        {booklet.address && (
+          <div style={{ margin: "0 16px 16px", borderRadius: 20, background: "rgba(255,255,255,0.13)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.22)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+            <MapPin size={14} color="rgba(255,255,255,0.55)" style={{ flexShrink: 0 }} />
+            <p style={{ margin: 0, flex: 1, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{booklet.address}</p>
+            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+              <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`} target="_blank" rel="noopener noreferrer"
+                style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                Maps
+              </a>
+              <a href={`https://waze.com/ul?q=${encodeURIComponent(booklet.address)}&navigate=yes`} target="_blank" rel="noopener noreferrer"
+                style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                Waze
+              </a>
             </div>
-          )}
-
-          {/* Adresse + boutons Maps/Waze */}
-          {booklet.address && (
-            <div style={{ borderTop: (checkinTime || checkoutTime) ? "1px solid rgba(255,255,255,0.15)" : "none", padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
-              <MapPin size={14} color="rgba(255,255,255,0.55)" style={{ flexShrink: 0 }} />
-              <p style={{ margin: 0, flex: 1, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{booklet.address}</p>
-              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`} target="_blank" rel="noopener noreferrer"
-                  style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
-                  Maps
-                </a>
-                <a href={`https://waze.com/ul?q=${encodeURIComponent(booklet.address)}&navigate=yes`} target="_blank" rel="noopener noreferrer"
-                  style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
-                  Waze
-                </a>
-              </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Grille de boutons */}
         <div style={{ padding: "0 16px 32px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -345,6 +323,47 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
       </div>
 
       {/* ── Drawers ── */}
+
+      {/* WiFi */}
+      {/* Horaires */}
+      <Drawer open={drawer === "horaires"} onClose={close} title="Horaires" icon={<Clock size={20} color={C.green} />} color={C.green}>
+        {checkinTime && (
+          <div style={{ display: "flex", gap: 14, padding: "14px 0", borderBottom: checkoutTime ? `1px solid ${C.sep}` : "none" }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Clock size={20} color={C.green} />
+            </div>
+            <div>
+              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Arrivée</p>
+              <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: C.green, letterSpacing: -1 }}>{formatTime(checkinTime)}</p>
+            </div>
+          </div>
+        )}
+        {checkoutTime && (
+          <div style={{ display: "flex", gap: 14, padding: "14px 0" }}>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <LogOut size={20} color={C.orange} />
+            </div>
+            <div>
+              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Départ</p>
+              <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: C.orange, letterSpacing: -1 }}>{formatTime(checkoutTime)}</p>
+            </div>
+          </div>
+        )}
+        {g(arrival, "checkin_process") && (
+          <div style={{ marginTop: 8 }}>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Procédure d'arrivée</p>
+            {g(arrival, "checkin_process").split("\n").filter(Boolean).map((step, i, arr) => (
+              <div key={i} style={{ display: "flex", gap: 14, padding: "10px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+                <div style={{ width: 26, height: 26, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.green }}>{i + 1}</span>
+                </div>
+                <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.6, paddingTop: 2 }}>{step}</p>
+              </div>
+            ))}
+          </div>
+        )}
+        <InfoRow icon={<Clock size={18} color={C.green} />} label="Arrivée anticipée" value={g(arrival, "early_checkin")} color={C.green} last />
+      </Drawer>
 
       {/* WiFi */}
       <Drawer open={drawer === "wifi"} onClose={close} title="WiFi" icon={<Wifi size={20} color={MODULE_COLORS.wifi} />} color={MODULE_COLORS.wifi}>
@@ -368,19 +387,6 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         )}
         <InfoRow icon={<MapPin size={18} color={MODULE_COLORS.access} />} label="Localisation des clés" value={g(arrival, "key_location")} color={MODULE_COLORS.access} />
         <InfoRow icon={<Car size={18} color={C.orange} />} label="Stationnement" value={g(arrival, "parking")} color={C.orange} last />
-      </Drawer>
-
-      {/* Arrivée */}
-      <Drawer open={drawer === "checkin"} onClose={close} title="Procédure d'arrivée" icon={<Clock size={20} color={C.green} />} color={C.green}>
-        {g(arrival, "checkin_process").split("\n").filter(Boolean).map((step, i, arr) => (
-          <div key={i} style={{ display: "flex", gap: 14, padding: "12px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.sep}` : "none" }}>
-            <div style={{ width: 28, height: 28, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <span style={{ fontSize: 12, fontWeight: 700, color: C.green }}>{i + 1}</span>
-            </div>
-            <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.6, paddingTop: 3 }}>{step}</p>
-          </div>
-        ))}
-        <InfoRow icon={<Clock size={18} color={C.green} />} label="Arrivée anticipée" value={g(arrival, "early_checkin")} color={C.green} last />
       </Drawer>
 
       {/* Règles */}
