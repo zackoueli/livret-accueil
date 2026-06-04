@@ -166,24 +166,33 @@ function ExpandableRow({ icon, title, content, accent, last = false }: {
 
 function BookletHero({ booklet }: { booklet: Booklet }) {
   return (
-    <div style={{ position: "relative", height: 260, overflow: "hidden", background: "#111827", flexShrink: 0, borderRadius: "0 0 28px 28px" }}>
+    <div style={{ position: "relative", height: 260, overflow: "hidden", background: "#e0e0e0", flexShrink: 0, borderRadius: "0 0 28px 28px" }}>
       {booklet.coverImage && (
-        <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.15)" }} />
+        <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(0.85) brightness(0.95)" }} />
       )}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 100%)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 22px 28px" }}>
-        <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1.5 }}>
-          Votre séjour
-        </p>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#fff", letterSpacing: -0.3, lineHeight: 1.2 }}>
-          {booklet.propertyName || booklet.title}
-        </h1>
-        {booklet.address && (
-          <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8 }}>
-            <MapPin size={13} color="rgba(255,255,255,0.5)" />
-            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{booklet.address}</p>
-          </div>
-        )}
+      {/* Fond glassmorphism pour le texte */}
+      <div style={{ position: "absolute", bottom: 20, left: 16, right: 16 }}>
+        <div style={{
+          background: "rgba(255,255,255,0.18)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderRadius: 20,
+          border: "1px solid rgba(255,255,255,0.35)",
+          padding: "14px 18px",
+        }}>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.75)", textTransform: "uppercase", letterSpacing: 1.5 }}>
+            Votre séjour
+          </p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: -0.3, lineHeight: 1.2 }}>
+            {booklet.propertyName || booklet.title}
+          </h1>
+          {booklet.address && (
+            <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6 }}>
+              <MapPin size={12} color="rgba(255,255,255,0.7)" />
+              <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.7)" }}>{booklet.address}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
