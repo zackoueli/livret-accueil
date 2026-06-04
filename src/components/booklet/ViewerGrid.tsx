@@ -239,7 +239,7 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
     { id: "rules",     label: "Règles",         icon: <ScrollText size={22} color="#fff" />,      color: MODULE_COLORS.rules,     photo: MODULE_PHOTOS.rules,     show: !!rules },
     { id: "heating",   label: "Chauffage",      icon: <Thermometer size={22} color="#fff" />,     color: MODULE_COLORS.heating,   photo: MODULE_PHOTOS.heating,   show: !!(accommodation && g(accommodation, "heating")) },
     { id: "ac",        label: "Climatisation",  icon: <Wind size={22} color="#fff" />,            color: MODULE_COLORS.ac,        photo: MODULE_PHOTOS.ac,        show: !!(accommodation && g(accommodation, "ac")) },
-    { id: "tv",        label: "TV & Internet",  icon: <Tv size={22} color="#fff" />,              color: "#8B5CF6",              photo: MODULE_PHOTOS.tv,        show: !!(accommodation && g(accommodation, "tv")) },
+    { id: "tv",        label: "Télévision",     icon: <Tv size={22} color="#fff" />,              color: "#8B5CF6",              photo: MODULE_PHOTOS.tv,        show: !!(accommodation && g(accommodation, "tv")) },
     { id: "kitchen",   label: "Cuisine",        icon: <UtensilsCrossed size={22} color="#fff" />, color: MODULE_COLORS.kitchen,  photo: MODULE_PHOTOS.kitchen,   show: !!kitchen },
     { id: "cleaning",  label: "Ménage",         icon: <Sparkles size={22} color="#fff" />,        color: MODULE_COLORS.cleaning,  photo: MODULE_PHOTOS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")) },
     { id: "safety",    label: "Urgences",       icon: <Shield size={22} color="#fff" />,          color: MODULE_COLORS.safety,    photo: MODULE_PHOTOS.safety,    show: !!safety },
