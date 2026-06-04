@@ -292,7 +292,7 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
 function ActivityEditor({ value, onChange, bookletId }: { value: string; onChange: (v: string) => void; bookletId: string }) {
   const items = parseActivities(value);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor));
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
 
   const save = (next: Activity[]) => onChange(JSON.stringify(next));
 
