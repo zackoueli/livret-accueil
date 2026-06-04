@@ -195,12 +195,24 @@ function BookletHero({ booklet, accent }: { booklet: Booklet; accent: string }) 
   );
 }
 
+function BunklyCredit({ accent }: { accent: string }) {
+  return (
+    <div style={{ textAlign: "center", padding: "24px 16px 12px" }}>
+      <a href="https://bunkly.co" target="_blank" rel="noopener noreferrer"
+        style={{ fontSize: 11, color: C.muted, textDecoration: "none", fontWeight: 500, letterSpacing: 0.3 }}>
+        Créé avec <span style={{ fontWeight: 700, color: accent }}>Bunkly.co</span>
+      </a>
+    </div>
+  );
+}
+
 function TabWithHero({ booklet, accent, children }: { booklet: Booklet; accent: string; children: React.ReactNode }) {
   return (
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       <div style={{ overflowY: "auto", flex: 1, touchAction: "pan-y" }}>
         <BookletHero booklet={booklet} accent={accent} />
         {children}
+        <BunklyCredit accent={accent} />
       </div>
     </div>
   );
@@ -439,6 +451,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
             <PhotoGallery images={arrival!.images!} />
           </div>
         )}
+        <BunklyCredit accent={accent} />
       </div>
     </div>
   );
@@ -1184,7 +1197,6 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
       {g(checkout, "thank_you") && (
         <div style={{ textAlign: "center", padding: "24px 16px 8px" }}>
           <p style={{ margin: 0, fontSize: 14, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
-          <p style={{ margin: "18px 0 0", fontSize: 12, color: C.muted }}>Créé avec <span style={{ fontWeight: 700, color: accent }}>Bunkly</span></p>
         </div>
       )}
     </div>
