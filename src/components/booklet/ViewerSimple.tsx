@@ -47,7 +47,7 @@ const C = {
   blue:   "#3B82F6",
 };
 
-const FONT = "-apple-system,'SF Pro Display','SF Pro Text',system-ui,sans-serif";
+const FONT = "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif";
 
 // ─── Composants de base ───────────────────────────────────────────────────────
 
@@ -68,8 +68,8 @@ function Card({ children, style = {}, noPad = false }: { children: React.ReactNo
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <p style={{
-      fontSize: 20, fontWeight: 800, color: C.label,
-      margin: "0 0 14px", letterSpacing: -0.5,
+      fontSize: 17, fontWeight: 700, color: C.label,
+      margin: "0 0 12px", letterSpacing: -0.2,
     }}>
       {children}
     </p>
@@ -175,7 +175,7 @@ function BookletHero({ booklet }: { booklet: Booklet }) {
         <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1.5 }}>
           Votre séjour
         </p>
-        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: -0.6, lineHeight: 1.15 }}>
+        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#fff", letterSpacing: -0.3, lineHeight: 1.2 }}>
           {booklet.propertyName || booklet.title}
         </h1>
         {booklet.address && (
