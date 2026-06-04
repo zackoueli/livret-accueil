@@ -538,7 +538,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const filtered = activeFilter === "all" ? activities : activities.filter(a => a.category === activeFilter);
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg }}>
+    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg, paddingBottom: TAB_BAR_H }}>
       <div style={{ padding: "48px 20px 20px", background: "#1a1a2e", position: "relative", overflow: "hidden" }}>
         {booklet.coverImage && <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4)" }} />}
         <div style={{ position: "relative" }}>
@@ -635,7 +635,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
   const doneCount = Object.values(checked).filter(Boolean).length;
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg }}>
+    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg, paddingBottom: TAB_BAR_H }}>
       <div style={{ padding: "48px 20px 20px", background: "#1a1a2e", position: "relative", overflow: "hidden" }}>
         {booklet.coverImage && <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4)" }} />}
         <div style={{ position: "relative" }}>
