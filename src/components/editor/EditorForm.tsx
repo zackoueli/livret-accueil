@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useEditorStore } from "@/store/editorStore";
 import { MODULE_META, MODULE_FIELDS, ACTIVITY_CATEGORIES, SERVICE_EMOJIS, parseActivities, parseServices, Activity, Service } from "@/lib/modules";
-import { EyeOff, ExternalLink, Plus, Trash2, ChevronDown, ChevronUp, ImagePlus, Loader2, X, GripVertical } from "lucide-react";
+import { EyeOff, ExternalLink, Plus, Trash2, ChevronDown, ChevronUp, ImagePlus, Loader2, X, GripVertical, Search } from "lucide-react";
 import { nanoid } from "nanoid";
 import { uploadImage } from "@/lib/upload";
 import { useAuthStore } from "@/store/authStore";
@@ -99,6 +99,82 @@ function PhotoUploader({ bookletId, storagePath, value, onChange, aspectRatio = 
   );
 }
 
+// ── Recherche Google Places ───────────────────────────────────────────────────
+
+function PlacesSearch({ onSelect }: { onSelect: (data: Partial<Activity>) => void }) {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<{ placeId: string; name: string; address: string; rating?: number }[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [searched, setSearched] = useState(false);
+
+  const search = async () => {
+    if (!query.trim()) return;
+    setLoading(true);
+    setSearched(true);
+    setResults([]);
+    try {
+      const res = await fetch(`/api/places?q=${encodeURIComponent(query)}`);
+      const data = await res.json();
+      setResults(data.results ?? []);
+    } catch { /* ignore */ }
+    finally { setLoading(false); }
+  };
+
+  const pick = async (placeId: string) => {
+    setLoadingId(placeId);
+    try {
+      const res = await fetch(`/api/places?placeId=${placeId}`);
+      const data = await res.json();
+      onSelect(data);
+      setQuery("");
+      setResults([]);
+      setSearched(false);
+    } catch { /* ignore */ }
+    finally { setLoadingId(null); }
+  };
+
+  return (
+    <div className="mb-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
+      <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">🔍 Recherche automatique</p>
+      <div className="flex gap-2">
+        <input
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && search()}
+          placeholder="Ex : Saut en parachute Perpignan..."
+          className="flex-1 text-sm border border-blue-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
+        />
+        <button onClick={search} disabled={loading || !query.trim()}
+          className="flex items-center gap-1.5 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg disabled:opacity-50 transition-colors">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+          Chercher
+        </button>
+      </div>
+      {searched && !loading && results.length === 0 && (
+        <p className="text-xs text-gray-400 mt-2">Aucun résultat trouvé.</p>
+      )}
+      {results.length > 0 && (
+        <div className="mt-2 space-y-1">
+          {results.map(r => (
+            <button key={r.placeId} onClick={() => pick(r.placeId)} disabled={loadingId === r.placeId}
+              className="w-full text-left px-3 py-2 bg-white hover:bg-blue-50 rounded-lg border border-blue-100 transition-colors flex items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-gray-800 truncate">{r.name}</p>
+                <p className="text-xs text-gray-400 truncate">{r.address}</p>
+              </div>
+              {loadingId === r.placeId
+                ? <Loader2 className="w-4 h-4 animate-spin text-blue-400 shrink-0" />
+                : <span className="text-xs text-blue-500 font-semibold shrink-0">Sélectionner →</span>
+              }
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Éditeur d'activités ───────────────────────────────────────────────────────
 
 function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bookletId }: {
@@ -140,6 +216,7 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
 
       {expanded && (
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
+          <PlacesSearch onSelect={patch => onUpdate(patch)} />
           <div>
             <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Catégorie</label>
             <div className="flex flex-wrap gap-2">
