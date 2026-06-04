@@ -289,23 +289,45 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           )}
         </div>
 
-        {/* Horaires arrivée/départ */}
-        {(checkinTime || checkoutTime) && (
-          <div style={{ display: "flex", gap: 10, margin: "0 16px 16px" }}>
-            {checkinTime && (
-              <div style={{ flex: 1, padding: "12px 14px", borderRadius: 16, background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", textAlign: "center", border: "1px solid rgba(255,255,255,0.2)" }}>
-                <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>Arrivée</p>
-                <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkinTime)}</p>
+        {/* Card glassmorphism — horaires + adresse */}
+        <div style={{ margin: "0 16px 16px", borderRadius: 20, background: "rgba(255,255,255,0.13)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.22)", overflow: "hidden" }}>
+
+          {/* Horaires */}
+          {(checkinTime || checkoutTime) && (
+            <div style={{ display: "flex" }}>
+              {checkinTime && (
+                <div style={{ flex: 1, padding: "14px 16px", textAlign: "center", borderRight: checkoutTime ? "1px solid rgba(255,255,255,0.15)" : "none" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.8 }}>Arrivée</p>
+                  <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkinTime)}</p>
+                </div>
+              )}
+              {checkoutTime && (
+                <div style={{ flex: 1, padding: "14px 16px", textAlign: "center" }}>
+                  <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.8 }}>Départ</p>
+                  <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkoutTime)}</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Adresse + boutons Maps/Waze */}
+          {booklet.address && (
+            <div style={{ borderTop: (checkinTime || checkoutTime) ? "1px solid rgba(255,255,255,0.15)" : "none", padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
+              <MapPin size={14} color="rgba(255,255,255,0.55)" style={{ flexShrink: 0 }} />
+              <p style={{ margin: 0, flex: 1, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{booklet.address}</p>
+              <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`} target="_blank" rel="noopener noreferrer"
+                  style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                  Maps
+                </a>
+                <a href={`https://waze.com/ul?q=${encodeURIComponent(booklet.address)}&navigate=yes`} target="_blank" rel="noopener noreferrer"
+                  style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                  Waze
+                </a>
               </div>
-            )}
-            {checkoutTime && (
-              <div style={{ flex: 1, padding: "12px 14px", borderRadius: 16, background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", textAlign: "center", border: "1px solid rgba(255,255,255,0.2)" }}>
-                <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>Départ</p>
-                <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkoutTime)}</p>
-              </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
         {/* Grille de boutons */}
         <div style={{ padding: "0 16px 32px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
