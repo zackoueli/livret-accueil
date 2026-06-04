@@ -43,6 +43,7 @@ export async function createBooklet(userId: string, title: string, templateId = 
     userId,
     title,
     slug,
+    templateId: "simple",
     accentColor: tpl.accentColor,
     propertyName: tpl.propertyName || title,
     address: tpl.address || "",

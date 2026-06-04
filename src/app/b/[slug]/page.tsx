@@ -3,6 +3,8 @@ import { Booklet } from "@/types";
 import { BookletViewer } from "@/components/booklet/BookletViewer";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 export default async function BookletPage({
   params,
   searchParams,

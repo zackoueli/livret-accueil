@@ -2,8 +2,9 @@
 
 import { Booklet } from "@/types";
 import { ViewerSimple } from "./ViewerSimple";
+import { ViewerGrid } from "./ViewerGrid";
 
 export function BookletViewer({ booklet }: { booklet: Booklet }) {
-  // Pour l'instant un seul template — d'autres viendront
+  if (booklet.templateId === "grid") return <ViewerGrid booklet={booklet} />;
   return <ViewerSimple booklet={booklet} />;
 }

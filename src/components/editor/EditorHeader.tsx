@@ -24,6 +24,8 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       router.push(`/${locale}/dashboard/settings`);
       return;
     }
+    // Sauvegarde d'abord pour s'assurer que tous les champs (templateId…) sont en base
+    if (isDirty) await onSave();
     const newVal = !booklet.isPublished;
     updateBookletField("isPublished", newVal);
     await updateBooklet(booklet.id, { ...booklet, isPublished: newVal });

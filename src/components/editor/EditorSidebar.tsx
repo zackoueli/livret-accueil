@@ -28,7 +28,7 @@ import { bookletUrl } from "@/lib/url";
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
   const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules, addModule } = useEditorStore();
-  const [tab, setTab] = useState<"modules" | "optional" | "appearance">("modules");
+  const [tab, setTab] = useState<"modules" | "appearance">("appearance");
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -55,13 +55,13 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
 
       {/* Tabs — seulement Modules + Apparence */}
       <div className="flex border-b border-gray-100 p-2 gap-1">
-        <button onClick={() => setTab("modules")}
-          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "modules" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
-          Modules
-        </button>
         <button onClick={() => setTab("appearance")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "appearance" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
           Apparence
+        </button>
+        <button onClick={() => setTab("modules")}
+          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "modules" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
+          Modules
         </button>
       </div>
 
@@ -381,6 +381,27 @@ function SidebarAppearance() {
               className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
             <span className="text-xs text-gray-400">Couleur personnalisée</span>
             <span className="text-xs font-mono text-gray-500 ml-auto">{booklet.accentColor}</span>
+          </div>
+        </div>
+
+        {/* Template */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Design du livret</label>
+          <div className="grid grid-cols-2 gap-2">
+            {[
+              { id: "simple", label: "Scroll", desc: "Vue défilante classique", emoji: "📜" },
+              { id: "grid",   label: "Grille", desc: "App mobile avec drawers", emoji: "📱" },
+            ].map((t) => {
+              const isActive = (booklet.templateId ?? "simple") === t.id;
+              return (
+                <button key={t.id} onClick={() => updateBookletField("templateId", t.id)}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all text-center ${isActive ? "border-orange-400 bg-orange-50" : "border-gray-200 hover:border-gray-300"}`}>
+                  <span className="text-2xl">{t.emoji}</span>
+                  <span className={`text-xs font-bold ${isActive ? "text-orange-500" : "text-gray-600"}`}>{t.label}</span>
+                  <span className="text-[10px] text-gray-400 leading-tight">{t.desc}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
