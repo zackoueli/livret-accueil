@@ -276,30 +276,32 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         {(checkinTime || checkoutTime) && (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>Horaires</SectionTitle>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Card>
               {checkinTime && (
-                <Card>
-                  <div style={{ padding: "18px 16px" }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 12, background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
-                      <Clock size={18} color={C.green} />
-                    </div>
-                    <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: C.sub, textTransform: "uppercase", letterSpacing: 0.5 }}>Arrivée</p>
-                    <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: accent, letterSpacing: -1, lineHeight: 1 }}>{formatTime(checkinTime)}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderBottom: checkoutTime ? `1px solid ${C.sep}` : "none" }}>
+                  <IconBox color={C.green}><Clock size={20} color={C.green} /></IconBox>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>Arrivée</p>
+                    <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: C.label, letterSpacing: -0.5, lineHeight: 1 }}>{formatTime(checkinTime)}</p>
                   </div>
-                </Card>
+                  <div style={{ background: `${C.green}12`, borderRadius: 20, padding: "5px 14px" }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: C.green }}>Check-in</span>
+                  </div>
+                </div>
               )}
               {checkoutTime && (
-                <Card>
-                  <div style={{ padding: "18px 16px" }}>
-                    <div style={{ width: 38, height: 38, borderRadius: 12, background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
-                      <Clock size={18} color={C.orange} />
-                    </div>
-                    <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: C.sub, textTransform: "uppercase", letterSpacing: 0.5 }}>Départ</p>
-                    <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: C.orange, letterSpacing: -1, lineHeight: 1 }}>{formatTime(checkoutTime)}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px" }}>
+                  <IconBox color={C.orange}><Clock size={20} color={C.orange} /></IconBox>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>Départ</p>
+                    <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: C.label, letterSpacing: -0.5, lineHeight: 1 }}>{formatTime(checkoutTime)}</p>
                   </div>
-                </Card>
+                  <div style={{ background: `${C.orange}12`, borderRadius: 20, padding: "5px 14px" }}>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: C.orange }}>Check-out</span>
+                  </div>
+                </div>
               )}
-            </div>
+            </Card>
           </div>
         )}
 
