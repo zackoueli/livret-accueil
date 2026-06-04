@@ -68,7 +68,7 @@ export function AuthPage() {
       {/* ── Colonne gauche : photo + pitch ── */}
       <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-12 overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=1200&q=80"
+          src="https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-margue-a-2157657342-34969307.jpg?alt=media&token=20fb6707-2d25-4cee-8e28-e028eacc68fc"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
         />
@@ -134,7 +134,7 @@ export function AuthPage() {
         {/* Background mobile */}
         <div className="lg:hidden absolute inset-0">
           <img
-            src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80"
+            src="https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-margue-a-2157657342-34969307.jpg?alt=media&token=20fb6707-2d25-4cee-8e28-e028eacc68fc"
             alt=""
             className="w-full h-full object-cover"
           />
