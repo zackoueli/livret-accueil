@@ -65,9 +65,11 @@ export function EditorPreview() {
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shrink-0">
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Aperçu</span>
         <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400 hidden lg:block">Si l'aperçu ne s'affiche pas,</span>
           <button onClick={() => setKey((k) => k + 1)}
-            className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors" title="Rafraîchir">
-            <RefreshCw className="w-3.5 h-3.5" />
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-orange-50 text-gray-400 hover:text-orange-500 transition-colors text-xs font-medium" title="Rafraîchir l'aperçu">
+            <RefreshCw className="w-3 h-3" />
+            <span>Rafraîchir</span>
           </button>
         </div>
       </div>

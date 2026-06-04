@@ -27,9 +27,6 @@ export default async function BookletPage({
   const doc = snap.docs[0];
   const booklet = { id: doc.id, ...doc.data() } as Booklet;
 
-  const userDoc = await adminDb.collection("users").doc(booklet.userId).get();
-  if (userDoc.data()?.plan !== "actif") notFound();
-
   const effectiveBooklet = templateOverride
     ? { ...booklet, templateId: templateOverride }
     : booklet;

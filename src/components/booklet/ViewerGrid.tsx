@@ -307,7 +307,21 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
             />
           ))}
         </div>
+        <BunklyCredit dark />
 
+    </div>
+  );
+}
+
+function BunklyCredit({ dark = false }: { dark?: boolean }) {
+  const color = dark ? "rgba(255,255,255,0.35)" : C.muted;
+  const bold  = dark ? "rgba(255,255,255,0.6)"  : C.sub;
+  return (
+    <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
+      <a href="https://bunkly.co" target="_blank" rel="noopener noreferrer"
+        style={{ fontSize: 11, color, textDecoration: "none", fontWeight: 500, letterSpacing: 0.3 }}>
+        Créé avec <span style={{ fontWeight: 700, color: bold }}>Bunkly.co</span>
+      </a>
     </div>
   );
 }
@@ -586,6 +600,8 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
       </div>
 
       {/* Drawer activité sélectionnée */}
+      <BunklyCredit />
+
       {selectedAct && (
         <Drawer open={!!selectedAct} onClose={() => setSelectedAct(null)} title={selectedAct.name} icon={<MapPin size={20} color={catColor[selectedAct.category]} />} color={catColor[selectedAct.category]}>
           {selectedAct.photo && (
@@ -708,6 +724,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
         {g(checkout, "thank_you") && (
           <p style={{ textAlign: "center", marginTop: 28, fontSize: 14, color: C.muted, fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
         )}
+        <BunklyCredit />
       </div>
     </div>
   );
