@@ -253,19 +253,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   ].filter(b => b.show);
 
   return (
-    <div style={{ position: "relative", flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
-
-      {/* ── Fond plein écran ── */}
-      <div style={{ position: "absolute", inset: 0, background: "#1a1a2e" }}>
-        {booklet.coverImage && (
-          <img src={booklet.coverImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-        )}
-        {/* Gradient du bas pour lisibilité des boutons */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.55) 100%)" }} />
-      </div>
-
-      {/* ── Contenu scrollable par-dessus ── */}
-      <div style={{ position: "relative", flex: 1, overflowY: "auto", touchAction: "pan-y", display: "flex", flexDirection: "column" }}>
+    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", display: "flex", flexDirection: "column", paddingBottom: TAB_BAR_H }}>
 
         {/* Header hôte */}
         <div style={{ padding: "48px 20px 20px", textAlign: "center" }}>
@@ -320,7 +308,6 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
             />
           ))}
         </div>
-      </div>
 
       {/* ── Drawers ── */}
 
@@ -745,24 +732,30 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 type GridTab = "home" | "area" | "checkout";
 
 function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (t: GridTab) => void; accent: string }) {
-  const inactive = "rgba(255,255,255,0.45)";
+  const isHome = active === "home";
+  const inactive = isHome ? "rgba(255,255,255,0.5)" : C.muted;
+
   const tabs = [
     { id: "home" as GridTab,     label: "Accueil",   icon: (a: boolean) => <Home size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
     { id: "area" as GridTab,     label: "Activités", icon: (a: boolean) => <MapPin size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
     { id: "checkout" as GridTab, label: "Départ",    icon: (a: boolean) => <LogOut size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
   ];
 
+  const bgStyle = isHome
+    ? { background: "rgba(10,10,20,0.55)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.12)" }
+    : { background: "#fff", borderTop: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 -4px 20px rgba(0,0,0,0.05)" };
+
   return (
-    <div style={{ display: "flex", background: "rgba(15,15,25,0.72)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.1)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
+    <div style={{ display: "flex", ...bgStyle, flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
       {tabs.map(t => {
         const isActive = active === t.id;
         return (
           <button key={t.id} onClick={() => onSelect(t.id)}
             style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "6px 0 8px", background: "none", border: "none", cursor: "pointer" }}>
-            <div style={{ width: 48, height: 32, borderRadius: 16, background: isActive ? `${accent}25` : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
+            <div style={{ width: 48, height: 32, borderRadius: 16, background: isActive ? `${accent}22` : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
               {t.icon(isActive)}
             </div>
-            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? accent : "rgba(255,255,255,0.45)", letterSpacing: 0.1 }}>
+            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? accent : inactive, letterSpacing: 0.1 }}>
               {t.label}
             </span>
           </button>
@@ -781,15 +774,25 @@ function GridContent({ booklet }: { booklet: Booklet }) {
   const accent = booklet.accentColor || C.blue;
 
   return (
-    <div style={{ position: "relative", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
-      {/* Pages — padding-bottom pour ne pas être caché sous la tab bar */}
-      <div style={{ position: "absolute", inset: 0, bottom: TAB_BAR_H, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+    <div style={{ position: "relative", height: "100%", fontFamily: FONT, WebkitFontSmoothing: "antialiased", background: tab === "home" ? "#1a1a2e" : C.bg }}>
+
+      {/* Fond photo plein écran — visible uniquement sur home, backdrop-filter peut le voir */}
+      {tab === "home" && booklet.coverImage && (
+        <>
+          <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.6) 100%)", zIndex: 1 }} />
+        </>
+      )}
+
+      {/* Page — scroll librement par-dessus le fond */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column" }}>
         {tab === "home"     && <PageHome     booklet={booklet} accent={accent} />}
         {tab === "area"     && <PageArea     booklet={booklet} accent={accent} />}
         {tab === "checkout" && <PageCheckout booklet={booklet} accent={accent} />}
       </div>
-      {/* Tab bar flottante — position absolute pour que backdrop-filter fonctionne */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: TAB_BAR_H }}>
+
+      {/* Tab bar au-dessus — backdrop-filter voit le fond photo via zIndex */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 50 }}>
         <GridTabBar active={tab} onSelect={setTab} accent={accent} />
       </div>
     </div>
