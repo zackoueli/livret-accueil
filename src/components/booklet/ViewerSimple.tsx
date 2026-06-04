@@ -164,38 +164,42 @@ function ExpandableRow({ icon, title, content, accent, last = false }: {
 
 // ─── Hero ─────────────────────────────────────────────────────────────────────
 
-function BookletHero({ booklet }: { booklet: Booklet }) {
+function BookletHero({ booklet, accent }: { booklet: Booklet; accent: string }) {
   return (
-    <div style={{ position: "relative", height: 260, overflow: "hidden", background: "#1a1a1a", flexShrink: 0, borderRadius: "0 0 28px 28px" }}>
-      {booklet.coverImage && (
-        <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.05)" }} />
-      )}
-      {/* Gradient doux uniquement sur le bas */}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 35%, rgba(0,0,0,0.55) 100%)" }} />
-      {/* Texte directement sur le gradient */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 20px 24px" }}>
-        <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.65)", textTransform: "uppercase", letterSpacing: 1.5 }}>
-          Votre séjour
-        </p>
-        <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: "#fff", letterSpacing: -0.3, lineHeight: 1.2 }}>
-          {booklet.propertyName || booklet.title}
-        </h1>
-        {booklet.address && (
-          <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 7 }}>
-            <MapPin size={12} color="rgba(255,255,255,0.65)" />
-            <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.65)" }}>{booklet.address}</p>
-          </div>
+    <div style={{ padding: "16px 16px 0", background: C.bg }}>
+      <div style={{
+        position: "relative", borderRadius: 24, overflow: "hidden",
+        background: "#1a1a1a", height: 280,
+        boxShadow: "0 8px 32px rgba(0,0,0,0.15)",
+      }}>
+        {booklet.coverImage && (
+          <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "saturate(1.1) brightness(0.9)" }} />
         )}
+        {/* Gradient fort en bas */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, transparent 25%, rgba(0,0,0,0.85) 100%)" }} />
+
+        {/* Contenu texte en bas */}
+        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "20px 20px 24px" }}>
+          <h1 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 700, color: "#fff", letterSpacing: -0.4, lineHeight: 1.2 }}>
+            {booklet.propertyName || booklet.title}
+          </h1>
+          {booklet.address && (
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <MapPin size={13} color="rgba(255,255,255,0.65)" />
+              <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{booklet.address}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-function TabWithHero({ booklet, children }: { booklet: Booklet; children: React.ReactNode }) {
+function TabWithHero({ booklet, accent, children }: { booklet: Booklet; accent: string; children: React.ReactNode }) {
   return (
     <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
       <div style={{ overflowY: "auto", flex: 1, touchAction: "pan-y" }}>
-        <BookletHero booklet={booklet} />
+        <BookletHero booklet={booklet} accent={accent} />
         {children}
       </div>
     </div>
@@ -246,7 +250,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
   return (
     <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
-      <BookletHero booklet={booklet} />
+      <BookletHero booklet={booklet} accent={accent} />
       <div style={{ padding: "24px 16px 48px" }}>
 
         {/* Hôte + message */}
@@ -278,32 +282,30 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         {(checkinTime || checkoutTime) && (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>Horaires</SectionTitle>
-            <Card>
+            <div style={{ display: "grid", gridTemplateColumns: checkinTime && checkoutTime ? "1fr 1fr" : "1fr", gap: 12 }}>
               {checkinTime && (
-                <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderBottom: checkoutTime ? `1px solid ${C.sep}` : "none" }}>
-                  <IconBox color={C.green}><Clock size={20} color={C.green} /></IconBox>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>Arrivée</p>
-                    <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: C.label, letterSpacing: -0.5, lineHeight: 1 }}>{formatTime(checkinTime)}</p>
+                <Card>
+                  <div style={{ padding: "20px 16px" }}>
+                    <div style={{ width: 42, height: 42, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                      <Clock size={20} color={C.green} />
+                    </div>
+                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.8 }}>Arrivée</p>
+                    <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: C.label, letterSpacing: -1, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{formatTime(checkinTime)}</p>
                   </div>
-                  <div style={{ background: `${C.green}12`, borderRadius: 20, padding: "5px 14px" }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: C.green }}>Check-in</span>
-                  </div>
-                </div>
+                </Card>
               )}
               {checkoutTime && (
-                <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px" }}>
-                  <IconBox color={C.orange}><Clock size={20} color={C.orange} /></IconBox>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ margin: "0 0 2px", fontSize: 12, fontWeight: 600, color: C.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>Départ</p>
-                    <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: C.label, letterSpacing: -0.5, lineHeight: 1 }}>{formatTime(checkoutTime)}</p>
+                <Card>
+                  <div style={{ padding: "20px 16px" }}>
+                    <div style={{ width: 42, height: 42, borderRadius: "50%", background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
+                      <Clock size={20} color={C.orange} />
+                    </div>
+                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.8 }}>Départ</p>
+                    <p style={{ margin: 0, fontSize: 28, fontWeight: 800, color: C.label, letterSpacing: -1, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>{formatTime(checkoutTime)}</p>
                   </div>
-                  <div style={{ background: `${C.orange}12`, borderRadius: 20, padding: "5px 14px" }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: C.orange }}>Check-out</span>
-                  </div>
-                </div>
+                </Card>
               )}
-            </Card>
+            </div>
           </div>
         )}
 
@@ -1277,10 +1279,10 @@ function ViewerContent({ booklet }: { booklet: Booklet }) {
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", overflow: "hidden" }}>
       <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {tab === "home"     && <TabHome     booklet={booklet} accent={accent} />}
-        {tab === "stay"     && <TabWithHero booklet={booklet}><TabStay     booklet={booklet} accent={accent} /></TabWithHero>}
-        {tab === "area"     && <TabWithHero booklet={booklet}><TabArea     booklet={booklet} accent={accent} /></TabWithHero>}
-        {tab === "safety"   && <TabWithHero booklet={booklet}><TabSafety   booklet={booklet} accent={accent} /></TabWithHero>}
-        {tab === "checkout" && <TabWithHero booklet={booklet}><TabCheckout booklet={booklet} accent={accent} /></TabWithHero>}
+        {tab === "stay"     && <TabWithHero booklet={booklet} accent={accent}><TabStay     booklet={booklet} accent={accent} /></TabWithHero>}
+        {tab === "area"     && <TabWithHero booklet={booklet} accent={accent}><TabArea     booklet={booklet} accent={accent} /></TabWithHero>}
+        {tab === "safety"   && <TabWithHero booklet={booklet} accent={accent}><TabSafety   booklet={booklet} accent={accent} /></TabWithHero>}
+        {tab === "checkout" && <TabWithHero booklet={booklet} accent={accent}><TabCheckout booklet={booklet} accent={accent} /></TabWithHero>}
       </div>
       <TabBar active={tab} onSelect={setTab} accent={accent} />
     </div>
