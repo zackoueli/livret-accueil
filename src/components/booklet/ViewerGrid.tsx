@@ -98,7 +98,7 @@ function Drawer({ open, onClose, title, icon, color, children }: {
 }) {
   if (!open) return null;
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 100, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+    <div style={{ position: "absolute", inset: 0, zIndex: 200, display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
       {/* Backdrop */}
       <div onClick={onClose} style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }} />
       {/* Sheet */}
