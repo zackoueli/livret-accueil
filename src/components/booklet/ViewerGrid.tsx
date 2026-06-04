@@ -752,7 +752,7 @@ function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (
   ];
 
   return (
-    <div style={{ display: "flex", background: "#fff", borderTop: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 -4px 20px rgba(0,0,0,0.06)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
+    <div style={{ display: "flex", background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.4)", boxShadow: "0 -4px 20px rgba(0,0,0,0.08)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
       {tabs.map(t => {
         const isActive = active === t.id;
         return (
