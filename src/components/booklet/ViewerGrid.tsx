@@ -206,50 +206,6 @@ function GridButton({ label, icon, color, photo, onClick, wide = false }: {
   );
 }
 
-// ─── HERO ─────────────────────────────────────────────────────────────────────
-
-function GridHero({ booklet, accent }: { booklet: Booklet; accent: string }) {
-  const contact = useMod(booklet, "contact");
-  const hostName = g(contact, "host_name");
-  const hostPhoto = g(contact, "host_photo");
-  const welcomeMsg = g(contact, "welcome_message") || g(useMod(booklet, "arrival"), "welcome_message");
-
-  return (
-    <div style={{ position: "relative", overflow: "hidden", background: "#111827" }}>
-      {/* Image de fond */}
-      {booklet.coverImage && (
-        <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.35) saturate(1.1)" }} />
-      )}
-      <div style={{ position: "relative", padding: "48px 24px 32px", textAlign: "center" }}>
-        {/* Photo hôte */}
-        {hostPhoto ? (
-          <img src={hostPhoto} alt="" style={{ width: 72, height: 72, borderRadius: "50%", objectFit: "cover", border: "3px solid rgba(255,255,255,0.3)", margin: "0 auto 14px", display: "block" }} />
-        ) : (
-          <div style={{ width: 72, height: 72, borderRadius: "50%", background: `${accent}30`, border: "3px solid rgba(255,255,255,0.2)", margin: "0 auto 14px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Users size={28} color="rgba(255,255,255,0.7)" />
-          </div>
-        )}
-        {/* Nom du logement */}
-        <h1 style={{ margin: "0 0 4px", fontSize: 22, fontWeight: 700, color: "#fff", letterSpacing: -0.4 }}>
-          {booklet.propertyName || booklet.title}
-        </h1>
-        {/* Hôte */}
-        {hostName && (
-          <p style={{ margin: "0 0 10px", fontSize: 13, color: "rgba(255,255,255,0.55)" }}>
-            Votre hôte · {hostName}
-          </p>
-        )}
-        {/* Message de bienvenue */}
-        {welcomeMsg && (
-          <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6, maxWidth: 280, marginLeft: "auto", marginRight: "auto" }}>
-            {welcomeMsg.length > 100 ? welcomeMsg.slice(0, 100) + "…" : welcomeMsg}
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 // ─── PAGE ACCUEIL ─────────────────────────────────────────────────────────────
 
 function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
@@ -273,61 +229,97 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const accessCode = g(arrival, "access_code");
   const checkinTime = g(arrival, "checkin_time");
   const checkoutTime = g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
+  const hostName = g(contact, "host_name");
+  const hostPhoto = g(contact, "host_photo");
+  const welcomeMsg = g(contact, "welcome_message") || g(arrival, "welcome_message");
 
-  // Boutons à afficher selon les modules actifs
   const buttons = [
-    { id: "wifi",     label: "WiFi",           icon: <Wifi size={24} color="#fff" />,           color: MODULE_COLORS.wifi,     photo: MODULE_PHOTOS.wifi,     show: !!(wifiName || wifiPass) },
-    { id: "access",   label: "Accès & Clés",   icon: <Key size={24} color="#fff" />,            color: MODULE_COLORS.access,   photo: MODULE_PHOTOS.access,   show: !!accessCode },
-    { id: "checkin",  label: "Arrivée",         icon: <Clock size={24} color="#fff" />,          color: C.green,               photo: "",                     show: !!checkinTime },
-    { id: "rules",    label: "Règles",          icon: <ScrollText size={24} color="#fff" />,     color: MODULE_COLORS.rules,    photo: MODULE_PHOTOS.rules,    show: !!rules },
-    { id: "heating",  label: "Chauffage",       icon: <Thermometer size={24} color="#fff" />,    color: MODULE_COLORS.heating,  photo: MODULE_PHOTOS.heating,  show: !!(accommodation && g(accommodation, "heating")) },
-    { id: "ac",       label: "Climatisation",   icon: <Wind size={24} color="#fff" />,           color: MODULE_COLORS.ac,       photo: MODULE_PHOTOS.ac,       show: !!(accommodation && g(accommodation, "ac")) },
-    { id: "tv",       label: "TV & Internet",   icon: <Tv size={24} color="#fff" />,             color: "#8B5CF6",             photo: "",                     show: !!(accommodation && g(accommodation, "tv")) },
-    { id: "kitchen",  label: "Cuisine",         icon: <UtensilsCrossed size={24} color="#fff" />, color: MODULE_COLORS.kitchen, photo: MODULE_PHOTOS.kitchen, show: !!kitchen },
-    { id: "cleaning", label: "Ménage",          icon: <Sparkles size={24} color="#fff" />,       color: MODULE_COLORS.cleaning, photo: MODULE_PHOTOS.cleaning, show: !!(kitchen && g(kitchen, "cleaning")) },
-    { id: "safety",   label: "Urgences",        icon: <Shield size={24} color="#fff" />,         color: MODULE_COLORS.safety,   photo: MODULE_PHOTOS.safety,   show: !!safety },
-    { id: "contact",  label: "Contact",         icon: <Phone size={24} color="#fff" />,          color: MODULE_COLORS.contact,  photo: MODULE_PHOTOS.contact,  show: !!contact },
-    { id: "pool",     label: "Piscine",         icon: <Waves size={24} color="#fff" />,          color: MODULE_COLORS.pool,     photo: MODULE_PHOTOS.pool,     show: !!pool },
-    { id: "baby",     label: "Bébé",            icon: <Baby size={24} color="#fff" />,           color: MODULE_COLORS.baby,     photo: MODULE_PHOTOS.baby,     show: !!baby },
-    { id: "pets",     label: "Animaux",         icon: <Dog size={24} color="#fff" />,            color: MODULE_COLORS.pets,     photo: MODULE_PHOTOS.pets,     show: !!petsModule },
-    { id: "coworking",label: "Télétravail",     icon: <Briefcase size={24} color="#fff" />,      color: MODULE_COLORS.coworking,photo: MODULE_PHOTOS.coworking,show: !!coworking },
-    { id: "transport",label: "Transport",       icon: <Bus size={24} color="#fff" />,            color: MODULE_COLORS.transport,photo: MODULE_PHOTOS.transport,show: !!transport },
+    { id: "wifi",      label: "WiFi",          icon: <Wifi size={22} color="#fff" />,            color: MODULE_COLORS.wifi,      photo: MODULE_PHOTOS.wifi,      show: !!(wifiName || wifiPass) },
+    { id: "access",    label: "Accès & Clés",  icon: <Key size={22} color="#fff" />,             color: MODULE_COLORS.access,    photo: MODULE_PHOTOS.access,    show: !!accessCode },
+    { id: "checkin",   label: "Arrivée",        icon: <Clock size={22} color="#fff" />,           color: C.green,                photo: "",                      show: !!checkinTime },
+    { id: "rules",     label: "Règles",         icon: <ScrollText size={22} color="#fff" />,      color: MODULE_COLORS.rules,     photo: MODULE_PHOTOS.rules,     show: !!rules },
+    { id: "heating",   label: "Chauffage",      icon: <Thermometer size={22} color="#fff" />,     color: MODULE_COLORS.heating,   photo: MODULE_PHOTOS.heating,   show: !!(accommodation && g(accommodation, "heating")) },
+    { id: "ac",        label: "Climatisation",  icon: <Wind size={22} color="#fff" />,            color: MODULE_COLORS.ac,        photo: MODULE_PHOTOS.ac,        show: !!(accommodation && g(accommodation, "ac")) },
+    { id: "tv",        label: "TV & Internet",  icon: <Tv size={22} color="#fff" />,              color: "#8B5CF6",              photo: "",                      show: !!(accommodation && g(accommodation, "tv")) },
+    { id: "kitchen",   label: "Cuisine",        icon: <UtensilsCrossed size={22} color="#fff" />, color: MODULE_COLORS.kitchen,  photo: MODULE_PHOTOS.kitchen,   show: !!kitchen },
+    { id: "cleaning",  label: "Ménage",         icon: <Sparkles size={22} color="#fff" />,        color: MODULE_COLORS.cleaning,  photo: MODULE_PHOTOS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")) },
+    { id: "safety",    label: "Urgences",       icon: <Shield size={22} color="#fff" />,          color: MODULE_COLORS.safety,    photo: MODULE_PHOTOS.safety,    show: !!safety },
+    { id: "contact",   label: "Contact",        icon: <Phone size={22} color="#fff" />,           color: MODULE_COLORS.contact,   photo: MODULE_PHOTOS.contact,   show: !!contact },
+    { id: "pool",      label: "Piscine",        icon: <Waves size={22} color="#fff" />,           color: MODULE_COLORS.pool,      photo: MODULE_PHOTOS.pool,      show: !!pool },
+    { id: "baby",      label: "Bébé",           icon: <Baby size={22} color="#fff" />,            color: MODULE_COLORS.baby,      photo: MODULE_PHOTOS.baby,      show: !!baby },
+    { id: "pets",      label: "Animaux",        icon: <Dog size={22} color="#fff" />,             color: MODULE_COLORS.pets,      photo: MODULE_PHOTOS.pets,      show: !!petsModule },
+    { id: "coworking", label: "Télétravail",    icon: <Briefcase size={22} color="#fff" />,       color: MODULE_COLORS.coworking, photo: MODULE_PHOTOS.coworking, show: !!coworking },
+    { id: "transport", label: "Transport",      icon: <Bus size={22} color="#fff" />,             color: MODULE_COLORS.transport, photo: MODULE_PHOTOS.transport, show: !!transport },
   ].filter(b => b.show);
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
-      <GridHero booklet={booklet} accent={accent} />
+    <div style={{ position: "relative", flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
 
-      {/* Horaires rapides */}
-      {(checkinTime || checkoutTime) && (
-        <div style={{ display: "flex", gap: 0, background: C.card, borderBottom: `1px solid ${C.sep}` }}>
-          {checkinTime && (
-            <div style={{ flex: 1, padding: "14px 16px", textAlign: "center", borderRight: checkoutTime ? `1px solid ${C.sep}` : "none" }}>
-              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>Arrivée</p>
-              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: C.green, letterSpacing: -0.8, fontVariantNumeric: "tabular-nums" }}>{formatTime(checkinTime)}</p>
+      {/* ── Fond plein écran ── */}
+      <div style={{ position: "absolute", inset: 0, background: "#1a1a2e" }}>
+        {booklet.coverImage && (
+          <img src={booklet.coverImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        )}
+        {/* Gradient du bas pour lisibilité des boutons */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.55) 100%)" }} />
+      </div>
+
+      {/* ── Contenu scrollable par-dessus ── */}
+      <div style={{ position: "relative", flex: 1, overflowY: "auto", touchAction: "pan-y", display: "flex", flexDirection: "column" }}>
+
+        {/* Header hôte */}
+        <div style={{ padding: "48px 20px 20px", textAlign: "center" }}>
+          {hostPhoto ? (
+            <img src={hostPhoto} alt="" style={{ width: 68, height: 68, borderRadius: "50%", objectFit: "cover", border: "2.5px solid rgba(255,255,255,0.5)", margin: "0 auto 12px", display: "block" }} />
+          ) : (
+            <div style={{ width: 68, height: 68, borderRadius: "50%", background: "rgba(255,255,255,0.15)", border: "2.5px solid rgba(255,255,255,0.3)", margin: "0 auto 12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Users size={26} color="rgba(255,255,255,0.8)" />
             </div>
           )}
-          {checkoutTime && (
-            <div style={{ flex: 1, padding: "14px 16px", textAlign: "center" }}>
-              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.6 }}>Départ</p>
-              <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: C.orange, letterSpacing: -0.8, fontVariantNumeric: "tabular-nums" }}>{formatTime(checkoutTime)}</p>
-            </div>
+          <h1 style={{ margin: "0 0 4px", fontSize: 24, fontWeight: 800, color: "#fff", letterSpacing: -0.5, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>
+            {booklet.propertyName || booklet.title}
+          </h1>
+          {hostName && (
+            <p style={{ margin: "0 0 8px", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>Votre hôte · {hostName}</p>
+          )}
+          {welcomeMsg && (
+            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.55, maxWidth: 260, marginLeft: "auto", marginRight: "auto" }}>
+              {welcomeMsg.length > 80 ? welcomeMsg.slice(0, 80) + "…" : welcomeMsg}
+            </p>
           )}
         </div>
-      )}
 
-      {/* Grille de boutons */}
-      <div style={{ padding: "16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-        {buttons.map((btn) => (
-          <GridButton
-            key={btn.id}
-            label={btn.label}
-            icon={btn.icon}
-            color={btn.color}
-            photo={btn.photo || undefined}
-            onClick={() => setDrawer(btn.id)}
-          />
-        ))}
+        {/* Horaires arrivée/départ */}
+        {(checkinTime || checkoutTime) && (
+          <div style={{ display: "flex", gap: 10, margin: "0 16px 16px" }}>
+            {checkinTime && (
+              <div style={{ flex: 1, padding: "12px 14px", borderRadius: 16, background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", textAlign: "center", border: "1px solid rgba(255,255,255,0.2)" }}>
+                <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>Arrivée</p>
+                <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkinTime)}</p>
+              </div>
+            )}
+            {checkoutTime && (
+              <div style={{ flex: 1, padding: "12px 14px", borderRadius: 16, background: "rgba(255,255,255,0.15)", backdropFilter: "blur(12px)", textAlign: "center", border: "1px solid rgba(255,255,255,0.2)" }}>
+                <p style={{ margin: "0 0 2px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>Départ</p>
+                <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: -0.5 }}>{formatTime(checkoutTime)}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Grille de boutons */}
+        <div style={{ padding: "0 16px 32px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+          {buttons.map((btn) => (
+            <GridButton
+              key={btn.id}
+              label={btn.label}
+              icon={btn.icon}
+              color={btn.color}
+              photo={btn.photo || undefined}
+              onClick={() => setDrawer(btn.id)}
+            />
+          ))}
+        </div>
       </div>
 
       {/* ── Drawers ── */}
@@ -531,8 +523,14 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const filtered = activeFilter === "all" ? activities : activities.filter(a => a.category === activeFilter);
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
-      <GridHero booklet={booklet} accent={accent} />
+    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg }}>
+      <div style={{ padding: "48px 20px 20px", background: "#1a1a2e", position: "relative", overflow: "hidden" }}>
+        {booklet.coverImage && <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4)" }} />}
+        <div style={{ position: "relative" }}>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 1 }}>À découvrir</p>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4 }}>{booklet.propertyName || booklet.title}</h2>
+        </div>
+      </div>
 
       <div style={{ padding: "20px 16px 48px" }}>
         {/* Filtres */}
@@ -620,8 +618,14 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
   const doneCount = Object.values(checked).filter(Boolean).length;
 
   return (
-    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
-      <GridHero booklet={booklet} accent={accent} />
+    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg }}>
+      <div style={{ padding: "48px 20px 20px", background: "#1a1a2e", position: "relative", overflow: "hidden" }}>
+        {booklet.coverImage && <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4)" }} />}
+        <div style={{ position: "relative" }}>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 1 }}>Checklist</p>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4 }}>Votre départ</h2>
+        </div>
+      </div>
 
       <div style={{ padding: "20px 16px 48px" }}>
 
