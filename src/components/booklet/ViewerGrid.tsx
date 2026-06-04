@@ -745,23 +745,24 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 type GridTab = "home" | "area" | "checkout";
 
 function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (t: GridTab) => void; accent: string }) {
+  const inactive = "rgba(255,255,255,0.45)";
   const tabs = [
-    { id: "home" as GridTab,     label: "Accueil",   icon: (a: boolean) => <Home size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "area" as GridTab,     label: "Activités", icon: (a: boolean) => <MapPin size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "checkout" as GridTab, label: "Départ",    icon: (a: boolean) => <LogOut size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "home" as GridTab,     label: "Accueil",   icon: (a: boolean) => <Home size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "area" as GridTab,     label: "Activités", icon: (a: boolean) => <MapPin size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "checkout" as GridTab, label: "Départ",    icon: (a: boolean) => <LogOut size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
   ];
 
   return (
-    <div style={{ display: "flex", background: "rgba(255,255,255,0.75)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", borderTop: "1px solid rgba(255,255,255,0.4)", boxShadow: "0 -4px 20px rgba(0,0,0,0.08)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
+    <div style={{ display: "flex", background: "rgba(15,15,25,0.72)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.1)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
       {tabs.map(t => {
         const isActive = active === t.id;
         return (
           <button key={t.id} onClick={() => onSelect(t.id)}
             style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "6px 0 8px", background: "none", border: "none", cursor: "pointer" }}>
-            <div style={{ width: 48, height: 32, borderRadius: 16, background: isActive ? `${accent}15` : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
+            <div style={{ width: 48, height: 32, borderRadius: 16, background: isActive ? `${accent}25` : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
               {t.icon(isActive)}
             </div>
-            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? accent : C.muted, letterSpacing: 0.1 }}>
+            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? accent : "rgba(255,255,255,0.45)", letterSpacing: 0.1 }}>
               {t.label}
             </span>
           </button>
