@@ -50,21 +50,21 @@ const C = {
 
 // Photos placeholder par module (à remplacer par URLs Firebase)
 const MODULE_PHOTOS: Record<string, string> = {
-  wifi:        "",
-  access:      "",
-  heating:     "",
-  ac:          "",
-  rules:       "",
-  kitchen:     "",
-  cleaning:    "",
-  safety:      "",
-  contact:     "",
-  checkout:    "",
-  pool:        "",
-  baby:        "",
-  pets:        "",
-  coworking:   "",
-  transport:   "",
+  wifi:      "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-brettjordan-5703429.jpg?alt=media&token=aedd5134-7da0-43e7-9a2d-421c113da11f",
+  access:    "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-felixmoeller-36750789.jpg?alt=media&token=d62e7a56-4549-4e98-a38c-b324317a8f52",
+  heating:   "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-mart-production-7328504.jpg?alt=media&token=2056e2f3-11be-40b2-a947-7d371edbfede",
+  ac:        "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-erfanamiri-28054343.jpg?alt=media&token=e5602c2c-357d-41f2-bc45-7a6ddfb9d95f",
+  rules:     "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-jibarofoto-16475250.jpg?alt=media&token=78d93c2b-f74e-4adc-8dd0-c1bd4c3187af",
+  kitchen:   "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-francesco-ungaro-30735585.jpg?alt=media&token=eb4120dd-327b-41ee-85d2-47f4e11e3257",
+  cleaning:  "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-jonathanborba-28576637.jpg?alt=media&token=3b2c84f4-ecb5-4969-b541-7bdab3420075",
+  safety:    "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-pixabay-263402.jpg?alt=media&token=b814a1a7-5d3f-48d8-8418-ee40c84b9e53",
+  contact:   "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/templates%2FModules%2Fpexels-cottonbro-6964158.jpg?alt=media&token=e79841e5-d724-4610-995f-5e3e7a7aa7f1",
+  checkout:  "",
+  pool:      "",
+  baby:      "",
+  pets:      "",
+  coworking: "",
+  transport: "",
 };
 
 // Couleurs de fond fallback si pas de photo
