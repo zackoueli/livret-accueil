@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { ArrowLeft, Save, Eye, CheckCircle, Loader2, Globe, Lock } from "lucide-react";
+import { ArrowLeft, Save, Eye, CheckCircle, Loader2, Globe } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { useEditorStore } from "@/store/editorStore";
@@ -19,11 +19,6 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
   if (!booklet) return null;
 
   const togglePublish = async () => {
-    if (profile?.plan !== "actif") {
-      toast.error("Passez au plan Actif pour publier vos livrets");
-      router.push(`/${locale}/dashboard/settings`);
-      return;
-    }
     // Sauvegarde d'abord pour s'assurer que tous les champs (templateId…) sont en base
     if (isDirty) await onSave();
     const newVal = !booklet.isPublished;
@@ -88,17 +83,13 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       <button
         onClick={togglePublish}
         className={`flex items-center gap-1.5 text-sm font-semibold px-5 py-2 rounded-xl transition-colors ${
-          profile?.plan !== "actif"
-            ? "bg-gray-100 text-gray-400 hover:bg-orange-50 hover:text-orange-500"
-            : booklet.isPublished
-              ? "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
-              : "bg-orange-500 hover:bg-orange-600 text-white"
+          booklet.isPublished
+            ? "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
+            : "bg-orange-500 hover:bg-orange-600 text-white"
         }`}>
-        {profile?.plan !== "actif"
-          ? <Lock className="w-4 h-4" />
-          : <Globe className="w-4 h-4" />}
+        <Globe className="w-4 h-4" />
         <span className="hidden sm:inline">
-          {profile?.plan !== "actif" ? "Publier" : booklet.isPublished ? "Publié" : "Publier"}
+          {booklet.isPublished ? "Publié" : "Publier"}
         </span>
       </button>
     </header>
