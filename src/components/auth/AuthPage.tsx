@@ -75,11 +75,8 @@ export function AuthPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/50 to-orange-900/40" />
 
         {/* Logo */}
-        <div className="relative flex items-center gap-2 font-bold text-xl text-white">
-          <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center">
-            <BookOpen className="w-4.5 h-4.5 text-white" />
-          </div>
-          Bunkly<span className="text-orange-400">.</span>
+        <div className="relative">
+          <img src="/Logo.png" alt="Bunkly" className="h-10 w-auto" />
         </div>
 
         {/* Pitch central */}
@@ -144,11 +141,8 @@ export function AuthPage() {
         <div className="relative flex flex-col flex-1 items-center justify-center px-6 py-12">
 
           {/* Logo mobile */}
-          <div className="lg:hidden flex items-center gap-2 font-bold text-xl text-white mb-10">
-            <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-white" />
-            </div>
-            Bunkly<span className="text-orange-400">.</span>
+          <div className="lg:hidden mb-10">
+            <img src="/Logo.png" alt="Bunkly" className="h-10 w-auto" />
           </div>
 
           <div className="w-full max-w-sm">
