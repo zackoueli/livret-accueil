@@ -773,18 +773,24 @@ function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (
 
 // ─── Viewer mobile (contenu seul) ─────────────────────────────────────────────
 
+const TAB_BAR_H = 72;
+
 function GridContent({ booklet }: { booklet: Booklet }) {
   const [tab, setTab] = useState<GridTab>("home");
   const accent = booklet.accentColor || C.blue;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
-      <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+    <div style={{ position: "relative", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
+      {/* Pages — padding-bottom pour ne pas être caché sous la tab bar */}
+      <div style={{ position: "absolute", inset: 0, bottom: TAB_BAR_H, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {tab === "home"     && <PageHome     booklet={booklet} accent={accent} />}
         {tab === "area"     && <PageArea     booklet={booklet} accent={accent} />}
         {tab === "checkout" && <PageCheckout booklet={booklet} accent={accent} />}
       </div>
-      <GridTabBar active={tab} onSelect={setTab} accent={accent} />
+      {/* Tab bar flottante — position absolute pour que backdrop-filter fonctionne */}
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: TAB_BAR_H }}>
+        <GridTabBar active={tab} onSelect={setTab} accent={accent} />
+      </div>
     </div>
   );
 }
