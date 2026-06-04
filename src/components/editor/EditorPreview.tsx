@@ -64,11 +64,14 @@ export function EditorPreview() {
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shrink-0">
         <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Aperçu</span>
-        <button onClick={() => setKey((k) => k + 1)}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-orange-50 text-gray-400 hover:text-orange-500 transition-colors text-xs font-medium whitespace-nowrap">
-          <RefreshCw className="w-3 h-3 shrink-0" />
-          <span>Rafraîchir</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-300 whitespace-nowrap">Pensez à rafraîchir →</span>
+          <button onClick={() => setKey((k) => k + 1)}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-orange-50 text-gray-400 hover:text-orange-500 transition-colors text-xs font-medium whitespace-nowrap">
+            <RefreshCw className="w-3 h-3 shrink-0" />
+            <span>Rafraîchir</span>
+          </button>
+        </div>
       </div>
 
       {/* Conteneur du preview */}
@@ -105,9 +108,6 @@ export function EditorPreview() {
         </div>
         </div>
       </div>
-      <p className="text-center text-xs text-gray-300 pb-3 shrink-0">
-        Rafraîchissez l'aperçu après chaque modification ↑
-      </p>
     </aside>
   );
 }
