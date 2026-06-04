@@ -293,7 +293,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         {booklet.address && (
           <div style={{ margin: "0 16px 16px", borderRadius: 20, background: "rgba(255,255,255,0.13)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.22)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
             <MapPin size={14} color="rgba(255,255,255,0.55)" style={{ flexShrink: 0 }} />
-            <p style={{ margin: 0, flex: 1, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{booklet.address}</p>
+            <p style={{ margin: 0, flex: 1, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>{booklet.address}</p>
             <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
               <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`} target="_blank" rel="noopener noreferrer"
                 style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
@@ -746,13 +746,13 @@ type GridTab = "home" | "area" | "checkout";
 
 function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (t: GridTab) => void; accent: string }) {
   const tabs = [
-    { id: "home" as GridTab,     label: "Accueil",    icon: (a: boolean) => <Home size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "area" as GridTab,     label: "Activités",  icon: (a: boolean) => <MapPin size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "checkout" as GridTab, label: "Départ",     icon: (a: boolean) => <LogOut size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "home" as GridTab,     label: "Accueil",   icon: (a: boolean) => <Home size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "area" as GridTab,     label: "Activités", icon: (a: boolean) => <MapPin size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "checkout" as GridTab, label: "Départ",    icon: (a: boolean) => <LogOut size={22} color={a ? accent : C.muted} strokeWidth={a ? 2.5 : 1.8} /> },
   ];
 
   return (
-    <div style={{ display: "flex", background: "#fff", boxShadow: "0 -1px 0 rgba(0,0,0,0.05), 0 -4px 20px rgba(0,0,0,0.04)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
+    <div style={{ display: "flex", background: "#fff", borderTop: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 -4px 20px rgba(0,0,0,0.06)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
       {tabs.map(t => {
         const isActive = active === t.id;
         return (
@@ -771,9 +771,9 @@ function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (
   );
 }
 
-// ─── Viewer principal ─────────────────────────────────────────────────────────
+// ─── Viewer mobile (contenu seul) ─────────────────────────────────────────────
 
-export function ViewerGrid({ booklet }: { booklet: Booklet }) {
+function GridContent({ booklet }: { booklet: Booklet }) {
   const [tab, setTab] = useState<GridTab>("home");
   const accent = booklet.accentColor || C.blue;
 
@@ -786,5 +786,95 @@ export function ViewerGrid({ booklet }: { booklet: Booklet }) {
       </div>
       <GridTabBar active={tab} onSelect={setTab} accent={accent} />
     </div>
+  );
+}
+
+// ─── Desktop (mockup iPhone + QR) ────────────────────────────────────────────
+
+function useQrCodeGrid(url: string) {
+  const [dataUrl, setDataUrl] = useState("");
+  if (typeof window !== "undefined") {
+    import("qrcode").then(QRCode => {
+      QRCode.toDataURL(url, { width: 200, margin: 1, color: { dark: "#111827", light: "#ffffff" } })
+        .then(setDataUrl).catch(() => {});
+    });
+  }
+  return dataUrl;
+}
+
+function GridDesktop({ booklet }: { booklet: Booklet }) {
+  const url = `https://app.bunkly.co/b/${booklet.slug}`;
+  const qrDataUrl = useQrCodeGrid(url);
+
+  return (
+    <div style={{
+      minHeight: "100vh",
+      background: "linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: "40px 20px", fontFamily: FONT,
+    }}>
+      {/* Texte + QR gauche */}
+      <div style={{ color: "#fff", maxWidth: 300, marginRight: 60, flexShrink: 0 }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "rgba(255,255,255,0.08)", borderRadius: 20, padding: "6px 14px", marginBottom: 24 }}>
+          <MapPin size={12} color="rgba(255,255,255,0.6)" />
+          <span style={{ fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.7)" }}>Expérience mobile</span>
+        </div>
+        <h1 style={{ margin: "0 0 10px", fontSize: 32, fontWeight: 800, lineHeight: 1.15, letterSpacing: -0.5 }}>
+          {booklet.propertyName || booklet.title}
+        </h1>
+        {booklet.address && (
+          <div style={{ display: "flex", alignItems: "flex-start", gap: 5, marginBottom: 20 }}>
+            <MapPin size={13} color="rgba(255,255,255,0.4)" style={{ marginTop: 2, flexShrink: 0 }} />
+            <p style={{ margin: 0, fontSize: 14, color: "rgba(255,255,255,0.4)" }}>{booklet.address}</p>
+          </div>
+        )}
+        <p style={{ margin: "0 0 28px", fontSize: 14, color: "rgba(255,255,255,0.35)", lineHeight: 1.7 }}>
+          Scannez ce QR code avec votre téléphone pour accéder au livret.
+        </p>
+        <div style={{ background: "#fff", borderRadius: 20, padding: 16, display: "inline-block", boxShadow: "0 8px 32px rgba(0,0,0,0.3)" }}>
+          {qrDataUrl
+            ? <img src={qrDataUrl} alt="QR code" style={{ width: 160, height: 160, display: "block", borderRadius: 8 }} />
+            : <div style={{ width: 160, height: 160, display: "flex", alignItems: "center", justifyContent: "center" }}><MapPin size={40} color="#ddd" /></div>
+          }
+          <p style={{ margin: "10px 0 0", fontSize: 11, color: "#9CA3AF", textAlign: "center", fontFamily: "ui-monospace,monospace" }}>
+            app.bunkly.co/b/{booklet.slug}
+          </p>
+        </div>
+      </div>
+
+      {/* Mockup iPhone */}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <div style={{
+          width: 390, height: 760, borderRadius: 52,
+          background: "#111827", padding: "12px 10px",
+          boxShadow: "0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06), inset 0 0 0 2px rgba(255,255,255,0.04)",
+          position: "relative",
+        }}>
+          <div style={{ position: "absolute", top: 18, left: "50%", transform: "translateX(-50%)", width: 120, height: 34, background: "#000", borderRadius: 20, zIndex: 10 }} />
+          <div style={{ width: "100%", height: "100%", borderRadius: 42, overflow: "hidden", background: C.bg }}>
+            <GridContent booklet={booklet} />
+          </div>
+        </div>
+        <div style={{ position: "absolute", left: -3, top: 120, width: 3, height: 32, background: "#374151", borderRadius: "2px 0 0 2px" }} />
+        <div style={{ position: "absolute", left: -3, top: 162, width: 3, height: 64, background: "#374151", borderRadius: "2px 0 0 2px" }} />
+        <div style={{ position: "absolute", left: -3, top: 236, width: 3, height: 64, background: "#374151", borderRadius: "2px 0 0 2px" }} />
+        <div style={{ position: "absolute", right: -3, top: 160, width: 3, height: 80, background: "#374151", borderRadius: "0 2px 2px 0" }} />
+      </div>
+    </div>
+  );
+}
+
+// ─── Viewer principal ─────────────────────────────────────────────────────────
+
+export function ViewerGrid({ booklet }: { booklet: Booklet }) {
+  return (
+    <>
+      <div className="md:hidden" style={{ height: "100vh", maxHeight: "100dvh" }}>
+        <GridContent booklet={booklet} />
+      </div>
+      <div className="hidden md:block">
+        <GridDesktop booklet={booklet} />
+      </div>
+    </>
   );
 }
