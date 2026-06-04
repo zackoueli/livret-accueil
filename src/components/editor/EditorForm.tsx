@@ -7,7 +7,7 @@ import { EyeOff, ExternalLink, Plus, Trash2, ChevronDown, ChevronUp, ImagePlus, 
 import { nanoid } from "nanoid";
 import { uploadImage } from "@/lib/upload";
 import { useAuthStore } from "@/store/authStore";
-import { DndContext, closestCenter, PointerSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
+import { DndContext, closestCenter, PointerSensor, MouseSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -292,7 +292,10 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
 function ActivityEditor({ value, onChange, bookletId }: { value: string; onChange: (v: string) => void; bookletId: string }) {
   const items = parseActivities(value);
   const [expanded, setExpanded] = useState<string | null>(null);
-  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+  const sensors = useSensors(
+    useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+  );
 
   const save = (next: Activity[]) => onChange(JSON.stringify(next));
 
