@@ -208,7 +208,7 @@ function GridButton({ label, icon, color, photo, onClick, wide = false }: {
 
 // ─── PAGE ACCUEIL ─────────────────────────────────────────────────────────────
 
-function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
+function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: string; setDrawer: (id: string) => void }) {
   const arrival       = useMod(booklet, "arrival");
   const accommodation = useMod(booklet, "accommodation");
   const rules         = useMod(booklet, "rules");
@@ -220,9 +220,6 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const pool          = useMod(booklet, "pool");
   const coworking     = useMod(booklet, "coworking");
   const transport     = useMod(booklet, "transport");
-
-  const [drawer, setDrawer] = useState<string | null>(null);
-  const close = () => setDrawer(null);
 
   const wifiName = g(accommodation, "wifi_name");
   const wifiPass = g(accommodation, "wifi_password");
@@ -309,16 +306,37 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           ))}
         </div>
 
-      {/* ── Drawers ── */}
+    </div>
+  );
+}
 
-      {/* WiFi */}
-      {/* Horaires */}
-      <Drawer open={drawer === "horaires"} onClose={close} title="Horaires" icon={<Clock size={20} color={C.green} />} color={C.green}>
+// ─── Drawers accueil (rendu dans GridContent au-dessus de tout) ───────────────
+
+function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; accent: string; drawer: string | null; onClose: () => void }) {
+  const arrival       = useMod(booklet, "arrival");
+  const accommodation = useMod(booklet, "accommodation");
+  const rules         = useMod(booklet, "rules");
+  const kitchen       = useMod(booklet, "kitchen");
+  const safety        = useMod(booklet, "safety");
+  const contact       = useMod(booklet, "contact");
+  const baby          = useMod(booklet, "baby");
+  const petsModule    = useMod(booklet, "pets");
+  const pool          = useMod(booklet, "pool");
+  const coworking     = useMod(booklet, "coworking");
+  const transport     = useMod(booklet, "transport");
+
+  const wifiName    = g(accommodation, "wifi_name");
+  const wifiPass    = g(accommodation, "wifi_password");
+  const accessCode  = g(arrival, "access_code");
+  const checkinTime = g(arrival, "checkin_time");
+  const checkoutTime= g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
+
+  return (
+    <>
+      <Drawer open={drawer === "horaires"} onClose={onClose} title="Horaires" icon={<Clock size={20} color={C.green} />} color={C.green}>
         {checkinTime && (
           <div style={{ display: "flex", gap: 14, padding: "14px 0", borderBottom: checkoutTime ? `1px solid ${C.sep}` : "none" }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Clock size={20} color={C.green} />
-            </div>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Clock size={20} color={C.green} /></div>
             <div>
               <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Arrivée</p>
               <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: C.green, letterSpacing: -1 }}>{formatTime(checkinTime)}</p>
@@ -327,9 +345,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         )}
         {checkoutTime && (
           <div style={{ display: "flex", gap: 14, padding: "14px 0" }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <LogOut size={20} color={C.orange} />
-            </div>
+            <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><LogOut size={20} color={C.orange} /></div>
             <div>
               <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Départ</p>
               <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: C.orange, letterSpacing: -1 }}>{formatTime(checkoutTime)}</p>
@@ -341,9 +357,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Procédure d'arrivée</p>
             {g(arrival, "checkin_process").split("\n").filter(Boolean).map((step, i, arr) => (
               <div key={i} style={{ display: "flex", gap: 14, padding: "10px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.sep}` : "none" }}>
-                <div style={{ width: 26, height: 26, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: C.green }}>{i + 1}</span>
-                </div>
+                <div style={{ width: 26, height: 26, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span style={{ fontSize: 11, fontWeight: 700, color: C.green }}>{i + 1}</span></div>
                 <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.6, paddingTop: 2 }}>{step}</p>
               </div>
             ))}
@@ -352,22 +366,18 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <InfoRow icon={<Clock size={18} color={C.green} />} label="Arrivée anticipée" value={g(arrival, "early_checkin")} color={C.green} last />
       </Drawer>
 
-      {/* WiFi */}
-      <Drawer open={drawer === "wifi"} onClose={close} title="WiFi" icon={<Wifi size={20} color={MODULE_COLORS.wifi} />} color={MODULE_COLORS.wifi}>
+      <Drawer open={drawer === "wifi"} onClose={onClose} title="WiFi" icon={<Wifi size={20} color={MODULE_COLORS.wifi} />} color={MODULE_COLORS.wifi}>
         <CopyRow label="Réseau" value={wifiName} accent={accent} />
         <CopyRow label="Mot de passe" value={wifiPass} accent={accent} />
       </Drawer>
 
-      {/* Accès */}
-      <Drawer open={drawer === "access"} onClose={close} title="Accès & Clés" icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>
+      <Drawer open={drawer === "access"} onClose={onClose} title="Accès & Clés" icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>
         {accessCode && (
           <div style={{ marginBottom: 16 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Code d'accès</p>
             <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
               {accessCode.split("").map((char, i) => (
-                <div key={i} style={{ width: 44, height: 52, borderRadius: 12, background: `${accent}10`, border: `1.5px solid ${accent}20`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800, color: accent, fontFamily: "ui-monospace,monospace" }}>
-                  {char}
-                </div>
+                <div key={i} style={{ width: 44, height: 52, borderRadius: 12, background: `${accent}10`, border: `1.5px solid ${accent}20`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800, color: accent, fontFamily: "ui-monospace,monospace" }}>{char}</div>
               ))}
             </div>
           </div>
@@ -376,8 +386,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <InfoRow icon={<Car size={18} color={C.orange} />} label="Stationnement" value={g(arrival, "parking")} color={C.orange} last />
       </Drawer>
 
-      {/* Règles */}
-      <Drawer open={drawer === "rules"} onClose={close} title="Règles du séjour" icon={<ScrollText size={20} color={MODULE_COLORS.rules} />} color={MODULE_COLORS.rules}>
+      <Drawer open={drawer === "rules"} onClose={onClose} title="Règles du séjour" icon={<ScrollText size={20} color={MODULE_COLORS.rules} />} color={MODULE_COLORS.rules}>
         <InfoRow icon={<Users size={18} color={C.blue} />} label="Personnes" value={g(rules, "max_guests")} color={C.blue} />
         <InfoRow icon={<Cigarette size={18} color={C.red} />} label="Tabac" value={g(rules, "smoking")} color={C.red} />
         <InfoRow icon={<Dog size={18} color={C.orange} />} label="Animaux" value={g(rules, "pets")} color={C.orange} />
@@ -386,37 +395,31 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <InfoRow icon={<Info size={18} color={C.muted} />} label="Autres" value={g(rules, "other")} color={C.muted} last />
       </Drawer>
 
-      {/* Chauffage */}
-      <Drawer open={drawer === "heating"} onClose={close} title="Chauffage" icon={<Thermometer size={20} color={MODULE_COLORS.heating} />} color={MODULE_COLORS.heating}>
+      <Drawer open={drawer === "heating"} onClose={onClose} title="Chauffage" icon={<Thermometer size={20} color={MODULE_COLORS.heating} />} color={MODULE_COLORS.heating}>
         <InfoRow icon={<Thermometer size={18} color={MODULE_COLORS.heating} />} label="Instructions" value={g(accommodation, "heating")} color={MODULE_COLORS.heating} last />
       </Drawer>
 
-      {/* Clim */}
-      <Drawer open={drawer === "ac"} onClose={close} title="Climatisation" icon={<Wind size={20} color={MODULE_COLORS.ac} />} color={MODULE_COLORS.ac}>
+      <Drawer open={drawer === "ac"} onClose={onClose} title="Climatisation" icon={<Wind size={20} color={MODULE_COLORS.ac} />} color={MODULE_COLORS.ac}>
         <InfoRow icon={<Wind size={18} color={MODULE_COLORS.ac} />} label="Instructions" value={g(accommodation, "ac")} color={MODULE_COLORS.ac} last />
       </Drawer>
 
-      {/* TV */}
-      <Drawer open={drawer === "tv"} onClose={close} title="TV & Divertissements" icon={<Tv size={20} color="#8B5CF6" />} color="#8B5CF6">
+      <Drawer open={drawer === "tv"} onClose={onClose} title="TV & Divertissements" icon={<Tv size={20} color="#8B5CF6" />} color="#8B5CF6">
         <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label="Instructions" value={g(accommodation, "tv")} color="#8B5CF6" last />
       </Drawer>
 
-      {/* Cuisine */}
-      <Drawer open={drawer === "kitchen"} onClose={close} title="Cuisine" icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen}>
+      <Drawer open={drawer === "kitchen"} onClose={onClose} title="Cuisine" icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen}>
         <InfoRow icon={<UtensilsCrossed size={18} color={MODULE_COLORS.kitchen} />} label="Équipements" value={g(kitchen, "equipment")} color={MODULE_COLORS.kitchen} />
         <InfoRow icon={<WashingMachine size={18} color={C.blue} />} label="Électroménager" value={g(accommodation, "appliances")} color={C.blue} />
         <InfoRow icon={<Mailbox size={18} color={C.orange} />} label="Boîte aux lettres" value={g(accommodation, "checkin_code")} color={C.orange} last />
       </Drawer>
 
-      {/* Ménage */}
-      <Drawer open={drawer === "cleaning"} onClose={close} title="Ménage & Déchets" icon={<Sparkles size={20} color={MODULE_COLORS.cleaning} />} color={MODULE_COLORS.cleaning}>
+      <Drawer open={drawer === "cleaning"} onClose={onClose} title="Ménage & Déchets" icon={<Sparkles size={20} color={MODULE_COLORS.cleaning} />} color={MODULE_COLORS.cleaning}>
         <InfoRow icon={<Sparkles size={18} color={MODULE_COLORS.cleaning} />} label="Produits & ménage" value={g(kitchen, "cleaning")} color={MODULE_COLORS.cleaning} />
         <InfoRow icon={<ShoppingBag size={18} color={C.blue} />} label="Linge de maison" value={g(kitchen, "linen")} color={C.blue} />
         <InfoRow icon={<Trash2Icon size={18} color={C.green} />} label="Tri des déchets" value={g(kitchen, "trash")} color={C.green} last />
       </Drawer>
 
-      {/* Urgences */}
-      <Drawer open={drawer === "safety"} onClose={close} title="Urgences & Sécurité" icon={<Shield size={20} color={MODULE_COLORS.safety} />} color={MODULE_COLORS.safety}>
+      <Drawer open={drawer === "safety"} onClose={onClose} title="Urgences & Sécurité" icon={<Shield size={20} color={MODULE_COLORS.safety} />} color={MODULE_COLORS.safety}>
         {g(safety, "emergency") && (
           <div style={{ background: "#FFF5F5", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: "1px solid #FEE2E2" }}>
             <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.7 }}>Numéros d'urgence</p>
@@ -429,14 +432,10 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <InfoRow icon={<Hospital size={18} color={C.green} />} label="Hôpital" value={g(safety, "hospital")} color={C.green} last />
       </Drawer>
 
-      {/* Contact */}
-      <Drawer open={drawer === "contact"} onClose={close} title="Contact" icon={<Phone size={20} color={MODULE_COLORS.contact} />} color={MODULE_COLORS.contact}>
+      <Drawer open={drawer === "contact"} onClose={onClose} title="Contact" icon={<Phone size={20} color={MODULE_COLORS.contact} />} color={MODULE_COLORS.contact}>
         {(g(contact, "host_name") || g(contact, "host_photo")) && (
           <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "0 0 14px", borderBottom: `1px solid ${C.sep}`, marginBottom: 4 }}>
-            {g(contact, "host_photo")
-              ? <img src={g(contact, "host_photo")} alt="" style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} />
-              : <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${accent}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Users size={22} color={accent} /></div>
-            }
+            {g(contact, "host_photo") ? <img src={g(contact, "host_photo")} alt="" style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} /> : <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${accent}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Users size={22} color={accent} /></div>}
             <div>
               <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: C.label }}>{g(contact, "host_name")}</p>
               {g(contact, "response_time") && <p style={{ margin: "2px 0 0", fontSize: 12, color: C.sub }}>{g(contact, "response_time")}</p>}
@@ -445,60 +444,45 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         )}
         {g(contact, "about") && <p style={{ margin: "12px 0", fontSize: 14, color: C.sub, lineHeight: 1.65 }}>{g(contact, "about")}</p>}
         <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-          {g(contact, "host_phone") && (
-            <a href={`tel:${g(contact, "host_phone")}`}
-              style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}>
-              <Phone size={16} color={accent} /> Appeler
-            </a>
-          )}
-          {g(contact, "host_email") && (
-            <a href={`mailto:${g(contact, "host_email")}`}
-              style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}>
-              <Phone size={16} color={accent} /> Email
-            </a>
-          )}
+          {g(contact, "host_phone") && <a href={`tel:${g(contact, "host_phone")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> Appeler</a>}
+          {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> Email</a>}
         </div>
         <InfoRow icon={<ConciergeBell size={18} color="#8B5CF6" />} label="Conciergerie" value={g(contact, "concierge")} color="#8B5CF6" />
         <InfoRow icon={<Wrench size={18} color={C.orange} />} label="Maintenance" value={g(contact, "maintenance")} color={C.orange} last />
       </Drawer>
 
-      {/* Piscine */}
-      <Drawer open={drawer === "pool"} onClose={close} title="Piscine & Extérieur" icon={<Waves size={20} color={MODULE_COLORS.pool} />} color={MODULE_COLORS.pool}>
+      <Drawer open={drawer === "pool"} onClose={onClose} title="Piscine & Extérieur" icon={<Waves size={20} color={MODULE_COLORS.pool} />} color={MODULE_COLORS.pool}>
         <InfoRow icon={<Clock size={18} color={C.blue} />} label="Horaires" value={g(pool, "hours")} color={C.blue} />
         <InfoRow icon={<Shield size={18} color={C.red} />} label="Règles" value={g(pool, "rules")} color={C.red} />
         <InfoRow icon={<Waves size={18} color={C.green} />} label="Équipements" value={g(pool, "equipment")} color={C.green} />
         <InfoRow icon={<Wrench size={18} color={C.muted} />} label="Entretien" value={g(pool, "maintenance")} color={C.muted} last />
       </Drawer>
 
-      {/* Bébé */}
-      <Drawer open={drawer === "baby"} onClose={close} title="Bébé & Enfants" icon={<Baby size={20} color={MODULE_COLORS.baby} />} color={MODULE_COLORS.baby}>
+      <Drawer open={drawer === "baby"} onClose={onClose} title="Bébé & Enfants" icon={<Baby size={20} color={MODULE_COLORS.baby} />} color={MODULE_COLORS.baby}>
         <InfoRow icon={<Baby size={18} color={MODULE_COLORS.baby} />} label="Équipements" value={g(baby, "available")} color={MODULE_COLORS.baby} />
         <InfoRow icon={<Shield size={18} color={C.green} />} label="Sécurité" value={g(baby, "safety")} color={C.green} />
         <InfoRow icon={<ShoppingBag size={18} color={C.blue} />} label="Location" value={g(baby, "rental")} color={C.blue} last />
       </Drawer>
 
-      {/* Animaux */}
-      <Drawer open={drawer === "pets"} onClose={close} title="Animaux acceptés" icon={<Dog size={20} color={MODULE_COLORS.pets} />} color={MODULE_COLORS.pets}>
+      <Drawer open={drawer === "pets"} onClose={onClose} title="Animaux acceptés" icon={<Dog size={20} color={MODULE_COLORS.pets} />} color={MODULE_COLORS.pets}>
         <InfoRow icon={<Dog size={18} color={MODULE_COLORS.pets} />} label="Règles" value={g(petsModule, "rules")} color={MODULE_COLORS.pets} />
         <InfoRow icon={<MapPin size={18} color={C.blue} />} label="Zones autorisées" value={g(petsModule, "zones")} color={C.blue} />
         <InfoRow icon={<Hospital size={18} color={C.green} />} label="Vétérinaires" value={g(petsModule, "nearby")} color={C.green} last />
       </Drawer>
 
-      {/* Télétravail */}
-      <Drawer open={drawer === "coworking"} onClose={close} title="Télétravail" icon={<Briefcase size={20} color={MODULE_COLORS.coworking} />} color={MODULE_COLORS.coworking}>
+      <Drawer open={drawer === "coworking"} onClose={onClose} title="Télétravail" icon={<Briefcase size={20} color={MODULE_COLORS.coworking} />} color={MODULE_COLORS.coworking}>
         <InfoRow icon={<Briefcase size={18} color={MODULE_COLORS.coworking} />} label="Espace de travail" value={g(coworking, "desk")} color={MODULE_COLORS.coworking} />
         <InfoRow icon={<Wifi size={18} color={C.blue} />} label="WiFi dédié" value={g(coworking, "wifi_pro")} color={C.blue} />
         <InfoRow icon={<Tv size={18} color={C.green} />} label="Écrans" value={g(coworking, "screens")} color={C.green} last />
       </Drawer>
 
-      {/* Transport */}
-      <Drawer open={drawer === "transport"} onClose={close} title="Transport" icon={<Bus size={20} color={MODULE_COLORS.transport} />} color={MODULE_COLORS.transport}>
+      <Drawer open={drawer === "transport"} onClose={onClose} title="Transport" icon={<Bus size={20} color={MODULE_COLORS.transport} />} color={MODULE_COLORS.transport}>
         <InfoRow icon={<Bus size={18} color={C.blue} />} label="Transports en commun" value={g(transport, "public")} color={C.blue} />
         <InfoRow icon={<Car size={18} color={C.orange} />} label="Taxi / VTC" value={g(transport, "taxi")} color={C.orange} />
         <InfoRow icon={<Bike size={18} color={C.green} />} label="Vélos" value={g(transport, "bike")} color={C.green} />
         <InfoRow icon={<Plane size={18} color="#8B5CF6" />} label="Aéroport" value={g(transport, "airport")} color="#8B5CF6" last />
       </Drawer>
-    </div>
+    </>
   );
 }
 
@@ -771,12 +755,13 @@ const TAB_BAR_H = 72;
 
 function GridContent({ booklet }: { booklet: Booklet }) {
   const [tab, setTab] = useState<GridTab>("home");
+  const [drawer, setDrawer] = useState<string | null>(null);
   const accent = booklet.accentColor || C.blue;
 
   return (
     <div style={{ position: "relative", height: "100%", fontFamily: FONT, WebkitFontSmoothing: "antialiased", background: tab === "home" ? "#1a1a2e" : C.bg }}>
 
-      {/* Fond photo plein écran — visible uniquement sur home, backdrop-filter peut le voir */}
+      {/* Fond photo plein écran */}
       {tab === "home" && booklet.coverImage && (
         <>
           <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />
@@ -784,16 +769,21 @@ function GridContent({ booklet }: { booklet: Booklet }) {
         </>
       )}
 
-      {/* Page — scroll librement par-dessus le fond */}
+      {/* Pages */}
       <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column" }}>
-        {tab === "home"     && <PageHome     booklet={booklet} accent={accent} />}
+        {tab === "home"     && <PageHome     booklet={booklet} accent={accent} setDrawer={setDrawer} />}
         {tab === "area"     && <PageArea     booklet={booklet} accent={accent} />}
         {tab === "checkout" && <PageCheckout booklet={booklet} accent={accent} />}
       </div>
 
-      {/* Tab bar au-dessus — backdrop-filter voit le fond photo via zIndex */}
+      {/* Tab bar */}
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 50 }}>
         <GridTabBar active={tab} onSelect={setTab} accent={accent} />
+      </div>
+
+      {/* Drawers — au-dessus de tout, même de la tab bar */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 300, pointerEvents: drawer ? "auto" : "none" }}>
+        <HomeDrawers booklet={booklet} accent={accent} drawer={drawer} onClose={() => setDrawer(null)} />
       </div>
     </div>
   );
