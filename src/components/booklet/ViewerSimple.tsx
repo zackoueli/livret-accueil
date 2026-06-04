@@ -35,12 +35,12 @@ function useMod(booklet: Booklet, type: BookletModule["type"]) {
 // ─── Design tokens ────────────────────────────────────────────────────────────
 
 const C = {
-  bg:     "#F4F6F9",
+  bg:     "#F7F7F9",   // gris chaud neutre
   card:   "#FFFFFF",
-  label:  "#0D1117",
+  label:  "#111827",
   sub:    "#6B7280",
-  muted:  "#9CA3AF",
-  sep:    "#F0F2F5",
+  muted:  "#B0B7C3",
+  sep:    "#F3F4F6",
   green:  "#10B981",
   orange: "#F59E0B",
   red:    "#EF4444",
@@ -55,10 +55,9 @@ function Card({ children, style = {}, noPad = false }: { children: React.ReactNo
   return (
     <div style={{
       background: C.card,
-      borderRadius: 20,
+      borderRadius: 24,
       overflow: "hidden",
-      boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04)",
-      border: "1px solid rgba(0,0,0,0.04)",
+      boxShadow: "0 2px 8px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)",
       ...style,
     }}>
       {children}
@@ -69,8 +68,8 @@ function Card({ children, style = {}, noPad = false }: { children: React.ReactNo
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <p style={{
-      fontSize: 18, fontWeight: 700, color: C.label,
-      margin: "0 0 12px", letterSpacing: -0.3,
+      fontSize: 20, fontWeight: 800, color: C.label,
+      margin: "0 0 14px", letterSpacing: -0.5,
     }}>
       {children}
     </p>
@@ -84,8 +83,8 @@ function Sep() {
 function IconBox({ color, children }: { color: string; children: React.ReactNode }) {
   return (
     <div style={{
-      width: 40, height: 40, borderRadius: 12,
-      background: `${color}15`,
+      width: 48, height: 48, borderRadius: "50%",
+      background: `${color}12`,
       display: "flex", alignItems: "center", justifyContent: "center",
       flexShrink: 0,
     }}>
@@ -123,7 +122,7 @@ function RowItem({ icon, title, subtitle, accent, last = false, onClick, chevron
   return (
     <div
       onClick={onClick}
-      style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderBottom: last ? "none" : `1px solid ${C.sep}`, cursor: onClick ? "pointer" : "default" }}>
+      style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderBottom: last ? "none" : `1px solid ${C.sep}`, cursor: onClick ? "pointer" : "default" }}>
       {icon}
       <div style={{ flex: 1, minWidth: 0 }}>
         <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: C.label, letterSpacing: -0.1 }}>{title}</p>
@@ -142,7 +141,7 @@ function ExpandableRow({ icon, title, content, accent, last = false }: {
     <div>
       <button
         onClick={() => setOpen(o => !o)}
-        style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderBottom: (!open && !last) ? `1px solid ${C.sep}` : "none", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
+        style={{ width: "100%", display: "flex", alignItems: "center", gap: 16, padding: "16px 20px", borderBottom: (!open && !last) ? `1px solid ${C.sep}` : "none", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
         {icon}
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: C.label }}>{title}</p>
@@ -167,22 +166,22 @@ function ExpandableRow({ icon, title, content, accent, last = false }: {
 
 function BookletHero({ booklet }: { booklet: Booklet }) {
   return (
-    <div style={{ position: "relative", height: 240, overflow: "hidden", background: "#0D1117", flexShrink: 0 }}>
+    <div style={{ position: "relative", height: 260, overflow: "hidden", background: "#111827", flexShrink: 0, borderRadius: "0 0 28px 28px" }}>
       {booklet.coverImage && (
-        <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.5) saturate(1.1)" }} />
+        <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.45) saturate(1.15)" }} />
       )}
-      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0) 20%, rgba(0,0,0,0.75) 100%)" }} />
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 20px 24px" }}>
-        <p style={{ margin: "0 0 6px", fontSize: 12, fontWeight: 600, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 1 }}>
+      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.65) 100%)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: "0 22px 28px" }}>
+        <p style={{ margin: "0 0 8px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1.5 }}>
           Votre séjour
         </p>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", letterSpacing: -0.5, lineHeight: 1.15 }}>
+        <h1 style={{ margin: 0, fontSize: 28, fontWeight: 800, color: "#fff", letterSpacing: -0.6, lineHeight: 1.15 }}>
           {booklet.propertyName || booklet.title}
         </h1>
         {booklet.address && (
-          <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 6 }}>
-            <MapPin size={12} color="rgba(255,255,255,0.6)" />
-            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.6)" }}>{booklet.address}</p>
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8 }}>
+            <MapPin size={13} color="rgba(255,255,255,0.5)" />
+            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{booklet.address}</p>
           </div>
         )}
       </div>
@@ -246,11 +245,11 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   return (
     <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
       <BookletHero booklet={booklet} />
-      <div style={{ padding: "20px 16px 40px" }}>
+      <div style={{ padding: "24px 16px 48px" }}>
 
         {/* Hôte + message */}
         {(welcomeMsg || hostName) && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <Card>
               {(hostPhoto || hostName) && (
                 <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px 16px 14px", borderBottom: welcomeMsg ? `1px solid ${C.sep}` : "none" }}>
@@ -275,7 +274,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Horaires */}
         {(checkinTime || checkoutTime) && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Horaires</SectionTitle>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {checkinTime && (
@@ -306,7 +305,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Accès */}
         {(accessCode || parking) && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Accès & Clés</SectionTitle>
             <Card>
               {accessCode && (
@@ -347,7 +346,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* WiFi */}
         {(wifiName || wifiPass) && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>WiFi</SectionTitle>
             <Card>
               {wifiName && (
@@ -377,7 +376,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Services */}
         {services.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Équipements inclus</SectionTitle>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
               {services.map((s, i) => (
@@ -395,7 +394,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Localisation */}
         {booklet.address && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Localisation</SectionTitle>
             <Card>
               <div style={{ borderRadius: "20px 20px 0 0", overflow: "hidden", height: 160 }}>
@@ -429,7 +428,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         )}
 
         {(arrival?.images?.length ?? 0) > 0 && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Photos</SectionTitle>
             <PhotoGallery images={arrival!.images!} />
           </div>
@@ -471,7 +470,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
       {/* Checklist arrivée */}
       {steps.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <SectionTitle>Procédure d'arrivée</SectionTitle>
             <span style={{ fontSize: 13, fontWeight: 600, color: accent }}>{checkinCount}/{steps.length}</span>
@@ -509,7 +508,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
       {/* Équipements */}
       {equipRows.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <SectionTitle>Dans votre logement</SectionTitle>
           <Card>
             {equipRows.map((r, i) => {
@@ -531,7 +530,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
                     </div>
                   </button>
                   {isOpen && (
-                    <div style={{ padding: "0 16px 14px 70px", borderBottom: i < equipRows.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+                    <div style={{ padding: "0 20px 16px 84px", borderBottom: i < equipRows.length - 1 ? `1px solid ${C.sep}` : "none" }}>
                       <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.7, whiteSpace: "pre-line" }}>{content}</p>
                     </div>
                   )}
@@ -554,7 +553,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(r => g(rules, r.key));
         if (!ruleRows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Règles du séjour</SectionTitle>
             <Card>
               {ruleRows.map((r, i) => (
@@ -576,7 +575,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(f => g(kitchen, f.key));
         if (!kitchenRows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Cuisine & Ménage</SectionTitle>
             <Card>
               {kitchenRows.map((f, i) => (
@@ -596,7 +595,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(f => g(baby, f.key));
         if (!rows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Bébé & Enfants</SectionTitle>
             <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(baby, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
           </div>
@@ -612,7 +611,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(f => g(petsModule, f.key));
         if (!rows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Animaux acceptés</SectionTitle>
             <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(petsModule, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
           </div>
@@ -629,7 +628,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(f => g(pool, f.key));
         if (!rows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Piscine & Extérieur</SectionTitle>
             <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(pool, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
           </div>
@@ -646,7 +645,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(f => g(coworking, f.key));
         if (!rows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Télétravail</SectionTitle>
             <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(coworking, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
           </div>
@@ -663,7 +662,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(f => g(accessibility, f.key));
         if (!rows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Accessibilité</SectionTitle>
             <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(accessibility, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
           </div>
@@ -783,7 +782,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const filtered = activeFilter === "all" ? activities : activities.filter(a => a.category === activeFilter);
 
   return (
-    <div style={{ padding: "20px 0 40px" }}>
+    <div style={{ padding: "24px 0 48px" }}>
 
       {/* Activités */}
       {activities.length > 0 && (
@@ -840,7 +839,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Carte */}
         {mapAddress && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Carte</SectionTitle>
             <Card>
               <div style={{ borderRadius: "20px 20px 0 0", overflow: "hidden", height: 180 }}>
@@ -860,7 +859,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Adresses */}
         {places.length > 0 && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Adresses</SectionTitle>
             <Card>
               {places.map((p, i) => (
@@ -884,7 +883,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Coup de cœur */}
         {g(neighborhood, "hidden_gems") && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Coup de cœur de l'hôte</SectionTitle>
             <Card>
               <div style={{ padding: "16px", display: "flex", gap: 12 }}>
@@ -899,7 +898,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Transports */}
         {(g(neighborhood, "transport") || transport) && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Transports</SectionTitle>
             <Card>
               {g(neighborhood, "transport") && (
@@ -921,7 +920,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Infos pratiques */}
         {practical && Object.entries(practical.content).filter(([, v]) => v).length > 0 && (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Infos pratiques</SectionTitle>
             <Card>
               {[
@@ -946,7 +945,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
           ].filter(f => g(experiences, f.key));
           if (!rows.length) return null;
           return (
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 28 }}>
               <SectionTitle>Expériences locales</SectionTitle>
               <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(experiences, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
             </div>
@@ -963,7 +962,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
           ].filter(f => g(eco, f.key));
           if (!rows.length) return null;
           return (
-            <div style={{ marginBottom: 24 }}>
+            <div style={{ marginBottom: 28 }}>
               <SectionTitle>Éco-responsable</SectionTitle>
               <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(eco, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
             </div>
@@ -984,7 +983,7 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
     <div style={{ padding: "20px 16px 40px" }}>
 
       {safety && g(safety, "emergency") && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <Card style={{ border: "1.5px solid #FEE2E2", background: "#FFF5F5" }}>
             <div style={{ padding: "16px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
@@ -1000,7 +999,7 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
       )}
 
       {contact && (g(contact, "host_name") || g(contact, "host_phone")) && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <SectionTitle>Votre hôte</SectionTitle>
           <Card>
             <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "16px", borderBottom: `1px solid ${C.sep}` }}>
@@ -1047,7 +1046,7 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
         ].filter(f => g(safety, f.key));
         if (!rows.length) return null;
         return (
-          <div style={{ marginBottom: 24 }}>
+          <div style={{ marginBottom: 28 }}>
             <SectionTitle>Sécurité</SectionTitle>
             <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(safety, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
           </div>
@@ -1055,7 +1054,7 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
       })()}
 
       {contact && (g(contact, "concierge") || g(contact, "maintenance")) && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <SectionTitle>Services</SectionTitle>
           <Card>
             {g(contact, "concierge") && (
@@ -1083,7 +1082,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
     <div style={{ padding: "20px 16px 40px" }}>
 
       {g(checkout, "checkout_time") && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <Card>
             <div style={{ padding: "28px 16px", textAlign: "center" }}>
               <div style={{ width: 52, height: 52, borderRadius: 16, background: `${accent}15`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
@@ -1102,7 +1101,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
       )}
 
       {tasks.length > 0 && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
             <SectionTitle>Checklist de départ</SectionTitle>
             <span style={{ fontSize: 13, fontWeight: 600, color: accent }}>{doneCount}/{tasks.length}</span>
@@ -1136,7 +1135,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
       )}
 
       {g(checkout, "keys_return") && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <Card>
             <div style={{ display: "flex", gap: 14, padding: "15px 16px", alignItems: "center" }}>
               <IconBox color="#F59E0B"><Key size={18} color="#F59E0B" /></IconBox>
@@ -1150,7 +1149,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
       )}
 
       {(g(checkout, "review_airbnb") || g(checkout, "review_google") || g(checkout, "review_booking")) && (
-        <div style={{ marginBottom: 24 }}>
+        <div style={{ marginBottom: 28 }}>
           <SectionTitle>Laissez un avis</SectionTitle>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {[
@@ -1215,27 +1214,38 @@ function TabBar({ active, onSelect, accent }: { active: Tab; onSelect: (t: Tab) 
   return (
     <div style={{
       display: "flex",
-      background: "rgba(255,255,255,0.96)",
-      backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)",
-      borderTop: "1px solid rgba(0,0,0,0.06)",
-      flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)",
+      background: "#FFFFFF",
+      boxShadow: "0 -1px 0 rgba(0,0,0,0.05), 0 -4px 20px rgba(0,0,0,0.04)",
+      flexShrink: 0,
+      paddingBottom: "env(safe-area-inset-bottom)",
+      paddingTop: 8,
+      paddingLeft: 8,
+      paddingRight: 8,
     }}>
-      {tabs.map(t => (
-        <button key={t.id} onClick={() => onSelect(t.id)}
-          style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "10px 0 8px", background: "none", border: "none", cursor: "pointer" }}>
-          {t.icon(active === t.id)}
-          <span style={{
-            fontSize: 10, fontWeight: active === t.id ? 700 : 400,
-            color: t.id === "safety" && active === t.id ? C.red : active === t.id ? accent : "#9CA3AF",
-            letterSpacing: 0.1,
-          }}>
-            {t.label}
-          </span>
-          {active === t.id && (
-            <div style={{ width: 18, height: 3, borderRadius: 2, background: t.id === "safety" ? C.red : accent, marginTop: -2 }} />
-          )}
-        </button>
-      ))}
+      {tabs.map(t => {
+        const isActive = active === t.id;
+        const color = t.id === "safety" ? C.red : accent;
+        return (
+          <button key={t.id} onClick={() => onSelect(t.id)}
+            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "6px 0 8px", background: "none", border: "none", cursor: "pointer" }}>
+            <div style={{
+              width: 48, height: 32, borderRadius: 16,
+              background: isActive ? `${color}15` : "transparent",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              transition: "background 0.2s",
+            }}>
+              {t.icon(isActive)}
+            </div>
+            <span style={{
+              fontSize: 10, fontWeight: isActive ? 700 : 400,
+              color: isActive ? color : C.muted,
+              letterSpacing: 0.1,
+            }}>
+              {t.label}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
