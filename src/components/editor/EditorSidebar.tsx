@@ -53,15 +53,11 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
   return (
     <aside className="w-full lg:w-64 bg-white border-r border-gray-100 flex flex-col shrink-0 overflow-hidden">
 
-      {/* Tabs */}
+      {/* Tabs — seulement Modules + Apparence */}
       <div className="flex border-b border-gray-100 p-2 gap-1">
         <button onClick={() => setTab("modules")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "modules" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
           Modules
-        </button>
-        <button onClick={() => setTab("optional")}
-          className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "optional" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
-          Options
         </button>
         <button onClick={() => setTab("appearance")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "appearance" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
@@ -74,6 +70,8 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
           <p className="text-xs text-gray-400 px-2 mb-3">
             Glissez pour réordonner · cliquez pour éditer
           </p>
+
+          {/* Modules actifs */}
           <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
             <SortableContext items={sortedModules.map((m) => m.id)} strategy={verticalListSortingStrategy}>
               {sortedModules.map((module) => (
@@ -87,31 +85,27 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
               ))}
             </SortableContext>
           </DndContext>
-        </div>
-      )}
 
-      {tab === "optional" && (
-        <div className="flex-1 overflow-y-auto p-3">
-          <p className="text-xs text-gray-400 px-2 mb-3">Modules optionnels à ajouter</p>
-          {OPTIONAL_MODULES.map((type) => {
-            const meta = MODULE_META[type];
-            const already = existingTypes.has(type);
-            return (
-              <div key={type} className="flex items-center gap-2 px-3 py-2.5 rounded-xl mb-1">
-                <span className="text-base leading-none">{meta.emoji}</span>
-                <span className="flex-1 text-sm text-gray-700 truncate">{meta.label}</span>
-                {already ? (
-                  <span className="text-xs text-gray-300 font-medium">Ajouté</span>
-                ) : (
-                  <button
-                    onClick={() => addModule(type)}
-                    className="text-xs font-bold text-orange-500 hover:text-orange-700 transition-colors">
-                    + Ajouter
-                  </button>
-                )}
-              </div>
-            );
-          })}
+          {/* Séparateur + modules optionnels */}
+          {OPTIONAL_MODULES.some(t => !existingTypes.has(t)) && (
+            <div className="mt-4">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">À ajouter</p>
+              {OPTIONAL_MODULES.filter(t => !existingTypes.has(t)).map((type) => {
+                const meta = MODULE_META[type];
+                return (
+                  <div key={type} className="flex items-center gap-2 px-3 py-2 rounded-xl mb-1 hover:bg-gray-50 transition-colors">
+                    <span className="text-base leading-none">{meta.emoji}</span>
+                    <span className="flex-1 text-sm text-gray-500 truncate">{meta.label}</span>
+                    <button
+                      onClick={() => addModule(type)}
+                      className="flex items-center gap-1 text-xs font-bold text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition-colors shrink-0">
+                      + Ajouter
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -141,33 +135,37 @@ function SortableModuleItem({
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-2 px-3 py-2.5 rounded-xl mb-1 cursor-pointer group transition-colors ${
+      className={`flex items-center gap-2 px-2 py-2 rounded-xl mb-1 cursor-pointer transition-colors ${
         isActive
           ? "bg-orange-50 border border-orange-100"
           : module.enabled
             ? "hover:bg-gray-50"
-            : "opacity-50 hover:bg-gray-50"
+            : "bg-gray-50 opacity-60 hover:opacity-80"
       }`}
       onClick={onClick}>
       {/* Drag handle */}
       <button
         {...attributes}
         {...listeners}
-        className="text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing shrink-0"
+        className="text-gray-300 hover:text-gray-500 cursor-grab active:cursor-grabbing shrink-0 p-0.5"
         onClick={(e) => e.stopPropagation()}>
         <GripVertical className="w-3.5 h-3.5" />
       </button>
 
-      <span className="text-base leading-none">{meta.emoji}</span>
+      <span className="text-base leading-none shrink-0">{meta.emoji}</span>
 
-      <span className={`flex-1 text-sm font-medium truncate ${isActive ? "text-orange-700" : "text-gray-700"}`}>
+      <span className={`flex-1 text-sm font-medium truncate ${isActive ? "text-orange-700" : module.enabled ? "text-gray-700" : "text-gray-400"}`}>
         {meta.label}
       </span>
 
-      {/* Toggle visibility */}
+      {/* Toggle visibility — toujours visible */}
       <button
         onClick={(e) => { e.stopPropagation(); onToggle(); }}
-        className="text-gray-300 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+        className={`shrink-0 p-1.5 rounded-lg transition-all ${
+          module.enabled
+            ? "bg-green-50 text-green-600 hover:bg-green-100"
+            : "bg-gray-100 text-gray-400 hover:bg-gray-200"
+        }`}>
         {module.enabled
           ? <Eye className="w-3.5 h-3.5" />
           : <EyeOff className="w-3.5 h-3.5" />}
