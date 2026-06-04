@@ -55,7 +55,7 @@ export const TEMPLATES: BookletTemplate[] = [
     accentColor: "#f97316",
     propertyName: "Villa Les Palmiers",
     address: "12 chemin des Oliviers, 06160 Juan-les-Pins",
-    coverImage: "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/Templates%20pr%C3%A9remplis%2Fpexels-valentin-ivantsov-2154772556-35418211%20(1).jpg?alt=media&token=86143604-3ff9-4dfc-ab2d-1f7d00c6e089",
+    coverImage: "https://firebasestorage.googleapis.com/v0/b/livret-d-accueil-b98ba.firebasestorage.app/o/Templates%20pr%C3%A9remplis%2Fpexels-valentin-ivantsov-2154772556-35418211%20(1).jpg?alt=media&token=1ce2bdb7-daa8-4908-aa8f-8996bcc48853",
     modules: () => makeModules({
       arrival: {
         welcome_message: "Bienvenue à la Villa Les Palmiers ! Nous sommes ravis de vous accueillir. Vous trouverez tout ce dont vous avez besoin dans ce livret. N'hésitez pas à nous contacter si vous avez la moindre question.",
