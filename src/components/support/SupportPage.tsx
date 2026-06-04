@@ -56,7 +56,7 @@ export function SupportPage() {
               <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center">
                 <BookOpen className="w-4 h-4 text-white" />
               </div>
-              Livret<span className="text-orange-500">.</span>
+              Bunkly<span className="text-orange-500">.</span>
             </a>
           </div>
         </div>

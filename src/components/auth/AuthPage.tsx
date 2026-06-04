@@ -79,7 +79,7 @@ export function AuthPage() {
           <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center">
             <BookOpen className="w-4.5 h-4.5 text-white" />
           </div>
-          Livret<span className="text-orange-400">.</span>
+          Bunkly<span className="text-orange-400">.</span>
         </div>
 
         {/* Pitch central */}
@@ -148,7 +148,7 @@ export function AuthPage() {
             <div className="w-9 h-9 rounded-xl bg-orange-500 flex items-center justify-center">
               <BookOpen className="w-4 h-4 text-white" />
             </div>
-            Livret<span className="text-orange-400">.</span>
+            Bunkly<span className="text-orange-400">.</span>
           </div>
 
           <div className="w-full max-w-sm">
