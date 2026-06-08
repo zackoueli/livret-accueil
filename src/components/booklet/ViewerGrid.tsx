@@ -772,10 +772,15 @@ function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (
 
 const TAB_BAR_H = 72;
 
-function GridContent({ booklet }: { booklet: Booklet }) {
+function GridContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   const [tab, setTab] = useState<GridTab>("home");
   const [drawer, setDrawer] = useState<string | null>(null);
   const accent = booklet.accentColor || C.blue;
+
+  const handleTabChange = (t: GridTab) => {
+    setTab(t);
+    onTabChange?.(t);
+  };
 
   return (
     <div style={{ position: "relative", height: "100%", fontFamily: FONT, WebkitFontSmoothing: "antialiased", background: tab === "home" ? "#1a1a2e" : C.bg }}>
@@ -797,7 +802,7 @@ function GridContent({ booklet }: { booklet: Booklet }) {
 
       {/* Tab bar */}
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 50 }}>
-        <GridTabBar active={tab} onSelect={setTab} accent={accent} />
+        <GridTabBar active={tab} onSelect={handleTabChange} accent={accent} />
       </div>
 
       {/* Drawers — au-dessus de tout, même de la tab bar */}
@@ -885,11 +890,11 @@ function GridDesktop({ booklet }: { booklet: Booklet }) {
 
 // ─── Viewer principal ─────────────────────────────────────────────────────────
 
-export function ViewerGrid({ booklet }: { booklet: Booklet }) {
+export function ViewerGrid({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   return (
     <>
       <div className="md:hidden" style={{ height: "100vh", maxHeight: "100dvh" }}>
-        <GridContent booklet={booklet} />
+        <GridContent booklet={booklet} onTabChange={onTabChange} />
       </div>
       <div className="hidden md:block">
         <GridDesktop booklet={booklet} />

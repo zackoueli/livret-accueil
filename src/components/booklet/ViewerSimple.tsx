@@ -1283,9 +1283,14 @@ function useQrCode(url: string) {
 
 // ─── Viewer ───────────────────────────────────────────────────────────────────
 
-function ViewerContent({ booklet }: { booklet: Booklet }) {
+function ViewerContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   const [tab, setTab] = useState<Tab>("home");
   const accent = booklet.accentColor || C.blue;
+
+  const handleTabChange = (t: Tab) => {
+    setTab(t);
+    onTabChange?.(t);
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", overflow: "hidden" }}>
@@ -1296,7 +1301,7 @@ function ViewerContent({ booklet }: { booklet: Booklet }) {
         {tab === "safety"   && <TabWithHero booklet={booklet} accent={accent}><TabSafety   booklet={booklet} accent={accent} /></TabWithHero>}
         {tab === "checkout" && <TabWithHero booklet={booklet} accent={accent}><TabCheckout booklet={booklet} accent={accent} /></TabWithHero>}
       </div>
-      <TabBar active={tab} onSelect={setTab} accent={accent} />
+      <TabBar active={tab} onSelect={handleTabChange} accent={accent} />
     </div>
   );
 }
@@ -1367,11 +1372,11 @@ function DesktopViewer({ booklet }: { booklet: Booklet }) {
   );
 }
 
-export function ViewerSimple({ booklet }: { booklet: Booklet }) {
+export function ViewerSimple({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   return (
     <>
       <div className="md:hidden" style={{ height: "100vh", maxHeight: "100dvh" }}>
-        <ViewerContent booklet={booklet} />
+        <ViewerContent booklet={booklet} onTabChange={onTabChange} />
       </div>
       <div className="hidden md:block">
         <DesktopViewer booklet={booklet} />
