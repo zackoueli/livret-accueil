@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { Suspense } from "react";
 import {
   Plus, BookOpen, Eye, Pencil, Trash2, Share2, Lock,
-  LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, ClipboardCheck, HelpCircle,
+  LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, HelpCircle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -16,7 +16,6 @@ import { Booklet } from "@/types";
 import { ShareModal } from "./ShareModal";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
-import { CheckInsModal } from "./CheckInsModal";
 import { CreateBookletModal } from "./CreateBookletModal";
 
 function DashboardPageInner() {
@@ -29,7 +28,6 @@ function DashboardPageInner() {
   const [creating, setCreating] = useState(false);
   const [showNewModal, setShowNewModal] = useState(false);
   const [shareBooklet, setShareBooklet] = useState<Booklet | null>(null);
-  const [checkInsBooklet, setCheckInsBooklet] = useState<Booklet | null>(null);
 
   const isFree = profile?.plan === "free";
   const canCreate = !isFree || booklets.length < 3;
@@ -207,7 +205,6 @@ function DashboardPageInner() {
                   window.open(bookletUrl(booklet.slug), "_blank");
                 }}
                 onShare={() => setShareBooklet(booklet)}
-                onCheckIns={() => setCheckInsBooklet(booklet)}
                 onDuplicate={() => handleDuplicate(booklet)}
                 onDelete={() => handleDelete(booklet.id)}
               />
@@ -233,9 +230,6 @@ function DashboardPageInner() {
       {/* Share modal */}
       {shareBooklet && (
         <ShareModal booklet={shareBooklet} onClose={() => setShareBooklet(null)} />
-      )}
-      {checkInsBooklet && (
-        <CheckInsModal booklet={checkInsBooklet} onClose={() => setCheckInsBooklet(null)} />
       )}
 
       {/* New booklet modal */}
@@ -276,13 +270,12 @@ function EmptyState({ onCreate }: { onCreate: () => void }) {
   );
 }
 
-function BookletCard({ booklet, isFree, onEdit, onPreview, onShare, onCheckIns, onDuplicate, onDelete }: {
+function BookletCard({ booklet, isFree, onEdit, onPreview, onShare, onDuplicate, onDelete }: {
   booklet: Booklet;
   isFree: boolean;
   onEdit: () => void;
   onPreview: () => void;
   onShare: () => void;
-  onCheckIns: () => void;
   onDuplicate: () => void;
   onDelete: () => void;
 }) {
@@ -341,10 +334,6 @@ function BookletCard({ booklet, isFree, onEdit, onPreview, onShare, onCheckIns, 
                       <Share2 className="w-4 h-4 text-gray-400" /> Partager
                     </button>
                   )}
-                  <button onClick={() => { onCheckIns(); setMenuOpen(false); }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                    <ClipboardCheck className="w-4 h-4 text-gray-400" /> Check-ins
-                  </button>
                   <button onClick={() => { onDuplicate(); setMenuOpen(false); }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
                     <Copy className="w-4 h-4 text-gray-400" /> Dupliquer
