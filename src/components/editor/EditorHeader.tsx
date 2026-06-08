@@ -1,20 +1,23 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { ArrowLeft, Save, Eye, CheckCircle, Loader2, Globe } from "lucide-react";
+import { ArrowLeft, Save, Eye, CheckCircle, Loader2, Globe, Sparkles } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { useEditorStore } from "@/store/editorStore";
 import { useAuthStore } from "@/store/authStore";
 import { updateBooklet } from "@/lib/booklets";
 import toast from "react-hot-toast";
+import { ImportListingModal } from "./ImportListingModal";
 
 export function EditorHeader({ onSave }: { onSave: () => void }) {
   const router = useRouter();
   const locale = useLocale();
   const { booklet, isDirty, isSaving, updateBookletField } = useEditorStore();
   const { profile } = useAuthStore();
+  const [showImport, setShowImport] = useState(false);
 
   if (!booklet) return null;
 
@@ -28,6 +31,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
   };
 
   return (
+    <>
     <header className="bg-white border-b border-gray-100 h-16 flex items-center px-5 gap-4 z-30 shrink-0">
       {/* Back */}
       <button
@@ -46,6 +50,14 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       </div>
 
       <div className="flex-1" />
+
+      {/* Import from listing */}
+      <button
+        onClick={() => setShowImport(true)}
+        className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors">
+        <Sparkles className="w-4 h-4" />
+        <span className="hidden sm:inline">Importer</span>
+      </button>
 
       {/* Save status */}
       <div className="flex items-center gap-1.5 text-xs">
@@ -93,5 +105,8 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
         </span>
       </button>
     </header>
+
+    {showImport && <ImportListingModal onClose={() => setShowImport(false)} />}
+    </>
   );
 }
