@@ -1,22 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-export async function POST(req: NextRequest) {
-  try {
-    const { text } = await req.json();
-    if (!text || typeof text !== "string" || text.trim().length < 20) {
-      return NextResponse.json({ error: "Texte trop court" }, { status: 400 });
-    }
-
-    const message = await client.messages.create({
-      model: "claude-haiku-4-5",
-      max_tokens: 2048,
-      messages: [
-        {
-          role: "user",
-          content: `Tu es un assistant qui extrait des informations structurées d'une annonce de location courte durée (Airbnb, Booking, etc.).
+const PROMPT = `Tu es un assistant qui extrait des informations structurées d'une annonce de location courte durée (Airbnb, Booking, etc.).
 
 Analyse ce texte et extrais les informations disponibles. Réponds UNIQUEMENT avec un objet JSON valide, sans texte avant ou après.
 
@@ -47,19 +34,24 @@ Champs à extraire (laisse null si non trouvé) :
   "hidden_gems": "coups de cœur de l'hôte"
 }
 
-Texte de l'annonce :
-${text.slice(0, 4000)}`,
-        },
+Texte de l'annonce :`;
+
+export async function POST(req: NextRequest) {
+  try {
+    const { text } = await req.json();
+    if (!text || typeof text !== "string" || text.trim().length < 20) {
+      return NextResponse.json({ error: "Texte trop court" }, { status: 400 });
+    }
+
+    const completion = await client.chat.completions.create({
+      model: "llama-3.1-8b-instant",
+      max_tokens: 2048,
+      messages: [
+        { role: "user", content: `${PROMPT}\n${text.slice(0, 4000)}` },
       ],
     });
 
-    const content = message.content[0];
-    if (content.type !== "text") {
-      return NextResponse.json({ error: "Réponse invalide" }, { status: 500 });
-    }
-
-    // Extract JSON from response (handle markdown code blocks)
-    const rawText = content.text.trim();
+    const rawText = completion.choices[0]?.message?.content?.trim() ?? "";
     const jsonMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/) || [null, rawText];
     const jsonText = jsonMatch[1] ?? rawText;
 
