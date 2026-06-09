@@ -47,7 +47,6 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
     if (!authLoading && !user) router.push(`/${locale}/auth`);
   }, [user, authLoading]);
 
-  // Autosave every 3 seconds when dirty
   const save = useCallback(async () => {
     if (!booklet || !isDirty) return;
     setIsSaving(true);
@@ -60,20 +59,6 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
       setIsSaving(false);
     }
   }, [booklet, isDirty]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => { if (isDirty) save(); }, 3000);
-    return () => clearTimeout(timer);
-  }, [isDirty, save]);
-
-  // Ctrl+S manual save
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "s") { e.preventDefault(); save(); }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [save]);
 
   if (!booklet) {
     return (

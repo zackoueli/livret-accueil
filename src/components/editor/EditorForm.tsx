@@ -619,9 +619,6 @@ export function EditorForm() {
           ))}
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-8 pb-4">
-          Sauvegarde automatique · Ctrl+S pour sauvegarder manuellement
-        </p>
       </div>
     </div>
   );

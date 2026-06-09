@@ -71,6 +71,7 @@ export interface Booklet {
   id: string;
   userId: string;
   templateId?: string;
+  paletteId?: string;
   title: string;
   slug: string;
   description?: string;

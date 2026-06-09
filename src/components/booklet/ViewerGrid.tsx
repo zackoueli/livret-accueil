@@ -172,11 +172,10 @@ function CopyRow({ label, value, accent }: { label: string; value: string; accen
 
 // ─── Bouton de grille ─────────────────────────────────────────────────────────
 
-function GridButton({ label, icon, color, photo, onClick, wide = false }: {
+function GridButton({ label, icon, color, onClick, wide = false }: {
   label: string;
   icon: React.ReactNode;
   color: string;
-  photo?: string;
   onClick: () => void;
   wide?: boolean;
 }) {
@@ -186,23 +185,24 @@ function GridButton({ label, icon, color, photo, onClick, wide = false }: {
       style={{
         gridColumn: wide ? "span 2" : "span 1",
         position: "relative",
-        height: wide ? 90 : 110,
+        height: wide ? 80 : 100,
         borderRadius: 20,
         overflow: "hidden",
-        border: "none",
+        border: "1px solid rgba(255,255,255,0.25)",
         cursor: "pointer",
-        background: photo ? "transparent" : color,
-        boxShadow: "0 2px 12px rgba(0,0,0,0.1)",
+        background: "rgba(255,255,255,0.13)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.2)",
       }}>
-      {photo && (
-        <img src={photo} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-      )}
-      {/* Overlay sombre */}
-      <div style={{ position: "absolute", inset: 0, background: photo ? "rgba(0,0,0,0.38)" : "rgba(0,0,0,0.15)" }} />
+      {/* Tache de couleur subtile */}
+      <div style={{ position: "absolute", inset: 0, background: `${color}22` }} />
       {/* Contenu */}
       <div style={{ position: "relative", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8, padding: "0 12px" }}>
-        <div style={{ opacity: 0.95 }}>{icon}</div>
-        <span style={{ fontSize: 13, fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.2, letterSpacing: -0.1 }}>{label}</span>
+        <div style={{ width: 40, height: 40, borderRadius: 14, background: `${color}30`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {icon}
+        </div>
+        <span style={{ fontSize: 12, fontWeight: 700, color: "#fff", textAlign: "center", lineHeight: 1.2, letterSpacing: -0.1, textShadow: "0 1px 4px rgba(0,0,0,0.3)" }}>{label}</span>
       </div>
     </button>
   );
@@ -233,22 +233,20 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const welcomeMsg = g(contact, "welcome_message") || g(arrival, "welcome_message");
 
   const buttons = [
-    { id: "wifi",      label: "WiFi",          icon: <Wifi size={22} color="#fff" />,            color: MODULE_COLORS.wifi,      photo: MODULE_PHOTOS.wifi,      show: !!(wifiName || wifiPass) },
-    { id: "access",    label: "Accès & Clés",  icon: <Key size={22} color="#fff" />,             color: MODULE_COLORS.access,    photo: MODULE_PHOTOS.access,    show: !!accessCode },
-    { id: "horaires",  label: "Horaires",       icon: <Clock size={22} color="#fff" />,           color: C.green,                photo: MODULE_PHOTOS.horaires,  show: !!(checkinTime || checkoutTime) },
-    { id: "rules",     label: "Règles",         icon: <ScrollText size={22} color="#fff" />,      color: MODULE_COLORS.rules,     photo: MODULE_PHOTOS.rules,     show: !!rules },
-    { id: "heating",   label: "Chauffage",      icon: <Thermometer size={22} color="#fff" />,     color: MODULE_COLORS.heating,   photo: MODULE_PHOTOS.heating,   show: !!(accommodation && g(accommodation, "heating")) },
-    { id: "ac",        label: "Climatisation",  icon: <Wind size={22} color="#fff" />,            color: MODULE_COLORS.ac,        photo: MODULE_PHOTOS.ac,        show: !!(accommodation && g(accommodation, "ac")) },
-    { id: "tv",        label: "Télévision",     icon: <Tv size={22} color="#fff" />,              color: "#8B5CF6",              photo: MODULE_PHOTOS.tv,        show: !!(accommodation && g(accommodation, "tv")) },
-    { id: "kitchen",   label: "Cuisine",        icon: <UtensilsCrossed size={22} color="#fff" />, color: MODULE_COLORS.kitchen,  photo: MODULE_PHOTOS.kitchen,   show: !!kitchen },
-    { id: "cleaning",  label: "Ménage",         icon: <Sparkles size={22} color="#fff" />,        color: MODULE_COLORS.cleaning,  photo: MODULE_PHOTOS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")) },
-    { id: "safety",    label: "Urgences",       icon: <Shield size={22} color="#fff" />,          color: MODULE_COLORS.safety,    photo: MODULE_PHOTOS.safety,    show: !!safety },
-    { id: "contact",   label: "Contact",        icon: <Phone size={22} color="#fff" />,           color: MODULE_COLORS.contact,   photo: MODULE_PHOTOS.contact,   show: !!contact },
-    { id: "pool",      label: "Piscine",        icon: <Waves size={22} color="#fff" />,           color: MODULE_COLORS.pool,      photo: MODULE_PHOTOS.pool,      show: !!pool },
-    { id: "baby",      label: "Bébé",           icon: <Baby size={22} color="#fff" />,            color: MODULE_COLORS.baby,      photo: MODULE_PHOTOS.baby,      show: !!baby },
-    { id: "pets",      label: "Animaux",        icon: <Dog size={22} color="#fff" />,             color: MODULE_COLORS.pets,      photo: MODULE_PHOTOS.pets,      show: !!petsModule },
-    { id: "coworking", label: "Télétravail",    icon: <Briefcase size={22} color="#fff" />,       color: MODULE_COLORS.coworking, photo: MODULE_PHOTOS.coworking, show: !!coworking },
-    { id: "transport", label: "Transport",      icon: <Bus size={22} color="#fff" />,             color: MODULE_COLORS.transport, photo: MODULE_PHOTOS.transport, show: !!transport },
+    { id: "wifi",      label: "WiFi",          icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass) },
+    { id: "access",    label: "Accès & Clés",  icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!accessCode },
+    { id: "horaires",  label: "Horaires",       icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime) },
+    { id: "rules",     label: "Règles",         icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules },
+    { id: "logement",  label: "Le logement",    icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: !!(accommodation && (g(accommodation, "heating") || g(accommodation, "ac") || g(accommodation, "tv"))) },
+    { id: "kitchen",   label: "Cuisine",        icon: <UtensilsCrossed size={20} color="#fff" />, color: MODULE_COLORS.kitchen,   show: !!kitchen },
+    { id: "cleaning",  label: "Ménage",         icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")) },
+    { id: "safety",    label: "Urgences",       icon: <Shield size={20} color="#fff" />,          color: MODULE_COLORS.safety,    show: !!safety },
+    { id: "contact",   label: "Contact",        icon: <Phone size={20} color="#fff" />,           color: MODULE_COLORS.contact,   show: !!contact },
+    { id: "pool",      label: "Piscine",        icon: <Waves size={20} color="#fff" />,           color: MODULE_COLORS.pool,      show: !!pool },
+    { id: "baby",      label: "Bébé",           icon: <Baby size={20} color="#fff" />,            color: MODULE_COLORS.baby,      show: !!baby },
+    { id: "pets",      label: "Animaux",        icon: <Dog size={20} color="#fff" />,             color: MODULE_COLORS.pets,      show: !!petsModule },
+    { id: "coworking", label: "Télétravail",    icon: <Briefcase size={20} color="#fff" />,       color: MODULE_COLORS.coworking, show: !!coworking },
+    { id: "transport", label: "Transport",      icon: <Bus size={20} color="#fff" />,             color: MODULE_COLORS.transport, show: !!transport },
   ].filter(b => b.show);
 
   return (
@@ -302,7 +300,6 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
               label={btn.label}
               icon={btn.icon}
               color={btn.color}
-              photo={btn.photo || undefined}
               onClick={() => setDrawer(btn.id)}
             />
           ))}
@@ -411,16 +408,10 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <InfoRow icon={<Info size={18} color={C.muted} />} label="Autres" value={g(rules, "other")} color={C.muted} last />
       </Drawer>
 
-      <Drawer open={drawer === "heating"} onClose={onClose} title="Chauffage" icon={<Thermometer size={20} color={MODULE_COLORS.heating} />} color={MODULE_COLORS.heating}>
-        <InfoRow icon={<Thermometer size={18} color={MODULE_COLORS.heating} />} label="Instructions" value={g(accommodation, "heating")} color={MODULE_COLORS.heating} last />
-      </Drawer>
-
-      <Drawer open={drawer === "ac"} onClose={onClose} title="Climatisation" icon={<Wind size={20} color={MODULE_COLORS.ac} />} color={MODULE_COLORS.ac}>
-        <InfoRow icon={<Wind size={18} color={MODULE_COLORS.ac} />} label="Instructions" value={g(accommodation, "ac")} color={MODULE_COLORS.ac} last />
-      </Drawer>
-
-      <Drawer open={drawer === "tv"} onClose={onClose} title="TV & Divertissements" icon={<Tv size={20} color="#8B5CF6" />} color="#8B5CF6">
-        <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label="Instructions" value={g(accommodation, "tv")} color="#8B5CF6" last />
+      <Drawer open={drawer === "logement"} onClose={onClose} title="Le logement" icon={<Home size={20} color="#6366F1" />} color="#6366F1">
+        <InfoRow icon={<Thermometer size={18} color={MODULE_COLORS.heating} />} label="Chauffage" value={g(accommodation, "heating")} color={MODULE_COLORS.heating} />
+        <InfoRow icon={<Wind size={18} color={MODULE_COLORS.ac} />} label="Climatisation" value={g(accommodation, "ac")} color={MODULE_COLORS.ac} />
+        <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label="TV & Divertissements" value={g(accommodation, "tv")} color="#8B5CF6" last />
       </Drawer>
 
       <Drawer open={drawer === "kitchen"} onClose={onClose} title="Cuisine" icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen}>

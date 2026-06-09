@@ -36,20 +36,20 @@ function sanitizeForFirestore(
 import { nanoid } from "nanoid";
 import { getTemplate } from "./templates";
 
-export async function createBooklet(userId: string, title: string, templateId = "blank"): Promise<string> {
+export async function createBooklet(userId: string, title: string, contentTemplateId = "blank", layoutId = "simple"): Promise<string> {
   const slug = nanoid(10);
-  const tpl = getTemplate(templateId);
+  const tpl = getTemplate(contentTemplateId);
   const booklet: Omit<Booklet, "id"> = {
     userId,
     title,
     slug,
-    templateId: "simple",
+    templateId: layoutId,
     accentColor: tpl.accentColor,
     propertyName: tpl.propertyName || title,
-    address: tpl.address || "",
-    coverImage: tpl.coverImage || "",
+    address: tpl.address ?? "",
+    coverImage: tpl.coverImage ?? "",
     modules: tpl.modules(),
-    isPublished: false,
+    isPublished: true,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };

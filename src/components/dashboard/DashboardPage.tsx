@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import {
   Plus, BookOpen, Eye, Pencil, Trash2, Share2, Lock,
   LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, HelpCircle,
+  Monitor, Smartphone, Search, ArrowRight, Star,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -18,6 +19,94 @@ import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { CreateBookletModal } from "./CreateBookletModal";
 import { AnalyticsModal } from "./AnalyticsModal";
+
+const SERVICES = [
+  {
+    icon: Monitor,
+    color: "text-blue-500",
+    bg: "bg-blue-50",
+    title: "Site web professionnel",
+    desc: "Vitrine moderne pour votre location, optimisée pour convertir.",
+  },
+  {
+    icon: Smartphone,
+    color: "text-purple-500",
+    bg: "bg-purple-50",
+    title: "Application mobile",
+    desc: "Une app à votre image pour vos voyageurs, iOS & Android.",
+  },
+  {
+    icon: Search,
+    color: "text-green-500",
+    bg: "bg-green-50",
+    title: "Référencement Airbnb",
+    desc: "Optimisation de vos annonces pour apparaître en tête des résultats.",
+  },
+  {
+    icon: Star,
+    color: "text-orange-500",
+    bg: "bg-orange-50",
+    title: "Avis & e-réputation",
+    desc: "Stratégie pour booster vos avis et fidéliser vos voyageurs.",
+  },
+];
+
+function PromoSidebar() {
+  return (
+    <>
+      {/* Card principale */}
+      <div className="rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm">
+        {/* Header gradient */}
+        <div className="bg-gradient-to-br from-orange-500 to-orange-400 px-5 py-5">
+          <p className="text-xs font-semibold text-orange-100 uppercase tracking-wider mb-1">Nos services</p>
+          <h3 className="text-base font-bold text-white leading-snug">
+            Boostez votre présence en ligne
+          </h3>
+          <p className="text-xs text-orange-100 mt-1.5 leading-relaxed">
+            Des experts dédiés à la location courte durée.
+          </p>
+        </div>
+
+        {/* Services list */}
+        <div className="divide-y divide-gray-50">
+          {SERVICES.map(({ icon: Icon, color, bg, title, desc }) => (
+            <div key={title} className="flex gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors cursor-default">
+              <div className={`w-8 h-8 rounded-xl ${bg} flex items-center justify-center shrink-0 mt-0.5`}>
+                <Icon className={`w-4 h-4 ${color}`} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-gray-800 leading-snug">{title}</p>
+                <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <div className="px-4 pb-5 pt-3">
+          <a
+            href="mailto:contact@bunkly.co?subject=Demande de service"
+            className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold py-2.5 rounded-xl transition-colors shadow-sm shadow-orange-100">
+            Nous contacter
+            <ArrowRight className="w-3.5 h-3.5" />
+          </a>
+          <p className="text-center text-xs text-gray-400 mt-2.5">Réponse sous 24h · Devis gratuit</p>
+        </div>
+      </div>
+
+      {/* Mini card témoignage */}
+      <div className="rounded-2xl border border-gray-100 bg-white shadow-sm px-4 py-4">
+        <div className="flex gap-0.5 mb-2">
+          {[1,2,3,4,5].map(i => <Star key={i} className="w-3 h-3 fill-orange-400 text-orange-400" />)}
+        </div>
+        <p className="text-xs text-gray-600 leading-relaxed italic">
+          &ldquo;Notre taux d&apos;occupation est passé de 68% à 94% en 3 mois grâce à leur aide.&rdquo;
+        </p>
+        <p className="text-xs font-semibold text-gray-700 mt-2">Sophie M. · Propriétaire à Nice</p>
+      </div>
+    </>
+  );
+}
 
 function DashboardPageInner() {
   const router = useRouter();
@@ -57,11 +146,11 @@ function DashboardPageInner() {
     }
   }, [searchParams, locale, router]);
 
-  const handleCreate = async (title: string, templateId: string) => {
+  const handleCreate = async (title: string, contentTemplateId: string, layoutId: string) => {
     if (!user) return;
     setCreating(true);
     try {
-      const id = await createBooklet(user.uid, title, templateId);
+      const id = await createBooklet(user.uid, title, contentTemplateId, layoutId);
       router.push(`/${locale}/editor/${id}`);
     } catch {
       toast.error("Erreur lors de la création");
@@ -100,7 +189,7 @@ function DashboardPageInner() {
 
       {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-5 h-16 flex items-center justify-between">
           <a href={`/${locale}`}>
             <BunklyLogo height={28} />
           </a>
@@ -141,7 +230,7 @@ function DashboardPageInner() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-5 py-10">
+      <main className="max-w-7xl mx-auto px-5 py-10">
 
         {/* Page title */}
         <div className="flex items-center justify-between mb-8">
@@ -162,72 +251,85 @@ function DashboardPageInner() {
           </button>
         </div>
 
-        {/* Upgrade banner */}
-        {isFree && booklets.length > 0 && (
-          <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5 mb-8 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
-                <Crown className="w-5 h-5 text-orange-500" />
-              </div>
-              <div>
-                <p className="font-semibold text-gray-800 text-sm">Activez vos livrets</p>
-                <p className="text-xs text-gray-500 mt-0.5">Passez au plan Actif pour partager vos livrets avec vos voyageurs</p>
-              </div>
-            </div>
-            <button
-              onClick={() => router.push(`/${locale}/dashboard/settings`)}
-              className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-              Voir les tarifs
-            </button>
-          </div>
-        )}
+        <div className="flex gap-8 items-start">
 
-        {/* Grid */}
-        {loadingBooklets ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-2xl h-52 animate-pulse border border-gray-100" />
-            ))}
-          </div>
-        ) : booklets.length === 0 ? (
-          <EmptyState onCreate={() => setShowNewModal(true)} />
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {booklets.map((booklet) => (
-              <BookletCard
-                key={booklet.id}
-                booklet={booklet}
-                isFree={isFree}
-                onEdit={() => router.push(`/${locale}/editor/${booklet.id}`)}
-                onPreview={() => {
-                  if (!booklet.isPublished) {
-                    toast("Publiez ce livret pour le voir en ligne.", { icon: "🔒" });
-                    return;
-                  }
-                  window.open(bookletUrl(booklet.slug), "_blank");
-                }}
-                onShare={() => setShareBooklet(booklet)}
-                onAnalytics={() => setAnalyticsBooklet(booklet)}
-                onDuplicate={() => handleDuplicate(booklet)}
-                onDelete={() => handleDelete(booklet.id)}
-              />
-            ))}
+          {/* Colonne principale */}
+          <div className="flex-1 min-w-0">
 
-            {canCreate && (
-              <button
-                onClick={() => setShowNewModal(true)}
-                className="bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-orange-300 hover:bg-orange-50/30 flex flex-col items-center justify-center gap-3 p-8 transition-all group"
-                style={{ minHeight: "200px" }}>
-                <div className="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-orange-100 flex items-center justify-center transition-colors">
-                  <Plus className="w-6 h-6 text-gray-400 group-hover:text-orange-500 transition-colors" />
+            {/* Upgrade banner */}
+            {isFree && booklets.length > 0 && (
+              <div className="bg-orange-50 border border-orange-100 rounded-2xl p-5 mb-8 flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-orange-100 flex items-center justify-center shrink-0">
+                    <Crown className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-800 text-sm">Activez vos livrets</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Passez au plan Actif pour partager vos livrets avec vos voyageurs</p>
+                  </div>
                 </div>
-                <span className="text-sm font-medium text-gray-400 group-hover:text-orange-500 transition-colors">
-                  Nouveau livret
-                </span>
-              </button>
+                <button
+                  onClick={() => router.push(`/${locale}/dashboard/settings`)}
+                  className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
+                  Voir les tarifs
+                </button>
+              </div>
+            )}
+
+            {/* Grid livrets */}
+            {loadingBooklets ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="bg-white rounded-2xl h-52 animate-pulse border border-gray-100" />
+                ))}
+              </div>
+            ) : booklets.length === 0 ? (
+              <EmptyState onCreate={() => setShowNewModal(true)} />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {booklets.map((booklet) => (
+                  <BookletCard
+                    key={booklet.id}
+                    booklet={booklet}
+                    isFree={isFree}
+                    onEdit={() => router.push(`/${locale}/editor/${booklet.id}`)}
+                    onPreview={() => {
+                      if (!booklet.isPublished) {
+                        toast("Publiez ce livret pour le voir en ligne.", { icon: "🔒" });
+                        return;
+                      }
+                      window.open(bookletUrl(booklet.slug), "_blank");
+                    }}
+                    onShare={() => setShareBooklet(booklet)}
+                    onAnalytics={() => setAnalyticsBooklet(booklet)}
+                    onDuplicate={() => handleDuplicate(booklet)}
+                    onDelete={() => handleDelete(booklet.id)}
+                  />
+                ))}
+
+                {canCreate && (
+                  <button
+                    onClick={() => setShowNewModal(true)}
+                    className="bg-white rounded-2xl border-2 border-dashed border-gray-200 hover:border-orange-300 hover:bg-orange-50/30 flex flex-col items-center justify-center gap-3 p-8 transition-all group"
+                    style={{ minHeight: "200px" }}>
+                    <div className="w-12 h-12 rounded-2xl bg-gray-100 group-hover:bg-orange-100 flex items-center justify-center transition-colors">
+                      <Plus className="w-6 h-6 text-gray-400 group-hover:text-orange-500 transition-colors" />
+                    </div>
+                    <span className="text-sm font-medium text-gray-400 group-hover:text-orange-500 transition-colors">
+                      Nouveau livret
+                    </span>
+                  </button>
+                )}
+              </div>
             )}
           </div>
-        )}
+
+          {/* Bandeau publicitaire — masqué sur mobile */}
+          <aside className="hidden lg:flex flex-col gap-4 w-60 shrink-0 sticky top-8">
+            <PromoSidebar />
+          </aside>
+
+        </div>
       </main>
 
       {/* Share modal */}
