@@ -3,7 +3,6 @@
 import { Booklet } from "@/types";
 import { ViewerSimple } from "./ViewerSimple";
 import { ViewerGrid } from "./ViewerGrid";
-import { ChatbotWidget } from "@/components/chatbot/ChatbotWidget";
 import { useBookletTracking } from "./useBookletTracking";
 
 export function BookletViewer({ booklet }: { booklet: Booklet }) {
@@ -14,7 +13,6 @@ export function BookletViewer({ booklet }: { booklet: Booklet }) {
       {booklet.templateId === "grid"
         ? <ViewerGrid booklet={booklet} onTabChange={trackSection} />
         : <ViewerSimple booklet={booklet} onTabChange={trackSection} />}
-      <ChatbotWidget booklet={booklet} />
     </>
   );
 }
