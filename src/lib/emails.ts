@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const FROM = process.env.RESEND_FROM || "noreply@bunkly.co";
+const FROM = process.env.RESEND_FROM || "onboarding@resend.dev";
 const APP_URL = "https://app.bunkly.co";
 
 const baseStyle = `

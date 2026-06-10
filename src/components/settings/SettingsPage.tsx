@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import {
-  BookOpen, Crown, Check, ArrowLeft, CreditCard,
+  Crown, Check, ArrowLeft, CreditCard,
   LogOut, Calendar, Zap, Lock, ExternalLink, X,
 } from "lucide-react";
+import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { signOut } from "@/lib/auth";
@@ -87,11 +88,8 @@ function SettingsPageInner() {
               className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <a href={`/${locale}`} className="flex items-center gap-2 font-bold text-xl text-gray-900">
-              <div className="w-8 h-8 rounded-xl bg-orange-500 flex items-center justify-center">
-                <BookOpen className="w-4 h-4 text-white" />
-              </div>
-              Bunkly<span className="text-orange-500">.</span>
+            <a href={`/${locale}`} className="flex items-center gap-2">
+              <BunklyLogo height={28} />
             </a>
           </div>
           <button onClick={handleSignOut} className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors">

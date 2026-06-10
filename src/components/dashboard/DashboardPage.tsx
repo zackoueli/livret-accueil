@@ -241,7 +241,7 @@ function DashboardPageInner() {
                 onClick={() => router.push(`/${locale}/dashboard/settings`)}
                 className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors border border-orange-100">
                 <Crown className="w-3.5 h-3.5" />
-                Passer au plan Actif
+                Passer au plan supérieur
               </button>
             )}
 
