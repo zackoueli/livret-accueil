@@ -124,6 +124,10 @@ export async function POST(request: NextRequest) {
       const uid = getUid(sub);
       if (!uid) break;
 
+      // Lire les données user avant de les écraser (pour l'email)
+      const userDoc = await adminDb.collection("users").doc(uid).get();
+      const userData = userDoc.data();
+
       await adminDb.collection("users").doc(uid).set(
         {
           plan: "free",
@@ -134,10 +138,32 @@ export async function POST(request: NextRequest) {
         { merge: true }
       );
 
+      // Dépublier tous les livrets au-delà de la limite gratuite (2)
+      try {
+        const FREE_LIMIT = 2;
+        const bookletsSnap = await adminDb.collection("booklets")
+          .where("userId", "==", uid)
+          .where("isPublished", "==", true)
+          .get();
+
+        const publishedDocs = bookletsSnap.docs.sort((a, b) =>
+          (b.data().updatedAt ?? 0) - (a.data().updatedAt ?? 0)
+        );
+
+        // Garder les 2 plus récents publiés, dépublier le reste
+        const toUnpublish = publishedDocs.slice(FREE_LIMIT);
+        const batch = adminDb.batch();
+        for (const doc of toUnpublish) {
+          batch.update(doc.ref, { isPublished: false });
+        }
+        if (toUnpublish.length > 0) await batch.commit();
+        console.log(`[webhook] unpublished ${toUnpublish.length} booklet(s) for user ${uid}`);
+      } catch (e) {
+        console.error("[webhook] Failed to unpublish booklets:", e);
+      }
+
       // Email passage en free
       try {
-        const userDoc = await adminDb.collection("users").doc(uid).get();
-        const userData = userDoc.data();
         if (userData?.email) {
           await sendSubscriptionExpired({
             to: userData.email,
