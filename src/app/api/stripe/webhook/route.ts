@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase-admin";
 import Stripe from "stripe";
+import { sendPurchaseConfirmation, sendSubscriptionExpired } from "@/lib/emails";
 
 export const runtime = "nodejs";
 
@@ -66,6 +67,22 @@ export async function POST(request: NextRequest) {
         { merge: true }
       );
       console.log(`[webhook] user ${uid} updated to ${newPlan} ✓`);
+
+      // Email de confirmation d'achat
+      try {
+        const userDoc = await adminDb.collection("users").doc(uid).get();
+        const userData = userDoc.data();
+        if (userData?.email) {
+          await sendPurchaseConfirmation({
+            to: userData.email,
+            name: userData.displayName || "",
+            plan: newPlan,
+            billingPeriod: period,
+          });
+        }
+      } catch (e) {
+        console.error("[webhook] Failed to send purchase email:", e);
+      }
       break;
     }
 
@@ -109,6 +126,20 @@ export async function POST(request: NextRequest) {
         },
         { merge: true }
       );
+
+      // Email passage en free
+      try {
+        const userDoc = await adminDb.collection("users").doc(uid).get();
+        const userData = userDoc.data();
+        if (userData?.email) {
+          await sendSubscriptionExpired({
+            to: userData.email,
+            name: userData.displayName || "",
+          });
+        }
+      } catch (e) {
+        console.error("[webhook] Failed to send expiration email:", e);
+      }
       break;
     }
 

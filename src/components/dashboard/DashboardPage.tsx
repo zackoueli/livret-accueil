@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import {
   Plus, BookOpen, Eye, Pencil, Trash2, Share2, Lock,
   LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, HelpCircle,
-  Monitor, Smartphone, Search, ArrowRight, Star, Folder, FolderOpen, FolderPlus, X, Check, ChevronRight,
+  Monitor, Smartphone, Search, ArrowRight, Star, Folder, FolderOpen, FolderPlus, X, Check, ChevronRight, AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -118,6 +118,14 @@ function DashboardPageInner() {
 
   const { plan, can, bookletLimit, isFree } = usePlan();
   const canCreate = booklets.length < bookletLimit;
+
+  // Bandeau expiration
+  const subscriptionEndDate = profile?.subscriptionEndDate;
+  const daysUntilExpiry = subscriptionEndDate
+    ? Math.ceil((subscriptionEndDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24))
+    : null;
+  const isExpiringSoon = !isFree && daysUntilExpiry !== null && daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+  const isExpired = profile?.subscriptionStatus === "canceled" && isFree;
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
   const [showUpgrade, setShowUpgrade] = useState(false);
 
@@ -264,6 +272,44 @@ function DashboardPageInner() {
       </header>
 
       <main className="max-w-7xl mx-auto px-5 py-10">
+
+        {/* Bandeau expiration imminente */}
+        {isExpiringSoon && (
+          <div className="flex items-center justify-between gap-4 bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 text-amber-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-amber-900 text-sm">Votre abonnement expire dans {daysUntilExpiry} jour{daysUntilExpiry! > 1 ? "s" : ""}</p>
+                <p className="text-xs text-amber-700 mt-0.5">Renouvelez maintenant pour ne pas interrompre l'accès à vos livrets.</p>
+              </div>
+            </div>
+            <button onClick={() => router.push(`/${locale}/dashboard/settings`)}
+              className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
+              Renouveler
+            </button>
+          </div>
+        )}
+
+        {/* Bandeau abonnement expiré */}
+        {isExpired && (
+          <div className="flex items-center justify-between gap-4 bg-red-50 border border-red-200 rounded-2xl px-5 py-4 mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-red-100 flex items-center justify-center shrink-0">
+                <Lock className="w-4 h-4 text-red-500" />
+              </div>
+              <div>
+                <p className="font-semibold text-red-900 text-sm">Votre abonnement a expiré</p>
+                <p className="text-xs text-red-700 mt-0.5">Vos livrets sont en pause. Réactivez votre abonnement pour les remettre en ligne — vos données sont intactes.</p>
+              </div>
+            </div>
+            <button onClick={() => setShowUpgrade(true)}
+              className="shrink-0 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
+              Réactiver
+            </button>
+          </div>
+        )}
 
         {/* Page title */}
         <div className="flex items-center justify-between mb-6">
