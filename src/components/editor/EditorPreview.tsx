@@ -44,6 +44,7 @@ export function EditorPreview() {
     booklet?.templateId,
     booklet?.coverImage,
     booklet?.propertyName,
+    booklet?.accentColor,
   ]);
 
   if (!booklet?.slug) {

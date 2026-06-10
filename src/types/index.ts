@@ -67,11 +67,20 @@ export interface CheckIn {
   createdAt: number;
 }
 
+export interface Folder {
+  id: string;
+  userId: string;
+  name: string;
+  color: string;
+  createdAt: number;
+}
+
 export interface Booklet {
   id: string;
   userId: string;
   templateId?: string;
   paletteId?: string;
+  folderId?: string;
   title: string;
   slug: string;
   description?: string;

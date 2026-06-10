@@ -11,7 +11,7 @@ import {
   deleteField,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { Booklet, BookletModule, ModuleType } from "@/types";
+import { Booklet, BookletModule, Folder, ModuleType } from "@/types";
 
 // Firestore rejette les `undefined`.
 // - Au niveau racine : on utilise deleteField() pour supprimer le champ
@@ -75,6 +75,37 @@ export async function updateBooklet(id: string, data: Partial<Booklet>) {
 export async function deleteBooklet(id: string) {
   await deleteDoc(doc(db, "booklets", id));
 }
+
+// ── Folders ────────────────────────────────────────────────────────────────────
+
+export async function getUserFolders(userId: string): Promise<Folder[]> {
+  const q = query(collection(db, "folders"), where("userId", "==", userId));
+  const snap = await getDocs(q);
+  return snap.docs
+    .map((d) => ({ id: d.id, ...d.data() } as Folder))
+    .sort((a, b) => a.createdAt - b.createdAt);
+}
+
+export async function createFolder(userId: string, name: string, color: string): Promise<Folder> {
+  const data = { userId, name, color, createdAt: Date.now() };
+  const ref = await addDoc(collection(db, "folders"), data);
+  return { id: ref.id, ...data };
+}
+
+export async function updateFolder(id: string, data: Partial<Pick<Folder, "name" | "color">>) {
+  await updateDoc(doc(db, "folders", id), data);
+}
+
+export async function deleteFolder(id: string) {
+  await deleteDoc(doc(db, "folders", id));
+}
+
+export async function moveBookletToFolder(bookletId: string, folderId: string | null) {
+  const clean = folderId ? { folderId, updatedAt: Date.now() } : { folderId: deleteField(), updatedAt: Date.now() };
+  await updateDoc(doc(db, "booklets", bookletId), clean);
+}
+
+// ── Booklets ───────────────────────────────────────────────────────────────────
 
 export async function duplicateBooklet(booklet: Booklet): Promise<string> {
   const newSlug = nanoid(10);
