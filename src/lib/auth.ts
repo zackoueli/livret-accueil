@@ -18,7 +18,7 @@ export async function registerWithEmail(email: string, password: string, name: s
     email,
     displayName: name,
     photoURL: null,
-    plan: "actif",
+    plan: "free",
     createdAt: Date.now(),
   };
   await setDoc(doc(db, "users", cred.user.uid), profile);
@@ -43,7 +43,7 @@ export async function loginWithGoogle() {
       email: result.user.email!,
       displayName: result.user.displayName,
       photoURL: result.user.photoURL,
-      ...(existing.exists() ? {} : { plan: "actif", createdAt: Date.now() }),
+      ...(existing.exists() ? {} : { plan: "free", createdAt: Date.now() }),
     };
     await setDoc(userRef, profile, { merge: true });
     return result.user;

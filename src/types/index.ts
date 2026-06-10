@@ -1,4 +1,4 @@
-export type Plan = "free" | "actif";
+export type Plan = "free" | "pro" | "agency";
 export type BillingPeriod = "monthly" | "yearly";
 
 export interface UserProfile {

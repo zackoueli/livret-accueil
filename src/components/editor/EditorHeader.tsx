@@ -3,20 +3,24 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles } from "lucide-react";
+import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { useEditorStore } from "@/store/editorStore";
 import { updateBooklet } from "@/lib/booklets";
 import toast from "react-hot-toast";
 import { ImportListingModal } from "./ImportListingModal";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
+import { usePlan } from "@/hooks/usePlan";
 
 export function EditorHeader({ onSave }: { onSave: () => void }) {
   const router = useRouter();
   const locale = useLocale();
   const { booklet, isDirty, isSaving, updateBookletField } = useEditorStore();
   const [showImport, setShowImport] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const { can } = usePlan();
 
   if (!booklet) return null;
 
@@ -56,10 +60,15 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
 
       {/* Import IA */}
       <button
-        onClick={() => setShowImport(true)}
-        className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-orange-200 bg-orange-50 hover:bg-orange-100 text-orange-600 transition-colors">
+        onClick={() => can("ai_import") ? setShowImport(true) : setShowUpgrade(true)}
+        className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border transition-colors ${
+          can("ai_import")
+            ? "border-orange-200 bg-orange-50 hover:bg-orange-100 text-orange-600"
+            : "border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-400"
+        }`}>
         <Sparkles className="w-4 h-4" />
         <span className="hidden sm:inline">Importer</span>
+        {!can("ai_import") && <Lock className="w-3 h-3" />}
       </button>
 
       {/* Aperçu */}
@@ -104,6 +113,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
     </header>
 
     {showImport && <ImportListingModal onClose={() => setShowImport(false)} />}
+    {showUpgrade && <UpgradeModal reason="L'import IA est réservé au plan Pro" onClose={() => setShowUpgrade(false)} />}
     </>
   );
 }

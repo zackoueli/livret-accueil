@@ -1,40 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import {
   BookOpen, Crown, Check, ArrowLeft, CreditCard,
-  LogOut, Calendar, Zap, Lock, ExternalLink,
+  LogOut, Calendar, Zap, Lock, ExternalLink, X,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { signOut } from "@/lib/auth";
+import { PLANS_CONFIG } from "@/lib/plans";
+import { usePlan } from "@/hooks/usePlan";
+import { Suspense } from "react";
 
-export function SettingsPage() {
+function SettingsPageInner() {
   const router = useRouter();
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const { user, profile } = useAuthStore();
-  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">("yearly");
-  const [loadingCheckout, setLoadingCheckout] = useState(false);
+  const { plan: currentPlan } = usePlan();
+  const [billing, setBilling] = useState<"monthly" | "yearly">(
+    (searchParams.get("billing") as "monthly" | "yearly") ?? "yearly"
+  );
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
 
-  const isFree = profile?.plan === "free";
-  const isActif = profile?.plan === "actif";
-
-  const handleUpgrade = async () => {
+  const handleUpgrade = async (planId: string) => {
     if (!user || !profile) return;
-    setLoadingCheckout(true);
+    setLoadingPlan(planId);
     try {
       const res = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId: user.uid,
-          email: user.email,
-          billingPeriod,
-          locale,
-        }),
+        body: JSON.stringify({ userId: user.uid, email: user.email, billingPeriod: billing, plan: planId, locale }),
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
@@ -42,7 +41,7 @@ export function SettingsPage() {
     } catch {
       toast.error("Erreur réseau");
     } finally {
-      setLoadingCheckout(false);
+      setLoadingPlan(null);
     }
   };
 
@@ -73,20 +72,18 @@ export function SettingsPage() {
   if (!user || !profile) return null;
 
   const subscriptionEndDate = profile.subscriptionEndDate
-    ? new Date(profile.subscriptionEndDate * 1000).toLocaleDateString("fr-FR", {
-        day: "numeric", month: "long", year: "numeric",
-      })
+    ? new Date(profile.subscriptionEndDate * 1000).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })
     : null;
+
+  const planLabel: Record<string, string> = { free: "Gratuit", pro: "Pro", agency: "Agence" };
+  const planColor: Record<string, string> = { free: "text-gray-500 bg-gray-100", pro: "text-orange-600 bg-orange-50", agency: "text-indigo-600 bg-indigo-50" };
 
   return (
     <div className="min-h-screen bg-gray-50">
-
-      {/* Header */}
       <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
-        <div className="max-w-3xl mx-auto px-5 h-16 flex items-center justify-between">
+        <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button
-              onClick={() => router.push(`/${locale}/dashboard`)}
+            <button onClick={() => router.push(`/${locale}/dashboard`)}
               className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -97,21 +94,20 @@ export function SettingsPage() {
               Bunkly<span className="text-orange-500">.</span>
             </a>
           </div>
-          <button onClick={handleSignOut}
-            className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          <button onClick={handleSignOut} className="flex items-center gap-2 text-sm text-gray-400 hover:text-gray-600 transition-colors">
             <LogOut className="w-4 h-4" />
             <span className="hidden sm:block">Déconnexion</span>
           </button>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-5 py-10 space-y-6">
+      <main className="max-w-4xl mx-auto px-5 py-10 space-y-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Paramètres</h1>
           <p className="text-sm text-gray-400 mt-0.5">Gérez votre compte et votre abonnement</p>
         </div>
 
-        {/* Profile card */}
+        {/* Profil */}
         <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Compte</h2>
           <div className="flex items-center gap-4">
@@ -123,59 +119,42 @@ export function SettingsPage() {
               <p className="text-sm text-gray-400">{user.email}</p>
             </div>
             <div className="ml-auto">
-              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${
-                isActif
-                  ? "bg-green-50 text-green-600"
-                  : "bg-amber-50 text-amber-600"
-              }`}>
-                {isActif ? <><Zap className="w-3 h-3" /> Plan Actif</> : <><Lock className="w-3 h-3" /> Plan Gratuit</>}
+              <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full ${planColor[currentPlan] || "text-gray-500 bg-gray-100"}`}>
+                {currentPlan === "free" ? <Lock className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
+                Plan {planLabel[currentPlan] || currentPlan}
               </span>
             </div>
           </div>
         </section>
 
-        {/* Subscription details (active plan) */}
-        {isActif && (
+        {/* Abonnement actif */}
+        {currentPlan !== "free" && (
           <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">Abonnement</h2>
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 flex items-center gap-2">
-                  <CreditCard className="w-4 h-4 text-gray-400" /> Plan
-                </span>
+                <span className="text-sm text-gray-600 flex items-center gap-2"><CreditCard className="w-4 h-4 text-gray-400" /> Plan</span>
                 <span className="text-sm font-semibold text-gray-900">
-                  Actif · {profile.billingPeriod === "yearly" ? "Annuel" : "Mensuel"}
+                  {planLabel[currentPlan]} · {profile.billingPeriod === "yearly" ? "Annuel" : "Mensuel"}
                 </span>
               </div>
               {profile.subscriptionStatus && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Statut</span>
-                  <span className={`text-sm font-semibold capitalize ${
-                    profile.subscriptionStatus === "active" ? "text-green-600" :
-                    profile.subscriptionStatus === "past_due" ? "text-red-500" :
-                    "text-gray-500"
-                  }`}>
-                    {profile.subscriptionStatus === "active" ? "Actif" :
-                     profile.subscriptionStatus === "past_due" ? "Paiement en attente" :
-                     profile.subscriptionStatus === "canceled" ? "Annulé" :
-                     profile.subscriptionStatus}
+                  <span className={`text-sm font-semibold ${profile.subscriptionStatus === "active" ? "text-green-600" : profile.subscriptionStatus === "past_due" ? "text-red-500" : "text-gray-500"}`}>
+                    {profile.subscriptionStatus === "active" ? "Actif" : profile.subscriptionStatus === "past_due" ? "Paiement en attente" : profile.subscriptionStatus === "canceled" ? "Annulé" : profile.subscriptionStatus}
                   </span>
                 </div>
               )}
               {subscriptionEndDate && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 flex items-center gap-2">
-                    <Calendar className="w-4 h-4 text-gray-400" /> Prochain renouvellement
-                  </span>
+                  <span className="text-sm text-gray-600 flex items-center gap-2"><Calendar className="w-4 h-4 text-gray-400" /> Prochain renouvellement</span>
                   <span className="text-sm font-semibold text-gray-900">{subscriptionEndDate}</span>
                 </div>
               )}
             </div>
-
             <div className="mt-5 pt-5 border-t border-gray-100">
-              <button
-                onClick={handlePortal}
-                disabled={loadingPortal}
+              <button onClick={handlePortal} disabled={loadingPortal}
                 className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-40">
                 <ExternalLink className="w-4 h-4" />
                 {loadingPortal ? "Chargement..." : "Gérer la facturation (Stripe)"}
@@ -184,88 +163,118 @@ export function SettingsPage() {
           </section>
         )}
 
-        {/* Upgrade section (free plan) */}
-        {isFree && (
-          <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-            <div className="bg-gradient-to-br from-orange-50 to-amber-50 px-6 pt-6 pb-4">
-              <div className="flex items-center gap-2 mb-2">
-                <Crown className="w-5 h-5 text-orange-500" />
-                <h2 className="font-bold text-gray-900">Passer au plan Actif</h2>
-              </div>
-              <p className="text-sm text-gray-500">Publiez, partagez et activez vos livrets avec vos voyageurs.</p>
+        {/* Plans pricing */}
+        <section>
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">
+                {currentPlan === "free" ? "Passez à la vitesse supérieure" : "Changer de plan"}
+              </h2>
+              <p className="text-sm text-gray-400 mt-0.5">Sans engagement · Annulez à tout moment</p>
             </div>
-
-            <div className="px-6 py-5">
-              {/* Billing toggle */}
-              <div className="flex items-center gap-3 mb-5">
-                <div className="flex bg-gray-100 rounded-xl p-1">
-                  <button
-                    onClick={() => setBillingPeriod("monthly")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                      billingPeriod === "monthly"
-                        ? "bg-white shadow-sm text-gray-900"
-                        : "text-gray-400 hover:text-gray-600"
-                    }`}>
-                    Mensuel
-                  </button>
-                  <button
-                    onClick={() => setBillingPeriod("yearly")}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
-                      billingPeriod === "yearly"
-                        ? "bg-white shadow-sm text-gray-900"
-                        : "text-gray-400 hover:text-gray-600"
-                    }`}>
-                    Annuel
-                  </button>
-                </div>
-                {billingPeriod === "yearly" && (
-                  <span className="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
-                    −36% · 2 mois offerts
-                  </span>
-                )}
+            {/* Billing toggle */}
+            <div className="flex items-center gap-3">
+              <div className="flex bg-gray-100 rounded-xl p-1">
+                <button onClick={() => setBilling("monthly")}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${billing === "monthly" ? "bg-white shadow-sm text-gray-900" : "text-gray-400"}`}>
+                  Mensuel
+                </button>
+                <button onClick={() => setBilling("yearly")}
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${billing === "yearly" ? "bg-white shadow-sm text-gray-900" : "text-gray-400"}`}>
+                  Annuel
+                </button>
               </div>
+              {billing === "yearly" && (
+                <span className="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">2 mois offerts</span>
+              )}
+            </div>
+          </div>
 
-              {/* Price */}
-              <div className="mb-5">
-                <div className="flex items-end gap-1.5">
-                  <span className="text-3xl font-bold text-gray-900">
-                    {billingPeriod === "yearly" ? "5,75" : "9"}€
-                  </span>
-                  <span className="text-sm text-gray-400 mb-1">/mois</span>
-                </div>
-                {billingPeriod === "yearly" && (
-                  <p className="text-xs text-gray-400 mt-0.5">Facturé 69€/an</p>
-                )}
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {PLANS_CONFIG.map((plan) => {
+              const isCurrent = plan.id === currentPlan;
+              const price = billing === "yearly" ? plan.price.yearly : plan.price.monthly;
+              const isLoading = loadingPlan === plan.id;
 
-              {/* Features */}
-              <ul className="space-y-2 mb-6">
-                {[
-                  "Livrets illimités",
-                  "Publication & partage par lien",
-                  "QR Code téléchargeable",
-                  "5 langues disponibles",
-                  "Mises à jour instantanées",
-                ].map((f) => (
-                  <li key={f} className="flex items-center gap-2.5 text-sm text-gray-600">
-                    <div className="w-4 h-4 rounded-full bg-orange-100 flex items-center justify-center shrink-0">
-                      <Check className="w-2.5 h-2.5 text-orange-500" />
+              return (
+                <div key={plan.id}
+                  className={`relative bg-white rounded-2xl border-2 p-6 flex flex-col transition-all ${
+                    plan.popular ? "border-orange-400 shadow-lg shadow-orange-100" : "border-gray-100 shadow-sm"
+                  }`}>
+
+                  {plan.popular && (
+                    <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
+                      <span className="bg-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full flex items-center gap-1">
+                        <Zap className="w-3 h-3" /> Populaire
+                      </span>
                     </div>
-                    {f}
-                  </li>
-                ))}
-              </ul>
+                  )}
+                  {isCurrent && (
+                    <div className="absolute -top-3.5 right-4">
+                      <span className="bg-gray-800 text-white text-xs font-bold px-3 py-1 rounded-full">Actuel</span>
+                    </div>
+                  )}
 
-              <button
-                onClick={handleUpgrade}
-                disabled={loadingCheckout}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3.5 rounded-2xl text-sm transition-colors disabled:opacity-40 shadow-sm shadow-orange-200">
-                {loadingCheckout ? "Redirection..." : "Commencer maintenant →"}
-              </button>
-            </div>
-          </section>
-        )}
+                  <div className="mb-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: plan.color + "20" }}>
+                        <Crown className="w-4 h-4" style={{ color: plan.color }} />
+                      </div>
+                      <span className="font-bold text-gray-900 text-lg">{plan.name}</span>
+                    </div>
+                    <p className="text-sm text-gray-400">{plan.description}</p>
+                  </div>
+
+                  <div className="mb-5">
+                    <div className="flex items-end gap-1">
+                      <span className="text-4xl font-bold text-gray-900">{price === 0 ? "0" : price.toFixed(2).replace(".", ",")}€</span>
+                      {price > 0 && <span className="text-sm text-gray-400 mb-1.5">/mois</span>}
+                    </div>
+                    {billing === "yearly" && plan.yearlyTotal
+                      ? <p className="text-xs text-gray-400 mt-0.5">Facturé {plan.yearlyTotal}€/an</p>
+                      : price === 0 ? <p className="text-xs text-gray-400">Pour toujours</p>
+                      : null
+                    }
+                  </div>
+
+                  <ul className="space-y-2.5 flex-1 mb-6">
+                    {plan.features.map((f) => (
+                      <li key={f.label} className="flex items-center gap-2.5 text-sm">
+                        <div className={`w-4 h-4 rounded-full flex items-center justify-center shrink-0 ${f.included ? "bg-green-100" : "bg-gray-100"}`}>
+                          {f.included ? <Check className="w-2.5 h-2.5 text-green-600" /> : <X className="w-2.5 h-2.5 text-gray-400" />}
+                        </div>
+                        <span className={f.included ? "text-gray-700" : "text-gray-400"}>{f.label}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <button
+                    onClick={() => !isCurrent && plan.id !== "free" && handleUpgrade(plan.id)}
+                    disabled={isCurrent || plan.id === "free" || isLoading}
+                    className={`w-full py-3 rounded-xl text-sm font-bold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      plan.popular ? "bg-orange-500 hover:bg-orange-600 text-white" : plan.id === "agency" ? "text-white" : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                    }`}
+                    style={plan.id === "agency" && !isCurrent ? { background: plan.color } : {}}>
+                    {isLoading ? "Redirection..." : isCurrent ? "Plan actuel" : plan.id === "free" ? "Plan actuel" : `Choisir ${plan.name} →`}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+
+          <p className="text-center text-sm text-gray-400 mt-6">
+            Une question ? <a href="mailto:hello@bunkly.co" className="text-orange-500 hover:underline font-medium">hello@bunkly.co</a>
+          </p>
+        </section>
       </main>
     </div>
+  );
+}
+
+export function SettingsPage() {
+  return (
+    <Suspense>
+      <SettingsPageInner />
+    </Suspense>
   );
 }
