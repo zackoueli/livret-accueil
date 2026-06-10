@@ -528,90 +528,105 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const visibleCats = CATS.filter(c => c.id === "all" || presentCats.has(c.id as Activity["category"]));
   const filtered = activeFilter === "all" ? activities : activities.filter(a => a.category === activeFilter);
 
+  const GLASS = { background: "rgba(255,255,255,0.12)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.2)" };
+  const GLASS_CARD = { background: "rgba(255,255,255,0.14)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20 };
+
   return (
-    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg, paddingBottom: TAB_BAR_H }}>
-      <div style={{ padding: "48px 20px 20px", background: "#1a1a2e", position: "relative", overflow: "hidden" }}>
-        {booklet.coverImage && <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4)" }} />}
-        <div style={{ position: "relative" }}>
-          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 1 }}>À découvrir</p>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4 }}>{booklet.propertyName || booklet.title}</h2>
+    <div style={{ position: "relative", flex: 1, height: "100%", overflow: "hidden" }}>
+      {/* Fond photo plein écran fixe */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        {booklet.coverImage
+          ? <img src={booklet.coverImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          : <div style={{ width: "100%", height: "100%", background: "#1a1a2e" }} />
+        }
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)" }} />
+      </div>
+
+      {/* Contenu scrollable */}
+      <div style={{ position: "relative", zIndex: 1, height: "100%", overflowY: "auto", touchAction: "pan-y", paddingBottom: TAB_BAR_H }}>
+
+        {/* Header */}
+        <div style={{ padding: "48px 20px 16px" }}>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1 }}>À découvrir</p>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{booklet.propertyName || booklet.title}</h2>
         </div>
-      </div>
 
-      <div style={{ padding: "20px 16px 48px" }}>
-        {/* Filtres */}
-        {visibleCats.length > 2 && (
-          <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", marginBottom: 16, touchAction: "pan-x" }}>
-            {visibleCats.map(cat => {
-              const isActive = activeFilter === cat.id;
-              return (
-                <button key={cat.id} onClick={() => setActiveFilter(cat.id)}
-                  style={{ flexShrink: 0, padding: "7px 16px", borderRadius: 20, border: isActive ? `1.5px solid ${accent}` : "1.5px solid #E5E7EB", cursor: "pointer", fontSize: 13, fontWeight: isActive ? 700 : 500, background: isActive ? `${accent}10` : C.card, color: isActive ? accent : C.sub }}>
-                  {cat.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Liste activités */}
-        {filtered.map((act, i) => (
-          <button key={i} onClick={() => setSelectedAct(act)}
-            style={{ width: "100%", display: "flex", gap: 14, padding: "14px 0", borderBottom: i < filtered.length - 1 ? `1px solid ${C.sep}` : "none", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
-            <div style={{ width: 64, height: 64, borderRadius: 16, overflow: "hidden", background: `${catColor[act.category] ?? C.muted}15`, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-              {act.photo
-                ? <img src={act.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                : <MapPin size={24} color={catColor[act.category] ?? C.muted} />
-              }
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: catColor[act.category], background: `${catColor[act.category]}12`, borderRadius: 6, padding: "2px 7px" }}>{catLabel[act.category]}</span>
-                {act.recommended && <Star size={12} color={C.orange} fill={C.orange} />}
-              </div>
-              <p style={{ margin: "0 0 3px", fontSize: 15, fontWeight: 600, color: C.label, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.name}</p>
-              {act.description && <p style={{ margin: 0, fontSize: 12, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.description}</p>}
-              <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-                {act.distance && <span style={{ fontSize: 11, color: C.muted }}>📍 {act.distance}</span>}
-                {act.priceRange && <span style={{ fontSize: 11, color: C.orange, fontWeight: 700 }}>{act.priceRange}</span>}
-              </div>
-            </div>
-          </button>
-        ))}
-
-        {/* Carte */}
-        {mapAddress && (
-          <div style={{ marginTop: 24 }}>
-            <p style={{ margin: "0 0 12px", fontSize: 17, fontWeight: 700, color: C.label }}>Carte</p>
-            <div style={{ borderRadius: 20, overflow: "hidden", height: 180, boxShadow: "0 2px 12px rgba(0,0,0,0.07)" }}>
-              <iframe src={`https://maps.google.com/maps?q=${mapAddress}&output=embed&z=15`} width="100%" height="180" style={{ border: 0, display: "block" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Carte" />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Drawer activité sélectionnée */}
-      <BunklyCredit />
-
-      {selectedAct && (
-        <Drawer open={!!selectedAct} onClose={() => setSelectedAct(null)} title={selectedAct.name} icon={<MapPin size={20} color={catColor[selectedAct.category]} />} color={catColor[selectedAct.category]}>
-          {selectedAct.photo && (
-            <div style={{ borderRadius: 16, overflow: "hidden", height: 160, marginBottom: 16 }}>
-              <img src={selectedAct.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        <div style={{ padding: "0 16px 32px" }}>
+          {/* Filtres glass */}
+          {visibleCats.length > 2 && (
+            <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", marginBottom: 14, touchAction: "pan-x" }}>
+              {visibleCats.map(cat => {
+                const isActive = activeFilter === cat.id;
+                return (
+                  <button key={cat.id} onClick={() => setActiveFilter(cat.id)}
+                    style={{ flexShrink: 0, padding: "7px 16px", borderRadius: 20, border: isActive ? `1.5px solid rgba(255,255,255,0.6)` : "1.5px solid rgba(255,255,255,0.2)", cursor: "pointer", fontSize: 13, fontWeight: isActive ? 700 : 500, background: isActive ? "rgba(255,255,255,0.25)" : "rgba(255,255,255,0.1)", backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", color: "#fff" }}>
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
           )}
-          {selectedAct.description && <p style={{ margin: "0 0 16px", fontSize: 14, color: C.sub, lineHeight: 1.7 }}>{selectedAct.description}</p>}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
-            {selectedAct.distance && <span style={{ fontSize: 12, color: C.sub, background: C.sep, borderRadius: 20, padding: "4px 10px" }}>📍 {selectedAct.distance}</span>}
-            {selectedAct.openHours && <span style={{ fontSize: 12, color: C.sub, background: C.sep, borderRadius: 20, padding: "4px 10px" }}>🕐 {selectedAct.openHours}</span>}
-            {selectedAct.priceRange && <span style={{ fontSize: 12, color: C.orange, fontWeight: 700, background: `${C.orange}12`, borderRadius: 20, padding: "4px 10px" }}>{selectedAct.priceRange}</span>}
+
+          {/* Liste activités glass */}
+          <div style={{ ...GLASS_CARD, overflow: "hidden", marginBottom: 16 }}>
+            {filtered.map((act, i) => (
+              <button key={i} onClick={() => setSelectedAct(act)}
+                style={{ width: "100%", display: "flex", gap: 12, padding: "12px 14px", background: "none", border: "none", borderBottom: i < filtered.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none", cursor: "pointer", textAlign: "left" }}>
+                <div style={{ width: 56, height: 56, borderRadius: 14, overflow: "hidden", background: "rgba(255,255,255,0.15)", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  {act.photo
+                    ? <img src={act.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                    : <MapPin size={22} color="rgba(255,255,255,0.7)" />
+                  }
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: catColor[act.category], background: `${catColor[act.category]}30`, borderRadius: 6, padding: "2px 7px" }}>{catLabel[act.category]}</span>
+                    {act.recommended && <Star size={11} color={C.orange} fill={C.orange} />}
+                  </div>
+                  <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.name}</p>
+                  {act.description && <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.description}</p>}
+                  <div style={{ display: "flex", gap: 8, marginTop: 3 }}>
+                    {act.distance && <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>📍 {act.distance}</span>}
+                    {act.priceRange && <span style={{ fontSize: 10, color: C.orange, fontWeight: 700 }}>{act.priceRange}</span>}
+                  </div>
+                </div>
+              </button>
+            ))}
           </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            {selectedAct.phone && <a href={`tel:${selectedAct.phone}`} style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Phone size={15} color={accent} /> Appeler</a>}
-            {selectedAct.address && <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedAct.address)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Navigation size={15} color={accent} /> Maps</a>}
-            {selectedAct.website && <a href={selectedAct.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Globe size={15} color={accent} /> Site</a>}
-          </div>
-        </Drawer>
+
+          {/* Carte */}
+          {mapAddress && (
+            <div style={{ ...GLASS_CARD, overflow: "hidden" }}>
+              <p style={{ margin: "0 0 0", padding: "12px 14px 10px", fontSize: 13, fontWeight: 700, color: "#fff" }}>Carte</p>
+              <iframe src={`https://maps.google.com/maps?q=${mapAddress}&output=embed&z=15`} width="100%" height="160" style={{ border: 0, display: "block" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Carte" />
+            </div>
+          )}
+        </div>
+        <BunklyCredit dark />
+      </div>
+
+      {/* Drawer activité */}
+      {selectedAct && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 200 }}>
+          <Drawer open={!!selectedAct} onClose={() => setSelectedAct(null)} title={selectedAct.name} icon={<MapPin size={20} color={catColor[selectedAct.category]} />} color={catColor[selectedAct.category]}>
+            {selectedAct.photo && (
+              <div style={{ borderRadius: 16, overflow: "hidden", height: 160, marginBottom: 16 }}>
+                <img src={selectedAct.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              </div>
+            )}
+            {selectedAct.description && <p style={{ margin: "0 0 16px", fontSize: 14, color: C.sub, lineHeight: 1.7 }}>{selectedAct.description}</p>}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
+              {selectedAct.distance && <span style={{ fontSize: 12, color: C.sub, background: C.sep, borderRadius: 20, padding: "4px 10px" }}>📍 {selectedAct.distance}</span>}
+              {selectedAct.openHours && <span style={{ fontSize: 12, color: C.sub, background: C.sep, borderRadius: 20, padding: "4px 10px" }}>🕐 {selectedAct.openHours}</span>}
+              {selectedAct.priceRange && <span style={{ fontSize: 12, color: C.orange, fontWeight: 700, background: `${C.orange}12`, borderRadius: 20, padding: "4px 10px" }}>{selectedAct.priceRange}</span>}
+            </div>
+            <div style={{ display: "flex", gap: 8 }}>
+              {selectedAct.phone && <a href={`tel:${selectedAct.phone}`} style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Phone size={15} color={accent} /> Appeler</a>}
+              {selectedAct.address && <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedAct.address)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Navigation size={15} color={accent} /> Maps</a>}
+              {selectedAct.website && <a href={selectedAct.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Globe size={15} color={accent} /> Site</a>}
+            </div>
+          </Drawer>
+        </div>
       )}
     </div>
   );
@@ -625,97 +640,110 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
   const [checked, setChecked] = useState<Record<number, boolean>>({});
   const doneCount = Object.values(checked).filter(Boolean).length;
 
+  const GLASS_CARD = { background: "rgba(255,255,255,0.14)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20 };
+
   return (
-    <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", background: C.bg, paddingBottom: TAB_BAR_H }}>
-      <div style={{ padding: "48px 20px 20px", background: "#1a1a2e", position: "relative", overflow: "hidden" }}>
-        {booklet.coverImage && <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: "brightness(0.4)" }} />}
-        <div style={{ position: "relative" }}>
-          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 1 }}>Checklist</p>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4 }}>Votre départ</h2>
-        </div>
+    <div style={{ position: "relative", flex: 1, height: "100%", overflow: "hidden" }}>
+      {/* Fond photo plein écran */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        {booklet.coverImage
+          ? <img src={booklet.coverImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          : <div style={{ width: "100%", height: "100%", background: "#1a1a2e" }} />
+        }
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)" }} />
       </div>
 
-      <div style={{ padding: "20px 16px 48px" }}>
+      {/* Contenu scrollable */}
+      <div style={{ position: "relative", zIndex: 1, height: "100%", overflowY: "auto", touchAction: "pan-y", paddingBottom: TAB_BAR_H }}>
 
-        {/* Heure */}
-        {g(checkout, "checkout_time") && (
-          <div style={{ background: C.card, borderRadius: 24, padding: "24px 20px", marginBottom: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)", textAlign: "center" }}>
-            <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${accent}15`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
-              <Clock size={26} color={accent} />
-            </div>
-            <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.8 }}>Heure de départ</p>
-            <p style={{ margin: 0, fontSize: 52, fontWeight: 800, color: C.label, letterSpacing: -2, lineHeight: 1 }}>{formatTime(g(checkout, "checkout_time"))}</p>
-            {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 13, color: C.sub }}>{g(checkout, "late_checkout_info")}</p>}
-          </div>
-        )}
+        {/* Header */}
+        <div style={{ padding: "48px 20px 16px" }}>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1 }}>Checklist</p>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>Votre départ</h2>
+        </div>
 
-        {/* Checklist */}
-        {tasks.length > 0 && (
-          <div style={{ background: C.card, borderRadius: 24, overflow: "hidden", marginBottom: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.04), 0 8px 32px rgba(0,0,0,0.06)" }}>
-            <div style={{ padding: "16px 20px 12px", borderBottom: `1px solid ${C.sep}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-              <p style={{ margin: 0, fontSize: 17, fontWeight: 700, color: C.label }}>Checklist de départ</p>
-              <span style={{ fontSize: 13, fontWeight: 700, color: accent }}>{doneCount}/{tasks.length}</span>
-            </div>
-            {tasks.map((task, i) => (
-              <button key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
-                style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 20px", background: "none", border: "none", borderBottom: i < tasks.length - 1 ? `1px solid ${C.sep}` : "none", cursor: "pointer", textAlign: "left" }}>
-                <div style={{ width: 26, height: 26, borderRadius: "50%", flexShrink: 0, background: checked[i] ? accent : "transparent", border: `2px solid ${checked[i] ? accent : "#D1D5DB"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.18s" }}>
-                  {checked[i] && <Check size={13} color="#fff" strokeWidth={3} />}
-                </div>
-                <p style={{ margin: 0, fontSize: 15, color: checked[i] ? C.muted : C.label, textDecoration: checked[i] ? "line-through" : "none", flex: 1 }}>{task}</p>
-              </button>
-            ))}
-            {doneCount === tasks.length && tasks.length > 0 && (
-              <div style={{ padding: "14px 20px", background: `${accent}08`, display: "flex", alignItems: "center", gap: 8 }}>
-                <Check size={16} color={accent} />
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: accent }}>Tout est prêt, bon voyage !</p>
+        <div style={{ padding: "0 16px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
+
+          {/* Heure */}
+          {g(checkout, "checkout_time") && (
+            <div style={{ ...GLASS_CARD, padding: "24px 20px", textAlign: "center" }}>
+              <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+                <Clock size={26} color="#fff" />
               </div>
-            )}
-          </div>
-        )}
-
-        {/* Retour des clés */}
-        {g(checkout, "keys_return") && (
-          <div style={{ background: C.card, borderRadius: 24, padding: "16px 20px", marginBottom: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", display: "flex", gap: 14, alignItems: "center" }}>
-            <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-              <Key size={20} color={C.orange} />
+              <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>Heure de départ</p>
+              <p style={{ margin: 0, fontSize: 52, fontWeight: 800, color: "#fff", letterSpacing: -2, lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>{formatTime(g(checkout, "checkout_time"))}</p>
+              {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{g(checkout, "late_checkout_info")}</p>}
             </div>
-            <div>
-              <p style={{ margin: "0 0 3px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Retour des clés</p>
-              <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.6 }}>{g(checkout, "keys_return")}</p>
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* Avis */}
-        {(g(checkout, "review_airbnb") || g(checkout, "review_google") || g(checkout, "review_booking")) && (
-          <div>
-            <p style={{ margin: "0 0 12px", fontSize: 17, fontWeight: 700, color: C.label }}>Laissez un avis</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-              {[
-                { key: "review_airbnb", label: "Airbnb" },
-                { key: "review_google", label: "Google" },
-                { key: "review_booking", label: "Booking.com" },
-              ].filter(r => g(checkout, r.key)).map(r => (
-                <a key={r.key} href={g(checkout, r.key)} target="_blank" rel="noopener noreferrer"
-                  style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderRadius: 20, background: C.card, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", textDecoration: "none" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-                    <div style={{ width: 44, height: 44, borderRadius: 14, background: `${accent}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Star size={20} color={accent} fill={accent} />
-                    </div>
-                    <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: C.label }}>{r.label}</p>
+          {/* Checklist */}
+          {tasks.length > 0 && (
+            <div style={{ ...GLASS_CARD, overflow: "hidden" }}>
+              <div style={{ padding: "14px 18px 12px", borderBottom: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>Checklist de départ</p>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>{doneCount}/{tasks.length}</span>
+              </div>
+              {tasks.map((task, i) => (
+                <button key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
+                  style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 18px", background: "none", border: "none", borderBottom: i < tasks.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none", cursor: "pointer", textAlign: "left" }}>
+                  <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: checked[i] ? accent : "transparent", border: `2px solid ${checked[i] ? accent : "rgba(255,255,255,0.4)"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.18s" }}>
+                    {checked[i] && <Check size={12} color="#fff" strokeWidth={3} />}
                   </div>
-                  <ChevronDown size={18} color={C.muted} style={{ transform: "rotate(-90deg)" }} />
-                </a>
+                  <p style={{ margin: 0, fontSize: 14, color: checked[i] ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.9)", textDecoration: checked[i] ? "line-through" : "none", flex: 1 }}>{task}</p>
+                </button>
               ))}
+              {doneCount === tasks.length && tasks.length > 0 && (
+                <div style={{ padding: "12px 18px", background: `${accent}30`, display: "flex", alignItems: "center", gap: 8 }}>
+                  <Check size={15} color="#fff" />
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff" }}>Tout est prêt, bon voyage !</p>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {g(checkout, "thank_you") && (
-          <p style={{ textAlign: "center", marginTop: 28, fontSize: 14, color: C.muted, fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
-        )}
-        <BunklyCredit />
+          {/* Retour des clés */}
+          {g(checkout, "keys_return") && (
+            <div style={{ ...GLASS_CARD, padding: "14px 18px", display: "flex", gap: 14, alignItems: "center" }}>
+              <div style={{ width: 42, height: 42, borderRadius: "50%", background: "rgba(255,255,255,0.18)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Key size={20} color="#fff" />
+              </div>
+              <div>
+                <p style={{ margin: "0 0 3px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.7 }}>Retour des clés</p>
+                <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{g(checkout, "keys_return")}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Avis */}
+          {(g(checkout, "review_airbnb") || g(checkout, "review_google") || g(checkout, "review_booking")) && (
+            <div>
+              <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 0.8 }}>Laissez un avis</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {[
+                  { key: "review_airbnb", label: "Airbnb" },
+                  { key: "review_google", label: "Google" },
+                  { key: "review_booking", label: "Booking.com" },
+                ].filter(r => g(checkout, r.key)).map(r => (
+                  <a key={r.key} href={g(checkout, r.key)} target="_blank" rel="noopener noreferrer"
+                    style={{ ...GLASS_CARD, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", textDecoration: "none" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                      <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Star size={18} color="#fff" fill="#fff" />
+                      </div>
+                      <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#fff" }}>{r.label}</p>
+                    </div>
+                    <ChevronDown size={16} color="rgba(255,255,255,0.5)" style={{ transform: "rotate(-90deg)" }} />
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {g(checkout, "thank_you") && (
+            <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: "rgba(255,255,255,0.6)", fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
+          )}
+        </div>
+        <BunklyCredit dark />
       </div>
     </div>
   );
@@ -726,30 +754,25 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 type GridTab = "home" | "area" | "checkout";
 
 function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (t: GridTab) => void; accent: string }) {
-  const isHome = active === "home";
-  const inactive = isHome ? "rgba(255,255,255,0.5)" : C.muted;
+  const inactive = "rgba(255,255,255,0.5)";
 
   const tabs = [
-    { id: "home" as GridTab,     label: "Accueil",   icon: (a: boolean) => <Home size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "area" as GridTab,     label: "Activités", icon: (a: boolean) => <MapPin size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "checkout" as GridTab, label: "Départ",    icon: (a: boolean) => <LogOut size={22} color={a ? accent : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "home" as GridTab,     label: "Accueil",   icon: (a: boolean) => <Home size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "area" as GridTab,     label: "Activités", icon: (a: boolean) => <MapPin size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "checkout" as GridTab, label: "Départ",    icon: (a: boolean) => <LogOut size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
   ];
 
-  const bgStyle = isHome
-    ? { background: "rgba(10,10,20,0.55)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.12)" }
-    : { background: "#fff", borderTop: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 -4px 20px rgba(0,0,0,0.05)" };
-
   return (
-    <div style={{ display: "flex", ...bgStyle, flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
+    <div style={{ display: "flex", background: "rgba(10,10,20,0.55)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", borderTop: "1px solid rgba(255,255,255,0.12)", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", paddingTop: 8, paddingLeft: 8, paddingRight: 8 }}>
       {tabs.map(t => {
         const isActive = active === t.id;
         return (
           <button key={t.id} onClick={() => onSelect(t.id)}
             style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "6px 0 8px", background: "none", border: "none", cursor: "pointer" }}>
-            <div style={{ width: 48, height: 32, borderRadius: 16, background: isActive ? `${accent}22` : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
+            <div style={{ width: 48, height: 32, borderRadius: 16, background: isActive ? "rgba(255,255,255,0.2)" : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.2s" }}>
               {t.icon(isActive)}
             </div>
-            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? accent : inactive, letterSpacing: 0.1 }}>
+            <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 400, color: isActive ? "#fff" : inactive, letterSpacing: 0.1 }}>
               {t.label}
             </span>
           </button>
@@ -774,9 +797,11 @@ function GridContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange?:
   };
 
   return (
-    <div style={{ position: "relative", height: "100%", fontFamily: FONT, WebkitFontSmoothing: "antialiased", background: tab === "home" ? "#1a1a2e" : C.bg }}>
+    <>
+      <style>{`::-webkit-scrollbar-thumb { background: ${accent} !important; }`}</style>
+      <div style={{ position: "relative", height: "100%", fontFamily: FONT, WebkitFontSmoothing: "antialiased", background: "#1a1a2e" }}>
 
-      {/* Fond photo plein écran */}
+      {/* Fond photo plein écran — home uniquement (area/checkout gèrent leur propre fond) */}
       {tab === "home" && booklet.coverImage && (
         <>
           <img src={booklet.coverImage} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 0 }} />
@@ -801,6 +826,7 @@ function GridContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange?:
         <HomeDrawers booklet={booklet} accent={accent} drawer={drawer} onClose={() => setDrawer(null)} />
       </div>
     </div>
+    </>
   );
 }
 
