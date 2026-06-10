@@ -52,10 +52,12 @@ export async function POST(request: NextRequest) {
           ? "yearly"
           : "monthly";
 
-      console.log(`[webhook] updating user ${uid} to actif, period: ${period}`);
+      const priceId = sub.items.data[0]?.price.id;
+      const newPlan = priceId === process.env.STRIPE_PRICE_AGENCY_MONTHLY || priceId === process.env.STRIPE_PRICE_AGENCY_YEARLY ? "agency" : "pro";
+      console.log(`[webhook] updating user ${uid} to ${newPlan}, period: ${period}`);
       await adminDb.collection("users").doc(uid).set(
         {
-          plan: "actif",
+          plan: newPlan,
           billingPeriod: period,
           stripeSubscriptionId: sub.id,
           subscriptionStatus: sub.status,
@@ -63,7 +65,7 @@ export async function POST(request: NextRequest) {
         },
         { merge: true }
       );
-      console.log(`[webhook] user ${uid} updated to actif ✓`);
+      console.log(`[webhook] user ${uid} updated to ${newPlan} ✓`);
       break;
     }
 
@@ -77,10 +79,12 @@ export async function POST(request: NextRequest) {
           ? "yearly"
           : "monthly";
       const isActive = sub.status === "active" || sub.status === "trialing";
+      const updatedPriceId = sub.items.data[0]?.price.id;
+      const updatedPlan = updatedPriceId === process.env.STRIPE_PRICE_AGENCY_MONTHLY || updatedPriceId === process.env.STRIPE_PRICE_AGENCY_YEARLY ? "agency" : "pro";
 
       await adminDb.collection("users").doc(uid).set(
         {
-          plan: isActive ? "actif" : "free",
+          plan: isActive ? updatedPlan : "free",
           billingPeriod: period,
           stripeSubscriptionId: sub.id,
           subscriptionStatus: sub.status,
