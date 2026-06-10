@@ -26,28 +26,28 @@ const SERVICES = [
     color: "text-blue-500",
     bg: "bg-blue-50",
     title: "Site web professionnel",
-    desc: "Vitrine moderne pour votre location, optimisée pour convertir.",
+    desc: "On crée votre vitrine en ligne, pensée pour convertir les visiteurs en réservations.",
   },
   {
     icon: Smartphone,
     color: "text-purple-500",
     bg: "bg-purple-50",
     title: "Application mobile",
-    desc: "Une app à votre image pour vos voyageurs, iOS & Android.",
+    desc: "On développe une app à votre image pour vos voyageurs, iOS & Android.",
   },
   {
     icon: Search,
     color: "text-green-500",
     bg: "bg-green-50",
     title: "Référencement Airbnb",
-    desc: "Optimisation de vos annonces pour apparaître en tête des résultats.",
+    desc: "On optimise vos annonces pour apparaître en tête des résultats de recherche.",
   },
   {
     icon: Star,
     color: "text-orange-500",
     bg: "bg-orange-50",
     title: "Avis & e-réputation",
-    desc: "Stratégie pour booster vos avis et fidéliser vos voyageurs.",
+    desc: "On met en place une stratégie pour booster vos avis et fidéliser vos voyageurs.",
   },
 ];
 
@@ -58,12 +58,12 @@ function PromoSidebar() {
       <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm">
         {/* Header sobre */}
         <div className="px-5 py-4 border-b border-gray-100">
-          <p className="text-xs font-semibold text-orange-500 uppercase tracking-wider mb-1">Nos services</p>
+          <p className="text-xs font-semibold text-orange-500 uppercase tracking-wider mb-1">Bunkly — Au-delà du livret</p>
           <h3 className="text-sm font-bold text-gray-900 leading-snug">
-            Boostez votre présence en ligne
+            On s'occupe aussi de votre visibilité en ligne
           </h3>
           <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-            Experts dédiés à la location courte durée.
+            En plus des livrets, notre équipe vous accompagne pour développer votre location courte durée.
           </p>
         </div>
 
@@ -85,12 +85,12 @@ function PromoSidebar() {
         {/* CTA */}
         <div className="px-4 pb-4 pt-3">
           <a
-            href="mailto:contact@bunkly.co?subject=Demande de service"
+            href="mailto:hello@bunkly.co?subject=Demande de service"
             className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold py-2.5 rounded-xl transition-colors">
             Nous contacter
             <ArrowRight className="w-3 h-3" />
           </a>
-          <p className="text-center text-xs text-gray-400 mt-2">Réponse sous 24h · Devis gratuit</p>
+          <p className="text-center text-xs text-gray-400 mt-2">hello@bunkly.co · Devis gratuit</p>
         </div>
       </div>
 
