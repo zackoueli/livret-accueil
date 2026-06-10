@@ -3,16 +3,16 @@ import { stripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase-admin";
 
 export async function POST(request: NextRequest) {
-  const { userId, email, billingPeriod, locale } = await request.json();
+  const { userId, email, billingPeriod, plan, locale } = await request.json();
 
   if (!userId || !email || !billingPeriod) {
     return Response.json({ error: "Missing parameters" }, { status: 400 });
   }
 
-  const priceId =
-    billingPeriod === "yearly"
-      ? process.env.STRIPE_PRICE_YEARLY!
-      : process.env.STRIPE_PRICE_MONTHLY!;
+  const isAgency = plan === "agency";
+  const priceId = isAgency
+    ? (billingPeriod === "yearly" ? process.env.STRIPE_PRICE_AGENCY_YEARLY! : process.env.STRIPE_PRICE_AGENCY_MONTHLY!)
+    : (billingPeriod === "yearly" ? process.env.STRIPE_PRICE_YEARLY! : process.env.STRIPE_PRICE_MONTHLY!);
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   const localePath = locale ? `/${locale}` : "";
