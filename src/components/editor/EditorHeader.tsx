@@ -1,17 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { useEditorStore } from "@/store/editorStore";
-import { updateBooklet } from "@/lib/booklets";
+import { updateBooklet, getUserBooklets } from "@/lib/booklets";
 import toast from "react-hot-toast";
 import { ImportListingModal } from "./ImportListingModal";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { usePlan } from "@/hooks/usePlan";
+import { useAuthStore } from "@/store/authStore";
+import { PLAN_LIMITS } from "@/lib/plans";
 
 export function EditorHeader({ onSave }: { onSave: () => void }) {
   const router = useRouter();
@@ -20,17 +22,35 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
   const [showImport, setShowImport] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [publishing, setPublishing] = useState(false);
-  const { can } = usePlan();
+  const [publishedCount, setPublishedCount] = useState(0);
+  const { can, plan } = usePlan();
+  const { user } = useAuthStore();
+
+  useEffect(() => {
+    if (!user) return;
+    getUserBooklets(user.uid).then(all => {
+      setPublishedCount(all.filter(b => b.isPublished).length);
+    });
+  }, [user]);
 
   if (!booklet) return null;
 
+  const limit = PLAN_LIMITS[plan].booklets;
+  const canPublish = booklet.isPublished || publishedCount < limit;
+
   const togglePublish = async () => {
+    if (!booklet.isPublished && !canPublish) {
+      setShowUpgrade(true);
+      return;
+    }
     setPublishing(true);
     try {
       if (isDirty) await onSave();
       const newVal = !booklet.isPublished;
       updateBookletField("isPublished", newVal);
       await updateBooklet(booklet.id, { ...booklet, isPublished: newVal });
+      if (newVal) setPublishedCount(c => c + 1);
+      else setPublishedCount(c => c - 1);
       toast.success(newVal ? "Livret publié ! Vos voyageurs peuvent y accéder." : "Livret dépublié");
     } finally {
       setPublishing(false);
@@ -97,14 +117,19 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       <button
         onClick={togglePublish}
         disabled={publishing}
+        title={!canPublish ? `Limite de ${limit} livret${limit > 1 ? "s" : ""} publiés atteinte` : undefined}
         className={`flex items-center gap-2 text-sm font-semibold px-5 py-2 rounded-xl transition-colors disabled:opacity-60 ${
           booklet.isPublished
             ? "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
-            : "bg-orange-500 hover:bg-orange-600 text-white"
+            : !canPublish
+              ? "bg-gray-100 text-gray-400 border border-gray-200"
+              : "bg-orange-500 hover:bg-orange-600 text-white"
         }`}>
         {publishing
           ? <Loader2 className="w-4 h-4 animate-spin" />
-          : <Globe className="w-4 h-4" />
+          : !canPublish
+            ? <Lock className="w-4 h-4" />
+            : <Globe className="w-4 h-4" />
         }
         <span className="hidden sm:inline">
           {booklet.isPublished ? "Publié" : "Publier"}
@@ -113,7 +138,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
     </header>
 
     {showImport && <ImportListingModal onClose={() => setShowImport(false)} />}
-    {showUpgrade && <UpgradeModal reason="L'import IA est réservé au plan Pro" onClose={() => setShowUpgrade(false)} />}
+    {showUpgrade && <UpgradeModal reason={!can("ai_import") ? "L'import IA est réservé au plan Pro" : `Limite de ${limit} livret${limit > 1 ? "s" : ""} publiés atteinte`} onClose={() => setShowUpgrade(false)} />}
     </>
   );
 }

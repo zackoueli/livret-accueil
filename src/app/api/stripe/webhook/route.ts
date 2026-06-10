@@ -68,17 +68,24 @@ export async function POST(request: NextRequest) {
       );
       console.log(`[webhook] user ${uid} updated to ${newPlan} ✓`);
 
-      // Email de confirmation d'achat
+      // Email de confirmation — on lit email+nom depuis Firestore (après écriture) et depuis le customer Stripe en fallback
       try {
         const userDoc = await adminDb.collection("users").doc(uid).get();
         const userData = userDoc.data();
-        if (userData?.email) {
-          await sendPurchaseConfirmation({
-            to: userData.email,
-            name: userData.displayName || "",
-            plan: newPlan,
-            billingPeriod: period,
-          });
+        // Fallback : récupérer l'email depuis le customer Stripe si absent en Firestore
+        let toEmail = userData?.email as string | undefined;
+        let toName = (userData?.displayName as string) || "";
+        if (!toEmail && session.customer) {
+          const customer = await stripe.customers.retrieve(session.customer as string) as Stripe.Customer;
+          toEmail = customer.email ?? undefined;
+          toName = customer.name ?? "";
+        }
+        console.log(`[webhook] sending purchase email to: ${toEmail}`);
+        if (toEmail) {
+          await sendPurchaseConfirmation({ to: toEmail, name: toName, plan: newPlan, billingPeriod: period });
+          console.log(`[webhook] purchase email sent ✓`);
+        } else {
+          console.error("[webhook] No email found for user", uid);
         }
       } catch (e) {
         console.error("[webhook] Failed to send purchase email:", e);
