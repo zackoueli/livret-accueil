@@ -63,8 +63,8 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
             }
           }
         }
-        if (booklet.title) entries.push({ moduleId: "__booklet__", field: "title", text: booklet.title });
-        if (booklet.description) entries.push({ moduleId: "__booklet__", field: "description", text: booklet.description });
+        if (booklet.title) entries.push({ moduleId: "_meta_", field: "title", text: booklet.title });
+        if (booklet.description) entries.push({ moduleId: "_meta_", field: "description", text: booklet.description });
 
         const res = await fetch("/api/translate", {
           method: "POST",

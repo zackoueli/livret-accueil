@@ -794,8 +794,8 @@ function useTranslatedBooklet(booklet: Booklet, lang: SupportedLang): Booklet {
     const tr = booklet.translations[lang]!;
     return {
       ...booklet,
-      title: tr["__booklet__"]?.title ?? booklet.title,
-      description: tr["__booklet__"]?.description ?? booklet.description,
+      title: tr["_meta_"]?.title ?? booklet.title,
+      description: tr["_meta_"]?.description ?? booklet.description,
       modules: booklet.modules.map(mod => ({
         ...mod,
         content: tr[mod.id] ? { ...mod.content, ...tr[mod.id] } : mod.content,
