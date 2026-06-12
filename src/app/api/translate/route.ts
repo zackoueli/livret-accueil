@@ -1,23 +1,46 @@
 import { NextRequest } from "next/server";
 
-export async function POST(request: NextRequest) {
-  const { text, targetLang } = await request.json();
+export const runtime = "nodejs";
 
-  if (!text || !targetLang) {
+const SUPPORTED_LANGS = ["fr", "en", "es", "de", "it", "ar"];
+
+export async function POST(request: NextRequest) {
+  const { texts, targetLang } = await request.json();
+
+  if (!texts || !targetLang) {
     return Response.json({ error: "Missing parameters" }, { status: 400 });
   }
+  if (!SUPPORTED_LANGS.includes(targetLang)) {
+    return Response.json({ error: "Unsupported language" }, { status: 400 });
+  }
 
-  const langMap: Record<string, string> = {
-    en: "en-GB", es: "es-ES", de: "de-DE", it: "it-IT", fr: "fr-FR",
-  };
-  const target = langMap[targetLang] ?? targetLang;
+  const apiKey = process.env.GOOGLE_TRANSLATE_API_KEY;
+  if (!apiKey) {
+    return Response.json({ error: "Translation API not configured" }, { status: 500 });
+  }
 
-  const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=fr|${target}`;
-  const res = await fetch(url);
+  // texts est un tableau de strings
+  const arr: string[] = Array.isArray(texts) ? texts : [texts];
+
+  const res = await fetch(
+    `https://translation.googleapis.com/language/translate/v2?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ q: arr, target: targetLang, source: "fr", format: "text" }),
+    }
+  );
+
+  if (!res.ok) {
+    const err = await res.text();
+    console.error("[translate] Google API error:", err);
+    return Response.json({ error: "Translation failed" }, { status: 500 });
+  }
+
   const data = await res.json();
+  const translations: string[] = data.data.translations.map(
+    (t: { translatedText: string }) => t.translatedText
+  );
 
-  const translated = data.responseData?.translatedText;
-  if (!translated) return Response.json({ error: "Translation failed" }, { status: 500 });
-
-  return Response.json({ translated });
+  return Response.json({ translations });
 }

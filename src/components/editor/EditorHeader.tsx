@@ -3,24 +3,28 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock } from "lucide-react";
+import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock, Languages } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { useEditorStore } from "@/store/editorStore";
 import { updateBooklet, getUserBooklets } from "@/lib/booklets";
 import toast from "react-hot-toast";
 import { ImportListingModal } from "./ImportListingModal";
+import { TranslateModal } from "./TranslateModal";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { usePlan } from "@/hooks/usePlan";
 import { useAuthStore } from "@/store/authStore";
 import { PLAN_LIMITS } from "@/lib/plans";
+import { BookletTranslations } from "@/types";
 
 export function EditorHeader({ onSave }: { onSave: () => void }) {
   const router = useRouter();
   const locale = useLocale();
   const { booklet, isDirty, isSaving, updateBookletField } = useEditorStore();
   const [showImport, setShowImport] = useState(false);
+  const [showTranslate, setShowTranslate] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [publishedCount, setPublishedCount] = useState(0);
   const { can, plan } = usePlan();
@@ -37,10 +41,16 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
 
   const limit = PLAN_LIMITS[plan].booklets;
   const canPublish = booklet.isPublished || publishedCount < limit;
+  const canTranslate = can("ai_import"); // même guard : Pro/Agence
+
+  const openUpgrade = (reason: string) => {
+    setUpgradeReason(reason);
+    setShowUpgrade(true);
+  };
 
   const togglePublish = async () => {
     if (!booklet.isPublished && !canPublish) {
-      setShowUpgrade(true);
+      openUpgrade(`Limite de ${limit} livret${limit > 1 ? "s" : ""} publiés atteinte`);
       return;
     }
     setPublishing(true);
@@ -55,6 +65,10 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
     } finally {
       setPublishing(false);
     }
+  };
+
+  const handleTranslated = (translations: Partial<BookletTranslations>) => {
+    updateBookletField("translations", translations);
   };
 
   return (
@@ -80,7 +94,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
 
       {/* Import IA */}
       <button
-        onClick={() => can("ai_import") ? setShowImport(true) : setShowUpgrade(true)}
+        onClick={() => can("ai_import") ? setShowImport(true) : openUpgrade("L'import IA est réservé au plan Pro")}
         className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border transition-colors ${
           can("ai_import")
             ? "border-orange-200 bg-orange-50 hover:bg-orange-100 text-orange-600"
@@ -91,6 +105,25 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
         {!can("ai_import") && <Lock className="w-3 h-3" />}
       </button>
 
+      {/* Traduire */}
+      <button
+        onClick={() => canTranslate ? setShowTranslate(true) : openUpgrade("La traduction automatique est réservée au plan Pro")}
+        title={canTranslate ? "Traduire le livret" : "Fonctionnalité Pro"}
+        className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border transition-colors ${
+          canTranslate
+            ? "border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600"
+            : "border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-400"
+        }`}>
+        <Languages className="w-4 h-4" />
+        <span className="hidden sm:inline">Traduire</span>
+        {!canTranslate && <Lock className="w-3 h-3" />}
+        {canTranslate && booklet.translations && Object.keys(booklet.translations).length > 0 && (
+          <span className="hidden sm:flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold">
+            {Object.keys(booklet.translations).length}
+          </span>
+        )}
+      </button>
+
       {/* Aperçu */}
       <button
         onClick={() => window.open(bookletUrl(booklet.slug), "_blank")}
@@ -99,7 +132,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
         <Eye className="w-4 h-4" />
       </button>
 
-      {/* Enregistrer — visible seulement si modifs non sauvegardées */}
+      {/* Enregistrer */}
       {isDirty && (
         <button
           onClick={onSave}
@@ -138,7 +171,16 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
     </header>
 
     {showImport && <ImportListingModal onClose={() => setShowImport(false)} />}
-    {showUpgrade && <UpgradeModal reason={!can("ai_import") ? "L'import IA est réservé au plan Pro" : `Limite de ${limit} livret${limit > 1 ? "s" : ""} publiés atteinte`} onClose={() => setShowUpgrade(false)} />}
+    {showTranslate && (
+      <TranslateModal
+        booklet={booklet}
+        onClose={() => setShowTranslate(false)}
+        onTranslated={handleTranslated}
+      />
+    )}
+    {showUpgrade && (
+      <UpgradeModal reason={upgradeReason} onClose={() => setShowUpgrade(false)} />
+    )}
     </>
   );
 }

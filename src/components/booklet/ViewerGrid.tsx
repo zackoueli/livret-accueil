@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Booklet, BookletModule } from "@/types";
+import { useState, useMemo } from "react";
+import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS } from "@/types";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
@@ -786,9 +786,85 @@ function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (
 
 const TAB_BAR_H = 72;
 
-function GridContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
+// ─── Sélecteur de langue ──────────────────────────────────────────────────────
+
+function useTranslatedBooklet(booklet: Booklet, lang: SupportedLang): Booklet {
+  return useMemo(() => {
+    if (lang === "fr" || !booklet.translations?.[lang]) return booklet;
+    const tr = booklet.translations[lang]!;
+    return {
+      ...booklet,
+      title: tr["__booklet__"]?.title ?? booklet.title,
+      description: tr["__booklet__"]?.description ?? booklet.description,
+      modules: booklet.modules.map(mod => ({
+        ...mod,
+        content: tr[mod.id] ? { ...mod.content, ...tr[mod.id] } : mod.content,
+      })),
+    };
+  }, [booklet, lang]);
+}
+
+function LangSelector({ booklet, lang, onSelect }: {
+  booklet: Booklet;
+  lang: SupportedLang;
+  onSelect: (l: SupportedLang) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const available = SUPPORTED_LANGS.filter(
+    l => l.code === "fr" || booklet.translations?.[l.code] !== undefined
+  );
+  if (available.length <= 1) return null;
+
+  const current = available.find(l => l.code === lang) ?? available[0];
+
+  return (
+    <div style={{ position: "absolute", top: 12, right: 12, zIndex: 200 }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{
+          display: "flex", alignItems: "center", gap: 6,
+          background: "rgba(0,0,0,0.45)", backdropFilter: "blur(12px)",
+          border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20,
+          padding: "6px 12px 6px 8px", color: "#fff", fontSize: 13, fontWeight: 600,
+          cursor: "pointer",
+        }}>
+        <span style={{ fontSize: 16 }}>{current.flag}</span>
+        <span>{current.code.toUpperCase()}</span>
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", right: 0,
+          background: "rgba(15,15,25,0.92)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(255,255,255,0.15)", borderRadius: 16,
+          padding: 6, minWidth: 140,
+        }}>
+          {available.map(l => (
+            <button
+              key={l.code}
+              onClick={() => { onSelect(l.code); setOpen(false); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10, width: "100%",
+                background: l.code === lang ? "rgba(255,255,255,0.12)" : "transparent",
+                border: "none", borderRadius: 10, padding: "8px 12px",
+                color: "#fff", fontSize: 13, fontWeight: l.code === lang ? 700 : 400,
+                cursor: "pointer", textAlign: "left",
+              }}>
+              <span style={{ fontSize: 16 }}>{l.flag}</span>
+              <span>{l.label}</span>
+              {l.code === lang && <Check size={12} style={{ marginLeft: "auto", color: "#34d399" }} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function GridContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   const [tab, setTab] = useState<GridTab>("home");
   const [drawer, setDrawer] = useState<string | null>(null);
+  const [lang, setLang] = useState<SupportedLang>("fr");
+  const booklet = useTranslatedBooklet(rawBooklet, lang);
   const accent = booklet.accentColor || C.blue;
 
   const handleTabChange = (t: GridTab) => {
@@ -808,6 +884,13 @@ function GridContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange?:
           <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.15) 35%, rgba(0,0,0,0.6) 100%)", zIndex: 1 }} />
         </>
       )}
+
+      {/* Sélecteur de langue */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 100, pointerEvents: "none" }}>
+        <div style={{ pointerEvents: "auto" }}>
+          <LangSelector booklet={rawBooklet} lang={lang} onSelect={setLang} />
+        </div>
+      </div>
 
       {/* Pages */}
       <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column" }}>

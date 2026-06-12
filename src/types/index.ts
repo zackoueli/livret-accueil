@@ -75,6 +75,30 @@ export interface Folder {
   createdAt: number;
 }
 
+export type SupportedLang = "fr" | "en" | "es" | "de" | "it" | "ar";
+
+export interface LangMeta {
+  code: SupportedLang;
+  label: string;
+  flag: string;
+  dir?: "rtl";
+}
+
+export const SUPPORTED_LANGS: LangMeta[] = [
+  { code: "fr", label: "Français", flag: "🇫🇷" },
+  { code: "en", label: "English", flag: "🇬🇧" },
+  { code: "es", label: "Español", flag: "🇪🇸" },
+  { code: "de", label: "Deutsch", flag: "🇩🇪" },
+  { code: "it", label: "Italiano", flag: "🇮🇹" },
+  { code: "ar", label: "العربية", flag: "🇸🇦", dir: "rtl" },
+];
+
+// Traductions d'un livret : par langue, par moduleId, par champ
+export type BookletTranslations = Record<
+  SupportedLang,
+  Record<string, Record<string, string>> // moduleId → { field: value }
+>;
+
 export interface Booklet {
   id: string;
   userId: string;
@@ -91,6 +115,7 @@ export interface Booklet {
   modules: BookletModule[];
   isPublished: boolean;
   viewCount?: number;
+  translations?: Partial<BookletTranslations>;
   createdAt: number;
   updatedAt: number;
 }
