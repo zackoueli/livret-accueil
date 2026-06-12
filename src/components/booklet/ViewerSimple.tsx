@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Booklet, BookletModule } from "@/types";
+import { useState, useEffect, useMemo } from "react";
+import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS } from "@/types";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
 import {
   Wifi, Copy, Check, MapPin, Clock, Key, Car, Thermometer, Wind, Tv, Mailbox,
@@ -1283,8 +1283,85 @@ function useQrCode(url: string) {
 
 // ─── Viewer ───────────────────────────────────────────────────────────────────
 
-function ViewerContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
+// ─── Traduction ───────────────────────────────────────────────────────────────
+
+function useTranslatedBooklet(booklet: Booklet, lang: SupportedLang): Booklet {
+  return useMemo(() => {
+    if (lang === "fr" || !booklet.translations?.[lang]) return booklet;
+    const tr = booklet.translations[lang]!;
+    return {
+      ...booklet,
+      title: tr["_meta_"]?.title ?? booklet.title,
+      description: tr["_meta_"]?.description ?? booklet.description,
+      modules: booklet.modules.map(mod => ({
+        ...mod,
+        content: tr[mod.id] ? { ...mod.content, ...tr[mod.id] } : mod.content,
+      })),
+    };
+  }, [booklet, lang]);
+}
+
+function LangSelector({ booklet, lang, onSelect }: {
+  booklet: Booklet;
+  lang: SupportedLang;
+  onSelect: (l: SupportedLang) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const available = SUPPORTED_LANGS.filter(
+    l => l.code === "fr" || booklet.translations?.[l.code] !== undefined
+  );
+  if (available.length <= 1) return null;
+
+  const current = available.find(l => l.code === lang) ?? available[0];
+
+  return (
+    <div style={{ position: "absolute", top: 12, right: 12, zIndex: 200 }}>
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{
+          display: "flex", alignItems: "center", gap: 6,
+          background: "rgba(255,255,255,0.92)", backdropFilter: "blur(12px)",
+          border: "1px solid rgba(0,0,0,0.1)", borderRadius: 20,
+          padding: "6px 12px 6px 8px", color: "#111827", fontSize: 13, fontWeight: 600,
+          cursor: "pointer", boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+        }}>
+        <span style={{ fontSize: 16 }}>{current.flag}</span>
+        <span>{current.code.toUpperCase()}</span>
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", top: "calc(100% + 6px)", right: 0,
+          background: "rgba(255,255,255,0.97)", backdropFilter: "blur(20px)",
+          border: "1px solid rgba(0,0,0,0.08)", borderRadius: 16,
+          padding: 6, minWidth: 150, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+        }}>
+          {available.map(l => (
+            <button
+              key={l.code}
+              onClick={() => { onSelect(l.code); setOpen(false); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 10, width: "100%",
+                background: l.code === lang ? "rgba(249,115,22,0.08)" : "transparent",
+                border: "none", borderRadius: 10, padding: "8px 12px",
+                color: l.code === lang ? "#f97316" : "#374151",
+                fontSize: 13, fontWeight: l.code === lang ? 700 : 400,
+                cursor: "pointer", textAlign: "left",
+              }}>
+              <span style={{ fontSize: 16 }}>{l.flag}</span>
+              <span>{l.label}</span>
+              {l.code === lang && <Check size={12} style={{ marginLeft: "auto" }} />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ViewerContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   const [tab, setTab] = useState<Tab>("home");
+  const [lang, setLang] = useState<SupportedLang>("fr");
+  const booklet = useTranslatedBooklet(rawBooklet, lang);
   const accent = booklet.accentColor || C.blue;
 
   const handleTabChange = (t: Tab) => {
@@ -1293,7 +1370,8 @@ function ViewerContent({ booklet, onTabChange }: { booklet: Booklet; onTabChange
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", overflow: "hidden" }}>
+    <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", overflow: "hidden" }}>
+      <LangSelector booklet={rawBooklet} lang={lang} onSelect={setLang} />
       <div style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
         {tab === "home"     && <TabHome     booklet={booklet} accent={accent} />}
         {tab === "stay"     && <TabWithHero booklet={booklet} accent={accent}><TabStay     booklet={booklet} accent={accent} /></TabWithHero>}
