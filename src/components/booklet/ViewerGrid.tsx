@@ -886,11 +886,7 @@ function GridContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; o
       )}
 
       {/* Sélecteur de langue */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 100, pointerEvents: "none" }}>
-        <div style={{ pointerEvents: "auto" }}>
-          <LangSelector booklet={rawBooklet} lang={lang} onSelect={setLang} />
-        </div>
-      </div>
+      <LangSelector booklet={rawBooklet} lang={lang} onSelect={setLang} />
 
       {/* Pages */}
       <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column" }}>
