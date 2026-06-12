@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, createContext, useContext } from "react";
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS } from "@/types";
+import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
@@ -13,6 +14,14 @@ import {
   Mailbox, Volume2, Cigarette, PartyPopper, ShoppingBag,
   Home, LogOut,
 } from "lucide-react";
+
+// ─── i18n Context ─────────────────────────────────────────────────────────────
+
+const LangCtx = createContext<SupportedLang>("fr");
+function useT() {
+  const lang = useContext(LangCtx);
+  return (key: I18nKey) => t(lang, key);
+}
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 
@@ -153,6 +162,7 @@ function InfoRow({ icon, label, value, color, last = false }: {
 }
 
 function CopyRow({ label, value, accent }: { label: string; value: string; accent: string }) {
+  const tr = useT();
   const [copied, setCopied] = useState(false);
   if (!value) return null;
   return (
@@ -164,7 +174,7 @@ function CopyRow({ label, value, accent }: { label: string; value: string; accen
       <button onClick={() => { navigator.clipboard.writeText(value); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
         style={{ display: "flex", alignItems: "center", gap: 5, padding: "7px 14px", borderRadius: 20, border: "none", cursor: "pointer", fontSize: 13, fontWeight: 600, background: copied ? `${C.green}15` : `${accent}12`, color: copied ? C.green : accent }}>
         {copied ? <Check size={13} /> : <Copy size={13} />}
-        {copied ? "Copié" : "Copier"}
+        {copied ? tr("copied") : tr("copy")}
       </button>
     </div>
   );
@@ -211,6 +221,7 @@ function GridButton({ label, icon, color, onClick, wide = false }: {
 // ─── PAGE ACCUEIL ─────────────────────────────────────────────────────────────
 
 function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: string; setDrawer: (id: string) => void }) {
+  const tr = useT();
   const arrival       = useMod(booklet, "arrival");
   const accommodation = useMod(booklet, "accommodation");
   const rules         = useMod(booklet, "rules");
@@ -233,20 +244,20 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const welcomeMsg = g(contact, "welcome_message") || g(arrival, "welcome_message");
 
   const buttons = [
-    { id: "wifi",      label: "WiFi",          icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass) },
-    { id: "access",    label: "Accès & Clés",  icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!accessCode },
-    { id: "horaires",  label: "Horaires",       icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime) },
-    { id: "rules",     label: "Règles",         icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules },
-    { id: "logement",  label: "Le logement",    icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: !!(accommodation && (g(accommodation, "heating") || g(accommodation, "ac") || g(accommodation, "tv"))) },
-    { id: "kitchen",   label: "Cuisine",        icon: <UtensilsCrossed size={20} color="#fff" />, color: MODULE_COLORS.kitchen,   show: !!kitchen },
-    { id: "cleaning",  label: "Ménage",         icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")) },
-    { id: "safety",    label: "Urgences",       icon: <Shield size={20} color="#fff" />,          color: MODULE_COLORS.safety,    show: !!safety },
-    { id: "contact",   label: "Contact",        icon: <Phone size={20} color="#fff" />,           color: MODULE_COLORS.contact,   show: !!contact },
-    { id: "pool",      label: "Piscine",        icon: <Waves size={20} color="#fff" />,           color: MODULE_COLORS.pool,      show: !!pool },
-    { id: "baby",      label: "Bébé",           icon: <Baby size={20} color="#fff" />,            color: MODULE_COLORS.baby,      show: !!baby },
-    { id: "pets",      label: "Animaux",        icon: <Dog size={20} color="#fff" />,             color: MODULE_COLORS.pets,      show: !!petsModule },
-    { id: "coworking", label: "Télétravail",    icon: <Briefcase size={20} color="#fff" />,       color: MODULE_COLORS.coworking, show: !!coworking },
-    { id: "transport", label: "Transport",      icon: <Bus size={20} color="#fff" />,             color: MODULE_COLORS.transport, show: !!transport },
+    { id: "wifi",      label: tr("wifi"),             icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass) },
+    { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!accessCode },
+    { id: "horaires",  label: tr("schedule"),          icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime) },
+    { id: "rules",     label: tr("rules"),             icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules },
+    { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: !!(accommodation && (g(accommodation, "heating") || g(accommodation, "ac") || g(accommodation, "tv"))) },
+    { id: "kitchen",   label: tr("kitchen_equip"),     icon: <UtensilsCrossed size={20} color="#fff" />, color: MODULE_COLORS.kitchen,   show: !!kitchen },
+    { id: "cleaning",  label: tr("menage_dechets"),    icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")) },
+    { id: "safety",    label: tr("nav_safety"),        icon: <Shield size={20} color="#fff" />,          color: MODULE_COLORS.safety,    show: !!safety },
+    { id: "contact",   label: tr("contact"),           icon: <Phone size={20} color="#fff" />,           color: MODULE_COLORS.contact,   show: !!contact },
+    { id: "pool",      label: tr("pool"),              icon: <Waves size={20} color="#fff" />,           color: MODULE_COLORS.pool,      show: !!pool },
+    { id: "baby",      label: tr("baby"),              icon: <Baby size={20} color="#fff" />,            color: MODULE_COLORS.baby,      show: !!baby },
+    { id: "pets",      label: tr("pets"),              icon: <Dog size={20} color="#fff" />,             color: MODULE_COLORS.pets,      show: !!petsModule },
+    { id: "coworking", label: tr("coworking"),         icon: <Briefcase size={20} color="#fff" />,       color: MODULE_COLORS.coworking, show: !!coworking },
+    { id: "transport", label: tr("transport"),         icon: <Bus size={20} color="#fff" />,             color: MODULE_COLORS.transport, show: !!transport },
   ].filter(b => b.show);
 
   return (
@@ -265,7 +276,7 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
             {booklet.propertyName || booklet.title}
           </h1>
           {hostName && (
-            <p style={{ margin: "0 0 8px", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>Votre hôte · {hostName}</p>
+            <p style={{ margin: "0 0 8px", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{tr("your_host")} · {hostName}</p>
           )}
           {welcomeMsg && (
             <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.55, maxWidth: 260, marginLeft: "auto", marginRight: "auto" }}>
@@ -311,13 +322,15 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
 }
 
 function BunklyCredit({ dark = false }: { dark?: boolean }) {
+  const tr = useT();
   const color = dark ? "rgba(255,255,255,0.35)" : C.muted;
   const bold  = dark ? "rgba(255,255,255,0.6)"  : C.sub;
   return (
     <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
       <a href="https://bunkly.co" target="_blank" rel="noopener noreferrer"
         style={{ fontSize: 11, color, textDecoration: "none", fontWeight: 500, letterSpacing: 0.3 }}>
-        Créé avec <span style={{ fontWeight: 700, color: bold }}>Bunkly.co</span>
+        {tr("created_with").replace("Bunkly.co", "")}
+        <span style={{ fontWeight: 700, color: bold }}>Bunkly.co</span>
       </a>
     </div>
   );
@@ -326,6 +339,7 @@ function BunklyCredit({ dark = false }: { dark?: boolean }) {
 // ─── Drawers accueil (rendu dans GridContent au-dessus de tout) ───────────────
 
 function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; accent: string; drawer: string | null; onClose: () => void }) {
+  const tr = useT();
   const arrival       = useMod(booklet, "arrival");
   const accommodation = useMod(booklet, "accommodation");
   const rules         = useMod(booklet, "rules");
@@ -346,12 +360,12 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
 
   return (
     <>
-      <Drawer open={drawer === "horaires"} onClose={onClose} title="Horaires" icon={<Clock size={20} color={C.green} />} color={C.green}>
+      <Drawer open={drawer === "horaires"} onClose={onClose} title={tr("schedule")} icon={<Clock size={20} color={C.green} />} color={C.green}>
         {checkinTime && (
           <div style={{ display: "flex", gap: 14, padding: "14px 0", borderBottom: checkoutTime ? `1px solid ${C.sep}` : "none" }}>
             <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><Clock size={20} color={C.green} /></div>
             <div>
-              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Arrivée</p>
+              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("checkin")}</p>
               <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: C.green, letterSpacing: -1 }}>{formatTime(checkinTime)}</p>
             </div>
           </div>
@@ -360,14 +374,14 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
           <div style={{ display: "flex", gap: 14, padding: "14px 0" }}>
             <div style={{ width: 44, height: 44, borderRadius: "50%", background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><LogOut size={20} color={C.orange} /></div>
             <div>
-              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Départ</p>
+              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("checkout")}</p>
               <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: C.orange, letterSpacing: -1 }}>{formatTime(checkoutTime)}</p>
             </div>
           </div>
         )}
         {g(arrival, "checkin_process") && (
           <div style={{ marginTop: 8 }}>
-            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Procédure d'arrivée</p>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("checkin_process")}</p>
             {g(arrival, "checkin_process").split("\n").filter(Boolean).map((step, i, arr) => (
               <div key={i} style={{ display: "flex", gap: 14, padding: "10px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.sep}` : "none" }}>
                 <div style={{ width: 26, height: 26, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span style={{ fontSize: 11, fontWeight: 700, color: C.green }}>{i + 1}</span></div>
@@ -376,18 +390,18 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
             ))}
           </div>
         )}
-        <InfoRow icon={<Clock size={18} color={C.green} />} label="Arrivée anticipée" value={g(arrival, "early_checkin")} color={C.green} last />
+        <InfoRow icon={<Clock size={18} color={C.green} />} label={tr("early_checkin")} value={g(arrival, "early_checkin")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "wifi"} onClose={onClose} title="WiFi" icon={<Wifi size={20} color={MODULE_COLORS.wifi} />} color={MODULE_COLORS.wifi}>
-        <CopyRow label="Réseau" value={wifiName} accent={accent} />
-        <CopyRow label="Mot de passe" value={wifiPass} accent={accent} />
+      <Drawer open={drawer === "wifi"} onClose={onClose} title={tr("wifi")} icon={<Wifi size={20} color={MODULE_COLORS.wifi} />} color={MODULE_COLORS.wifi}>
+        <CopyRow label={tr("network")} value={wifiName} accent={accent} />
+        <CopyRow label={tr("password")} value={wifiPass} accent={accent} />
       </Drawer>
 
-      <Drawer open={drawer === "access"} onClose={onClose} title="Accès & Clés" icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>
+      <Drawer open={drawer === "access"} onClose={onClose} title={tr("access_keys")} icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>
         {accessCode && (
           <div style={{ marginBottom: 16 }}>
-            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>Code d'accès</p>
+            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("access_code")}</p>
             <div style={{ display: "flex", gap: 6, marginBottom: 12 }}>
               {accessCode.split("").map((char, i) => (
                 <div key={i} style={{ width: 44, height: 52, borderRadius: 12, background: `${accent}10`, border: `1.5px solid ${accent}20`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, fontWeight: 800, color: accent, fontFamily: "ui-monospace,monospace" }}>{char}</div>
@@ -395,51 +409,51 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
             </div>
           </div>
         )}
-        <InfoRow icon={<MapPin size={18} color={MODULE_COLORS.access} />} label="Localisation des clés" value={g(arrival, "key_location")} color={MODULE_COLORS.access} />
-        <InfoRow icon={<Car size={18} color={C.orange} />} label="Stationnement" value={g(arrival, "parking")} color={C.orange} last />
+        <InfoRow icon={<MapPin size={18} color={MODULE_COLORS.access} />} label={tr("key_location")} value={g(arrival, "key_location")} color={MODULE_COLORS.access} />
+        <InfoRow icon={<Car size={18} color={C.orange} />} label={tr("parking")} value={g(arrival, "parking")} color={C.orange} last />
       </Drawer>
 
-      <Drawer open={drawer === "rules"} onClose={onClose} title="Règles du séjour" icon={<ScrollText size={20} color={MODULE_COLORS.rules} />} color={MODULE_COLORS.rules}>
-        <InfoRow icon={<Users size={18} color={C.blue} />} label="Personnes" value={g(rules, "max_guests")} color={C.blue} />
-        <InfoRow icon={<Cigarette size={18} color={C.red} />} label="Tabac" value={g(rules, "smoking")} color={C.red} />
-        <InfoRow icon={<Dog size={18} color={C.orange} />} label="Animaux" value={g(rules, "pets")} color={C.orange} />
-        <InfoRow icon={<Volume2 size={18} color={C.green} />} label="Bruit" value={g(rules, "noise")} color={C.green} />
-        <InfoRow icon={<PartyPopper size={18} color="#8B5CF6" />} label="Fêtes" value={g(rules, "parties")} color="#8B5CF6" />
-        <InfoRow icon={<Info size={18} color={C.muted} />} label="Autres" value={g(rules, "other")} color={C.muted} last />
+      <Drawer open={drawer === "rules"} onClose={onClose} title={tr("rules")} icon={<ScrollText size={20} color={MODULE_COLORS.rules} />} color={MODULE_COLORS.rules}>
+        <InfoRow icon={<Users size={18} color={C.blue} />} label={tr("persons")} value={g(rules, "max_guests")} color={C.blue} />
+        <InfoRow icon={<Cigarette size={18} color={C.red} />} label={tr("smoking")} value={g(rules, "smoking")} color={C.red} />
+        <InfoRow icon={<Dog size={18} color={C.orange} />} label={tr("pets")} value={g(rules, "pets")} color={C.orange} />
+        <InfoRow icon={<Volume2 size={18} color={C.green} />} label={tr("noise")} value={g(rules, "noise")} color={C.green} />
+        <InfoRow icon={<PartyPopper size={18} color="#8B5CF6" />} label={tr("parties")} value={g(rules, "parties")} color="#8B5CF6" />
+        <InfoRow icon={<Info size={18} color={C.muted} />} label={tr("other")} value={g(rules, "other")} color={C.muted} last />
       </Drawer>
 
-      <Drawer open={drawer === "logement"} onClose={onClose} title="Le logement" icon={<Home size={20} color="#6366F1" />} color="#6366F1">
-        <InfoRow icon={<Thermometer size={18} color={MODULE_COLORS.heating} />} label="Chauffage" value={g(accommodation, "heating")} color={MODULE_COLORS.heating} />
-        <InfoRow icon={<Wind size={18} color={MODULE_COLORS.ac} />} label="Climatisation" value={g(accommodation, "ac")} color={MODULE_COLORS.ac} />
-        <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label="TV & Divertissements" value={g(accommodation, "tv")} color="#8B5CF6" last />
+      <Drawer open={drawer === "logement"} onClose={onClose} title={tr("le_logement")} icon={<Home size={20} color="#6366F1" />} color="#6366F1">
+        <InfoRow icon={<Thermometer size={18} color={MODULE_COLORS.heating} />} label={tr("heating")} value={g(accommodation, "heating")} color={MODULE_COLORS.heating} />
+        <InfoRow icon={<Wind size={18} color={MODULE_COLORS.ac} />} label={tr("ac")} value={g(accommodation, "ac")} color={MODULE_COLORS.ac} />
+        <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label={tr("tv")} value={g(accommodation, "tv")} color="#8B5CF6" last />
       </Drawer>
 
-      <Drawer open={drawer === "kitchen"} onClose={onClose} title="Cuisine" icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen}>
-        <InfoRow icon={<UtensilsCrossed size={18} color={MODULE_COLORS.kitchen} />} label="Équipements" value={g(kitchen, "equipment")} color={MODULE_COLORS.kitchen} />
-        <InfoRow icon={<WashingMachine size={18} color={C.blue} />} label="Électroménager" value={g(accommodation, "appliances")} color={C.blue} />
-        <InfoRow icon={<Mailbox size={18} color={C.orange} />} label="Boîte aux lettres" value={g(accommodation, "checkin_code")} color={C.orange} last />
+      <Drawer open={drawer === "kitchen"} onClose={onClose} title={tr("kitchen_equip")} icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen}>
+        <InfoRow icon={<UtensilsCrossed size={18} color={MODULE_COLORS.kitchen} />} label={tr("kitchen_equip")} value={g(kitchen, "equipment")} color={MODULE_COLORS.kitchen} />
+        <InfoRow icon={<WashingMachine size={18} color={C.blue} />} label={tr("appliances")} value={g(accommodation, "appliances")} color={C.blue} />
+        <InfoRow icon={<Mailbox size={18} color={C.orange} />} label={tr("mailbox")} value={g(accommodation, "checkin_code")} color={C.orange} last />
       </Drawer>
 
-      <Drawer open={drawer === "cleaning"} onClose={onClose} title="Ménage & Déchets" icon={<Sparkles size={20} color={MODULE_COLORS.cleaning} />} color={MODULE_COLORS.cleaning}>
-        <InfoRow icon={<Sparkles size={18} color={MODULE_COLORS.cleaning} />} label="Produits & ménage" value={g(kitchen, "cleaning")} color={MODULE_COLORS.cleaning} />
-        <InfoRow icon={<ShoppingBag size={18} color={C.blue} />} label="Linge de maison" value={g(kitchen, "linen")} color={C.blue} />
-        <InfoRow icon={<Trash2Icon size={18} color={C.green} />} label="Tri des déchets" value={g(kitchen, "trash")} color={C.green} last />
+      <Drawer open={drawer === "cleaning"} onClose={onClose} title={tr("menage_dechets")} icon={<Sparkles size={20} color={MODULE_COLORS.cleaning} />} color={MODULE_COLORS.cleaning}>
+        <InfoRow icon={<Sparkles size={18} color={MODULE_COLORS.cleaning} />} label={tr("cleaning")} value={g(kitchen, "cleaning")} color={MODULE_COLORS.cleaning} />
+        <InfoRow icon={<ShoppingBag size={18} color={C.blue} />} label={tr("linen")} value={g(kitchen, "linen")} color={C.blue} />
+        <InfoRow icon={<Trash2Icon size={18} color={C.green} />} label={tr("waste")} value={g(kitchen, "trash")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "safety"} onClose={onClose} title="Urgences & Sécurité" icon={<Shield size={20} color={MODULE_COLORS.safety} />} color={MODULE_COLORS.safety}>
+      <Drawer open={drawer === "safety"} onClose={onClose} title={tr("safety")} icon={<Shield size={20} color={MODULE_COLORS.safety} />} color={MODULE_COLORS.safety}>
         {g(safety, "emergency") && (
           <div style={{ background: "#FFF5F5", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: "1px solid #FEE2E2" }}>
-            <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.7 }}>Numéros d'urgence</p>
+            <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("emergency_numbers")}</p>
             <p style={{ margin: 0, fontSize: 15, color: "#374151", lineHeight: 1.9, whiteSpace: "pre-line", fontWeight: 500 }}>{g(safety, "emergency")}</p>
           </div>
         )}
-        <InfoRow icon={<Flame size={18} color={C.red} />} label="Extincteur" value={g(safety, "fire_extinguisher")} color={C.red} />
-        <InfoRow icon={<Zap size={18} color={C.orange} />} label="Disjoncteur" value={g(safety, "circuit_breaker")} color={C.orange} />
-        <InfoRow icon={<Droplets size={18} color={C.blue} />} label="Coupure d'eau" value={g(safety, "water_shutoff")} color={C.blue} />
-        <InfoRow icon={<Hospital size={18} color={C.green} />} label="Hôpital" value={g(safety, "hospital")} color={C.green} last />
+        <InfoRow icon={<Flame size={18} color={C.red} />} label={tr("fire_extinguisher")} value={g(safety, "fire_extinguisher")} color={C.red} />
+        <InfoRow icon={<Zap size={18} color={C.orange} />} label={tr("circuit_breaker")} value={g(safety, "circuit_breaker")} color={C.orange} />
+        <InfoRow icon={<Droplets size={18} color={C.blue} />} label={tr("water_shutoff")} value={g(safety, "water_shutoff")} color={C.blue} />
+        <InfoRow icon={<Hospital size={18} color={C.green} />} label={tr("hospital")} value={g(safety, "hospital")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "contact"} onClose={onClose} title="Contact" icon={<Phone size={20} color={MODULE_COLORS.contact} />} color={MODULE_COLORS.contact}>
+      <Drawer open={drawer === "contact"} onClose={onClose} title={tr("contact")} icon={<Phone size={20} color={MODULE_COLORS.contact} />} color={MODULE_COLORS.contact}>
         {(g(contact, "host_name") || g(contact, "host_photo")) && (
           <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "0 0 14px", borderBottom: `1px solid ${C.sep}`, marginBottom: 4 }}>
             {g(contact, "host_photo") ? <img src={g(contact, "host_photo")} alt="" style={{ width: 52, height: 52, borderRadius: "50%", objectFit: "cover" }} /> : <div style={{ width: 52, height: 52, borderRadius: "50%", background: `${accent}15`, display: "flex", alignItems: "center", justifyContent: "center" }}><Users size={22} color={accent} /></div>}
@@ -451,43 +465,43 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         )}
         {g(contact, "about") && <p style={{ margin: "12px 0", fontSize: 14, color: C.sub, lineHeight: 1.65 }}>{g(contact, "about")}</p>}
         <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
-          {g(contact, "host_phone") && <a href={`tel:${g(contact, "host_phone")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> Appeler</a>}
-          {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> Email</a>}
+          {g(contact, "host_phone") && <a href={`tel:${g(contact, "host_phone")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> {tr("call")}</a>}
+          {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> {tr("email")}</a>}
         </div>
-        <InfoRow icon={<ConciergeBell size={18} color="#8B5CF6" />} label="Conciergerie" value={g(contact, "concierge")} color="#8B5CF6" />
-        <InfoRow icon={<Wrench size={18} color={C.orange} />} label="Maintenance" value={g(contact, "maintenance")} color={C.orange} last />
+        <InfoRow icon={<ConciergeBell size={18} color="#8B5CF6" />} label={tr("concierge")} value={g(contact, "concierge")} color="#8B5CF6" />
+        <InfoRow icon={<Wrench size={18} color={C.orange} />} label={tr("maintenance")} value={g(contact, "maintenance")} color={C.orange} last />
       </Drawer>
 
-      <Drawer open={drawer === "pool"} onClose={onClose} title="Piscine & Extérieur" icon={<Waves size={20} color={MODULE_COLORS.pool} />} color={MODULE_COLORS.pool}>
-        <InfoRow icon={<Clock size={18} color={C.blue} />} label="Horaires" value={g(pool, "hours")} color={C.blue} />
-        <InfoRow icon={<Shield size={18} color={C.red} />} label="Règles" value={g(pool, "rules")} color={C.red} />
-        <InfoRow icon={<Waves size={18} color={C.green} />} label="Équipements" value={g(pool, "equipment")} color={C.green} />
-        <InfoRow icon={<Wrench size={18} color={C.muted} />} label="Entretien" value={g(pool, "maintenance")} color={C.muted} last />
+      <Drawer open={drawer === "pool"} onClose={onClose} title={tr("pool")} icon={<Waves size={20} color={MODULE_COLORS.pool} />} color={MODULE_COLORS.pool}>
+        <InfoRow icon={<Clock size={18} color={C.blue} />} label={tr("schedule")} value={g(pool, "hours")} color={C.blue} />
+        <InfoRow icon={<Shield size={18} color={C.red} />} label={tr("pool_rules")} value={g(pool, "rules")} color={C.red} />
+        <InfoRow icon={<Waves size={18} color={C.green} />} label={tr("pool_equip")} value={g(pool, "equipment")} color={C.green} />
+        <InfoRow icon={<Wrench size={18} color={C.muted} />} label={tr("pool_maintenance")} value={g(pool, "maintenance")} color={C.muted} last />
       </Drawer>
 
-      <Drawer open={drawer === "baby"} onClose={onClose} title="Bébé & Enfants" icon={<Baby size={20} color={MODULE_COLORS.baby} />} color={MODULE_COLORS.baby}>
-        <InfoRow icon={<Baby size={18} color={MODULE_COLORS.baby} />} label="Équipements" value={g(baby, "available")} color={MODULE_COLORS.baby} />
-        <InfoRow icon={<Shield size={18} color={C.green} />} label="Sécurité" value={g(baby, "safety")} color={C.green} />
-        <InfoRow icon={<ShoppingBag size={18} color={C.blue} />} label="Location" value={g(baby, "rental")} color={C.blue} last />
+      <Drawer open={drawer === "baby"} onClose={onClose} title={tr("baby")} icon={<Baby size={20} color={MODULE_COLORS.baby} />} color={MODULE_COLORS.baby}>
+        <InfoRow icon={<Baby size={18} color={MODULE_COLORS.baby} />} label={tr("baby_equip")} value={g(baby, "available")} color={MODULE_COLORS.baby} />
+        <InfoRow icon={<Shield size={18} color={C.green} />} label={tr("baby_safety")} value={g(baby, "safety")} color={C.green} />
+        <InfoRow icon={<ShoppingBag size={18} color={C.blue} />} label={tr("baby_rental")} value={g(baby, "rental")} color={C.blue} last />
       </Drawer>
 
-      <Drawer open={drawer === "pets"} onClose={onClose} title="Animaux acceptés" icon={<Dog size={20} color={MODULE_COLORS.pets} />} color={MODULE_COLORS.pets}>
-        <InfoRow icon={<Dog size={18} color={MODULE_COLORS.pets} />} label="Règles" value={g(petsModule, "rules")} color={MODULE_COLORS.pets} />
-        <InfoRow icon={<MapPin size={18} color={C.blue} />} label="Zones autorisées" value={g(petsModule, "zones")} color={C.blue} />
-        <InfoRow icon={<Hospital size={18} color={C.green} />} label="Vétérinaires" value={g(petsModule, "nearby")} color={C.green} last />
+      <Drawer open={drawer === "pets"} onClose={onClose} title={tr("pets")} icon={<Dog size={20} color={MODULE_COLORS.pets} />} color={MODULE_COLORS.pets}>
+        <InfoRow icon={<Dog size={18} color={MODULE_COLORS.pets} />} label={tr("pets_rules")} value={g(petsModule, "rules")} color={MODULE_COLORS.pets} />
+        <InfoRow icon={<MapPin size={18} color={C.blue} />} label={tr("pets_zones")} value={g(petsModule, "zones")} color={C.blue} />
+        <InfoRow icon={<Hospital size={18} color={C.green} />} label={tr("pets_places")} value={g(petsModule, "nearby")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "coworking"} onClose={onClose} title="Télétravail" icon={<Briefcase size={20} color={MODULE_COLORS.coworking} />} color={MODULE_COLORS.coworking}>
-        <InfoRow icon={<Briefcase size={18} color={MODULE_COLORS.coworking} />} label="Espace de travail" value={g(coworking, "desk")} color={MODULE_COLORS.coworking} />
-        <InfoRow icon={<Wifi size={18} color={C.blue} />} label="WiFi dédié" value={g(coworking, "wifi_pro")} color={C.blue} />
-        <InfoRow icon={<Tv size={18} color={C.green} />} label="Écrans" value={g(coworking, "screens")} color={C.green} last />
+      <Drawer open={drawer === "coworking"} onClose={onClose} title={tr("coworking")} icon={<Briefcase size={20} color={MODULE_COLORS.coworking} />} color={MODULE_COLORS.coworking}>
+        <InfoRow icon={<Briefcase size={18} color={MODULE_COLORS.coworking} />} label={tr("workspace")} value={g(coworking, "desk")} color={MODULE_COLORS.coworking} />
+        <InfoRow icon={<Wifi size={18} color={C.blue} />} label={tr("wifi_dedicated")} value={g(coworking, "wifi_pro")} color={C.blue} />
+        <InfoRow icon={<Tv size={18} color={C.green} />} label={tr("screens")} value={g(coworking, "screens")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "transport"} onClose={onClose} title="Transport" icon={<Bus size={20} color={MODULE_COLORS.transport} />} color={MODULE_COLORS.transport}>
-        <InfoRow icon={<Bus size={18} color={C.blue} />} label="Transports en commun" value={g(transport, "public")} color={C.blue} />
-        <InfoRow icon={<Car size={18} color={C.orange} />} label="Taxi / VTC" value={g(transport, "taxi")} color={C.orange} />
-        <InfoRow icon={<Bike size={18} color={C.green} />} label="Vélos" value={g(transport, "bike")} color={C.green} />
-        <InfoRow icon={<Plane size={18} color="#8B5CF6" />} label="Aéroport" value={g(transport, "airport")} color="#8B5CF6" last />
+      <Drawer open={drawer === "transport"} onClose={onClose} title={tr("transport")} icon={<Bus size={20} color={MODULE_COLORS.transport} />} color={MODULE_COLORS.transport}>
+        <InfoRow icon={<Bus size={18} color={C.blue} />} label={tr("public_transport")} value={g(transport, "public")} color={C.blue} />
+        <InfoRow icon={<Car size={18} color={C.orange} />} label={tr("taxi")} value={g(transport, "taxi")} color={C.orange} />
+        <InfoRow icon={<Bike size={18} color={C.green} />} label={tr("bikes")} value={g(transport, "bike")} color={C.green} />
+        <InfoRow icon={<Plane size={18} color="#8B5CF6" />} label={tr("airport")} value={g(transport, "airport")} color="#8B5CF6" last />
       </Drawer>
     </>
   );
@@ -505,6 +519,7 @@ function Trash2Icon({ size, color }: { size: number; color: string }) {
 // ─── PAGE ACTIVITÉS ───────────────────────────────────────────────────────────
 
 function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
+  const tr = useT();
   const neighborhood = useMod(booklet, "neighborhood");
   const activities = parseActivities(g(neighborhood, "activities_list"));
   const places = neighborhood ? parsePlaces(g(neighborhood, "places")) : [];
@@ -513,15 +528,21 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const [selectedAct, setSelectedAct] = useState<Activity | null>(null);
 
   const catColor: Record<string, string> = { restaurant: C.red, activity: C.blue, shop: C.green, transport: C.orange, other: C.muted };
-  const catLabel: Record<string, string> = { restaurant: "Restaurant", activity: "Activité", shop: "Commerce", transport: "Transport", other: "Lieu" };
+  const catLabel: Record<string, string> = {
+    restaurant: tr("cat_restaurant"),
+    activity: tr("cat_activity"),
+    shop: tr("cat_shop"),
+    transport: tr("transport"),
+    other: tr("places"),
+  };
 
   const CATS = [
-    { id: "all", label: "Tout" },
-    { id: "restaurant", label: "Restau" },
-    { id: "activity", label: "Activités" },
-    { id: "shop", label: "Commerces" },
-    { id: "transport", label: "Transport" },
-    { id: "other", label: "Autres" },
+    { id: "all", label: tr("all") },
+    { id: "restaurant", label: tr("restaurant") },
+    { id: "activity", label: tr("activities") },
+    { id: "shop", label: tr("shops") },
+    { id: "transport", label: tr("transport") },
+    { id: "other", label: tr("other") },
   ];
 
   const presentCats = new Set(activities.map(a => a.category));
@@ -547,7 +568,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         {/* Header */}
         <div style={{ padding: "48px 20px 16px" }}>
-          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1 }}>À découvrir</p>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1 }}>{tr("discover")}</p>
           <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{booklet.propertyName || booklet.title}</h2>
         </div>
 
@@ -597,7 +618,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
           {/* Carte */}
           {mapAddress && (
             <div style={{ ...GLASS_CARD, overflow: "hidden" }}>
-              <p style={{ margin: "0 0 0", padding: "12px 14px 10px", fontSize: 13, fontWeight: 700, color: "#fff" }}>Carte</p>
+              <p style={{ margin: "0 0 0", padding: "12px 14px 10px", fontSize: 13, fontWeight: 700, color: "#fff" }}>{tr("map")}</p>
               <iframe src={`https://maps.google.com/maps?q=${mapAddress}&output=embed&z=15`} width="100%" height="160" style={{ border: 0, display: "block" }} loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Carte" />
             </div>
           )}
@@ -621,9 +642,9 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
               {selectedAct.priceRange && <span style={{ fontSize: 12, color: C.orange, fontWeight: 700, background: `${C.orange}12`, borderRadius: 20, padding: "4px 10px" }}>{selectedAct.priceRange}</span>}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              {selectedAct.phone && <a href={`tel:${selectedAct.phone}`} style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Phone size={15} color={accent} /> Appeler</a>}
-              {selectedAct.address && <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedAct.address)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Navigation size={15} color={accent} /> Maps</a>}
-              {selectedAct.website && <a href={selectedAct.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Globe size={15} color={accent} /> Site</a>}
+              {selectedAct.phone && <a href={`tel:${selectedAct.phone}`} style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Phone size={15} color={accent} /> {tr("call")}</a>}
+              {selectedAct.address && <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedAct.address)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Navigation size={15} color={accent} /> {tr("maps")}</a>}
+              {selectedAct.website && <a href={selectedAct.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 600, fontSize: 13 }}><Globe size={15} color={accent} /> {tr("website")}</a>}
             </div>
           </Drawer>
         </div>
@@ -635,6 +656,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 // ─── PAGE DÉPART ──────────────────────────────────────────────────────────────
 
 function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) {
+  const tr = useT();
   const checkout = useMod(booklet, "checkout");
   const tasks = g(checkout, "process").split("\n").filter(Boolean);
   const [checked, setChecked] = useState<Record<number, boolean>>({});
@@ -658,8 +680,8 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 
         {/* Header */}
         <div style={{ padding: "48px 20px 16px" }}>
-          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1 }}>Checklist</p>
-          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>Votre départ</h2>
+          <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 1 }}>{tr("checklist")}</p>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{tr("your_checkout")}</h2>
         </div>
 
         <div style={{ padding: "0 16px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
@@ -670,7 +692,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
               <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
                 <Clock size={26} color="#fff" />
               </div>
-              <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>Heure de départ</p>
+              <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("checkout_time")}</p>
               <p style={{ margin: 0, fontSize: 52, fontWeight: 800, color: "#fff", letterSpacing: -2, lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>{formatTime(g(checkout, "checkout_time"))}</p>
               {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{g(checkout, "late_checkout_info")}</p>}
             </div>
@@ -680,7 +702,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
           {tasks.length > 0 && (
             <div style={{ ...GLASS_CARD, overflow: "hidden" }}>
               <div style={{ padding: "14px 18px 12px", borderBottom: "1px solid rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>Checklist de départ</p>
+                <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>{tr("checkout_checklist")}</p>
                 <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>{doneCount}/{tasks.length}</span>
               </div>
               {tasks.map((task, i) => (
@@ -695,7 +717,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
               {doneCount === tasks.length && tasks.length > 0 && (
                 <div style={{ padding: "12px 18px", background: `${accent}30`, display: "flex", alignItems: "center", gap: 8 }}>
                   <Check size={15} color="#fff" />
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff" }}>Tout est prêt, bon voyage !</p>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: "#fff" }}>{tr("checkout_ready")}</p>
                 </div>
               )}
             </div>
@@ -708,7 +730,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
                 <Key size={20} color="#fff" />
               </div>
               <div>
-                <p style={{ margin: "0 0 3px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.7 }}>Retour des clés</p>
+                <p style={{ margin: "0 0 3px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("key_return")}</p>
                 <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{g(checkout, "keys_return")}</p>
               </div>
             </div>
@@ -717,7 +739,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
           {/* Avis */}
           {(g(checkout, "review_airbnb") || g(checkout, "review_google") || g(checkout, "review_booking")) && (
             <div>
-              <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 0.8 }}>Laissez un avis</p>
+              <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("leave_review")}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {[
                   { key: "review_airbnb", label: "Airbnb" },
@@ -754,12 +776,13 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 type GridTab = "home" | "area" | "checkout";
 
 function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (t: GridTab) => void; accent: string }) {
+  const tr = useT();
   const inactive = "rgba(255,255,255,0.5)";
 
   const tabs = [
-    { id: "home" as GridTab,     label: "Accueil",   icon: (a: boolean) => <Home size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "area" as GridTab,     label: "Activités", icon: (a: boolean) => <MapPin size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
-    { id: "checkout" as GridTab, label: "Départ",    icon: (a: boolean) => <LogOut size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "home" as GridTab,     label: tr("nav_home"),     icon: (a: boolean) => <Home size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "area" as GridTab,     label: tr("nav_area"),     icon: (a: boolean) => <MapPin size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    { id: "checkout" as GridTab, label: tr("nav_checkout"), icon: (a: boolean) => <LogOut size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
   ];
 
   return (
@@ -825,11 +848,10 @@ function LangSelector({ booklet, lang, onSelect }: {
           display: "flex", alignItems: "center", gap: 6,
           background: "rgba(0,0,0,0.45)", backdropFilter: "blur(12px)",
           border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20,
-          padding: "6px 12px 6px 8px", color: "#fff", fontSize: 13, fontWeight: 600,
+          padding: "6px 10px", color: "#fff", fontSize: 20, fontWeight: 600,
           cursor: "pointer",
         }}>
-        <span style={{ fontSize: 16 }}>{current.flag}</span>
-        <span>{current.code.toUpperCase()}</span>
+        <span>{current.flag}</span>
       </button>
       {open && (
         <div style={{
@@ -873,7 +895,7 @@ function GridContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; o
   };
 
   return (
-    <>
+    <LangCtx.Provider value={lang}>
       <style>{`::-webkit-scrollbar-thumb { background: ${accent} !important; }`}</style>
       <div style={{ position: "relative", height: "100%", fontFamily: FONT, WebkitFontSmoothing: "antialiased", background: "#1a1a2e" }}>
 
@@ -905,7 +927,7 @@ function GridContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; o
         <HomeDrawers booklet={booklet} accent={accent} drawer={drawer} onClose={() => setDrawer(null)} />
       </div>
     </div>
-    </>
+    </LangCtx.Provider>
   );
 }
 
