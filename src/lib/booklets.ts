@@ -11,7 +11,7 @@ import {
   deleteField,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { Booklet, BookletModule, Folder, ModuleType } from "@/types";
+import { Booklet, BookletModule, BookletTranslations, Folder, ModuleType } from "@/types";
 
 // Firestore rejette les `undefined`.
 // - Au niveau racine : on utilise deleteField() pour supprimer le champ
@@ -70,6 +70,10 @@ export async function getUserBooklets(userId: string): Promise<Booklet[]> {
 export async function updateBooklet(id: string, data: Partial<Booklet>) {
   const clean = sanitizeForFirestore({ ...data, updatedAt: Date.now() } as Record<string, unknown>);
   await updateDoc(doc(db, "booklets", id), clean);
+}
+
+export async function saveBookletTranslations(id: string, translations: Partial<BookletTranslations>) {
+  await updateDoc(doc(db, "booklets", id), { translations, updatedAt: Date.now() });
 }
 
 export async function deleteBooklet(id: string) {

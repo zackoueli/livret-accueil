@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X, Languages, Loader2, Check, AlertCircle } from "lucide-react";
 import { Booklet, SupportedLang, SUPPORTED_LANGS, BookletTranslations } from "@/types";
-import { updateBooklet } from "@/lib/booklets";
+import { saveBookletTranslations } from "@/lib/booklets";
 import toast from "react-hot-toast";
 
 interface Props {
@@ -80,9 +80,9 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
       }
     }
 
-    // Sauvegarder dans Firestore
+    // Sauvegarder dans Firestore (uniquement le champ translations)
     try {
-      await updateBooklet(booklet.id, { ...booklet, translations: allTranslations });
+      await saveBookletTranslations(booklet.id, allTranslations);
       onTranslated(allTranslations);
       toast.success("Traductions enregistrées !");
       onClose();
