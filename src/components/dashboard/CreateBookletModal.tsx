@@ -142,6 +142,15 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
                   </button>
                 );
               })}
+
+              {/* Carte bientôt disponible — pleine largeur */}
+              <div className="col-span-2 flex items-center gap-4 rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-5 py-4">
+                <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl shrink-0">✨</div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-500">Nouveaux designs à venir</p>
+                  <p className="text-xs text-gray-400 mt-0.5">D'autres templates arrivent bientôt — suivez-nous sur Instagram pour les découvrir en avant-première.</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
