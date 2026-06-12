@@ -827,6 +827,18 @@ function useTranslatedBooklet(booklet: Booklet, lang: SupportedLang): Booklet {
   }, [booklet, lang]);
 }
 
+const LANG_FLAG_ISO: Record<string, string> = { fr: "fr", en: "gb", es: "es", de: "de", it: "it", ar: "sa" };
+function FlagImg({ code, size = 20 }: { code: string; size?: number }) {
+  const iso = LANG_FLAG_ISO[code] ?? code;
+  return (
+    <img
+      src={`https://flagcdn.com/w40/${iso}.png`}
+      alt={code}
+      style={{ width: size, height: size * 0.67, borderRadius: 3, objectFit: "cover", display: "block", flexShrink: 0 }}
+    />
+  );
+}
+
 function LangSelector({ booklet, lang, onSelect }: {
   booklet: Booklet;
   lang: SupportedLang;
@@ -848,10 +860,9 @@ function LangSelector({ booklet, lang, onSelect }: {
           display: "flex", alignItems: "center", gap: 6,
           background: "rgba(0,0,0,0.45)", backdropFilter: "blur(12px)",
           border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20,
-          padding: "6px 10px", color: "#fff", fontSize: 20, fontWeight: 600,
-          cursor: "pointer",
+          padding: "7px 12px", cursor: "pointer",
         }}>
-        <span>{current.flag}</span>
+        <FlagImg code={current.code} size={22} />
       </button>
       {open && (
         <div style={{
@@ -871,7 +882,7 @@ function LangSelector({ booklet, lang, onSelect }: {
                 color: "#fff", fontSize: 13, fontWeight: l.code === lang ? 700 : 400,
                 cursor: "pointer", textAlign: "left",
               }}>
-              <span style={{ fontSize: 16 }}>{l.flag}</span>
+              <FlagImg code={l.code} size={20} />
               <span>{l.label}</span>
               {l.code === lang && <Check size={12} style={{ marginLeft: "auto", color: "#34d399" }} />}
             </button>
