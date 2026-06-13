@@ -13,6 +13,8 @@ export interface UserProfile {
   subscriptionStatus?: "active" | "canceled" | "past_due" | "trialing";
   subscriptionEndDate?: number;
   createdAt: number;
+  translationCharsUsed?: number;
+  translationCharsMonth?: string; // "YYYY-MM"
 }
 
 // ── Modules ────────────────────────────────────────────────────────────────────

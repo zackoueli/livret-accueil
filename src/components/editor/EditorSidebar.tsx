@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { GripVertical, Eye, EyeOff, Check, X, Loader2, Link, ImagePlus, Trash2 } from "lucide-react";
+import { GripVertical, Eye, EyeOff, Check, X, Loader2, Link, ImagePlus, Trash2, Lock } from "lucide-react";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "@/lib/firebase";
 import {
@@ -25,10 +25,14 @@ import { useEditorStore } from "@/store/editorStore";
 import { MODULE_META, CORE_MODULES, OPTIONAL_MODULES } from "@/lib/modules";
 import { BookletModule, ModuleType } from "@/types";
 import { bookletUrl } from "@/lib/url";
+import { usePlan } from "@/hooks/usePlan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
   const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules, addModule } = useEditorStore();
   const [tab, setTab] = useState<"modules" | "appearance">("appearance");
+  const { isPaid } = usePlan();
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -89,22 +93,44 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
           {/* Séparateur + modules optionnels */}
           {OPTIONAL_MODULES.some(t => !existingTypes.has(t)) && (
             <div className="mt-4">
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider px-2 mb-2">À ajouter</p>
+              <div className="flex items-center gap-2 px-2 mb-2">
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">À ajouter</p>
+                {!isPaid && (
+                  <span className="flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
+                    <Lock className="w-2.5 h-2.5" /> Pro
+                  </span>
+                )}
+              </div>
               {OPTIONAL_MODULES.filter(t => !existingTypes.has(t)).map((type) => {
                 const meta = MODULE_META[type];
                 return (
-                  <div key={type} className="flex items-center gap-2 px-3 py-2 rounded-xl mb-1 hover:bg-gray-50 transition-colors">
+                  <div key={type} className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-1 transition-colors ${isPaid ? "hover:bg-gray-50" : "opacity-60"}`}>
                     <span className="text-base leading-none">{meta.emoji}</span>
                     <span className="flex-1 text-sm text-gray-500 truncate">{meta.label}</span>
-                    <button
-                      onClick={() => addModule(type)}
-                      className="flex items-center gap-1 text-xs font-bold text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition-colors shrink-0">
-                      + Ajouter
-                    </button>
+                    {isPaid ? (
+                      <button
+                        onClick={() => addModule(type)}
+                        className="flex items-center gap-1 text-xs font-bold text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition-colors shrink-0">
+                        + Ajouter
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setShowUpgrade(true)}
+                        className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-orange-500 bg-gray-100 hover:bg-orange-50 px-2.5 py-1 rounded-lg transition-colors shrink-0">
+                        <Lock className="w-3 h-3" /> Pro
+                      </button>
+                    )}
                   </div>
                 );
               })}
             </div>
+          )}
+
+          {showUpgrade && (
+            <UpgradeModal
+              reason="Les modules optionnels sont réservés aux plans Pro et Agency"
+              onClose={() => setShowUpgrade(false)}
+            />
           )}
         </div>
       )}

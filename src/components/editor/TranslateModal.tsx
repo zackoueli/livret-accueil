@@ -4,7 +4,10 @@ import { useState, useEffect } from "react";
 import { X, Languages, Loader2, Check, AlertCircle, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { Booklet, SupportedLang, SUPPORTED_LANGS, BookletTranslations } from "@/types";
 import { saveBookletTranslations } from "@/lib/booklets";
+import { useAuthStore } from "@/store/authStore";
 import toast from "react-hot-toast";
+
+const MONTHLY_LIMIT = 50_000;
 
 interface Props {
   booklet: Booklet;
@@ -15,6 +18,7 @@ interface Props {
 type Tab = "auto" | "edit";
 
 export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
+  const { user, profile } = useAuthStore();
   const existingLangs = Object.keys(booklet.translations ?? {}) as SupportedLang[];
   const [tab, setTab] = useState<Tab>("auto");
 
@@ -23,6 +27,14 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<Record<SupportedLang, "idle" | "loading" | "done" | "error">>({
     fr: "idle", en: "idle", es: "idle", de: "idle", it: "idle", ar: "idle",
+  });
+
+  // Quota from profile (refreshed after translation)
+  const [charsUsed, setCharsUsed] = useState<number>(() => {
+    if (!profile) return 0;
+    const now = new Date();
+    const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+    return profile.translationCharsMonth === month ? (profile.translationCharsUsed ?? 0) : 0;
   });
 
   // ── Onglet Édition manuelle ──────────────────────────────────────────────────
@@ -49,6 +61,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
     if (targets.length === 0) return;
     setLoading(true);
 
+    const token = user ? await user.getIdToken() : null;
     const allTranslations: Partial<BookletTranslations> = { ...(booklet.translations ?? {}) };
 
     for (const lang of targets) {
@@ -68,11 +81,24 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
 
         const res = await fetch("/api/translate", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          },
           body: JSON.stringify({ texts: entries.map(e => e.text), targetLang: lang }),
         });
+
+        if (res.status === 429) {
+          const body = await res.json();
+          setCharsUsed(body.charsUsed ?? MONTHLY_LIMIT);
+          toast.error(`Limite mensuelle de ${MONTHLY_LIMIT.toLocaleString()} caractères atteinte`);
+          setProgress(p => ({ ...p, [lang]: "error" }));
+          continue;
+        }
         if (!res.ok) throw new Error("API error");
-        const { translations } = await res.json();
+        const body = await res.json();
+        const { translations } = body;
+        if (body.charsUsed !== undefined) setCharsUsed(body.charsUsed);
 
         const langMap: Record<string, Record<string, string>> = {};
         entries.forEach((entry, i) => {
@@ -217,16 +243,35 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
                 );
               })}
             </div>
-            <div className="px-6 pb-5 flex items-center justify-between gap-3 shrink-0 border-t border-gray-100 pt-4">
-              <p className="text-xs text-gray-400">
-                {targetCount === 0 ? "Sélectionnez au moins une langue" : `${targetCount} langue${targetCount > 1 ? "s" : ""} sélectionnée${targetCount > 1 ? "s" : ""}`}
-              </p>
-              <button
-                onClick={handleTranslate}
-                disabled={loading || targetCount === 0}
-                className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50">
-                {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Traduction...</> : <><Languages className="w-4 h-4" /> Traduire</>}
-              </button>
+            <div className="px-6 pb-5 shrink-0 border-t border-gray-100 pt-4 space-y-3">
+              {/* Quota bar */}
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs text-gray-400">Quota mensuel</span>
+                  <span className={`text-xs font-medium ${charsUsed >= MONTHLY_LIMIT ? "text-red-500" : charsUsed >= MONTHLY_LIMIT * 0.8 ? "text-orange-500" : "text-gray-500"}`}>
+                    {charsUsed.toLocaleString()} / {MONTHLY_LIMIT.toLocaleString()} car.
+                  </span>
+                </div>
+                <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${charsUsed >= MONTHLY_LIMIT ? "bg-red-400" : charsUsed >= MONTHLY_LIMIT * 0.8 ? "bg-orange-400" : "bg-green-400"}`}
+                    style={{ width: `${Math.min(100, (charsUsed / MONTHLY_LIMIT) * 100)}%` }}
+                  />
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <p className="text-xs text-gray-400">
+                  {charsUsed >= MONTHLY_LIMIT
+                    ? "Limite atteinte — réinitialisée le 1er du mois"
+                    : targetCount === 0 ? "Sélectionnez au moins une langue" : `${targetCount} langue${targetCount > 1 ? "s" : ""} sélectionnée${targetCount > 1 ? "s" : ""}`}
+                </p>
+                <button
+                  onClick={handleTranslate}
+                  disabled={loading || targetCount === 0 || charsUsed >= MONTHLY_LIMIT}
+                  className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50">
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Traduction...</> : <><Languages className="w-4 h-4" /> Traduire</>}
+                </button>
+              </div>
             </div>
           </>
         )}
