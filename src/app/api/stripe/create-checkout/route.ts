@@ -22,6 +22,15 @@ export async function POST(request: NextRequest) {
   const userData = userDoc.data();
   let customerId: string | undefined = userData?.stripeCustomerId;
 
+  if (customerId) {
+    // Vérifie que le customer existe bien en mode live (pas un ID test)
+    try {
+      await stripe.customers.retrieve(customerId);
+    } catch {
+      customerId = undefined;
+    }
+  }
+
   if (!customerId) {
     const customer = await stripe.customers.create({
       email,
