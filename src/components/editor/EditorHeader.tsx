@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock, Languages } from "lucide-react";
+import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock, Languages, Crown } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { useEditorStore } from "@/store/editorStore";
@@ -27,7 +27,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
   const [upgradeReason, setUpgradeReason] = useState("");
   const [publishing, setPublishing] = useState(false);
   const [publishedCount, setPublishedCount] = useState(0);
-  const { can, plan } = usePlan();
+  const { can, plan, isPaid } = usePlan();
   const { user } = useAuthStore();
 
   useEffect(() => {
@@ -91,6 +91,16 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       </div>
 
       <div className="flex-1" />
+
+      {/* Upgrade CTA — comptes free seulement */}
+      {!isPaid && (
+        <button
+          onClick={() => openUpgrade("Passez Pro pour débloquer toutes les fonctionnalités")}
+          className="hidden sm:flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white shadow-sm transition-all">
+          <Crown className="w-3.5 h-3.5" />
+          Passer Pro
+        </button>
+      )}
 
       {/* Import IA */}
       <button
