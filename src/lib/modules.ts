@@ -62,6 +62,8 @@ export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
   accommodation: [
     { key: "wifi_name",     label: "Nom du réseau WiFi",  placeholder: "GuestWifi",            type: "text" },
     { key: "wifi_password", label: "Mot de passe WiFi",   placeholder: "motdepasse123",         type: "text" },
+    { key: "wifi_security", label: "Type de sécurité WiFi", placeholder: "WPA",                 type: "text",
+      hint: "WPA (par défaut, recommandé) — WEP (anciens routeurs) — Aucune (réseau ouvert)" },
     { key: "services_list", label: "Services & équipements inclus", placeholder: "", type: "services",
       hint: "Ajoutez les services inclus (piscine, parking, BBQ...) avec icône et description courte." },
     { key: "heating",       label: "Chauffage",           placeholder: "Thermostat dans le couloir, régler à 20°C maximum.", type: "textarea" },

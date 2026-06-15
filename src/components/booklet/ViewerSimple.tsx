@@ -125,12 +125,15 @@ function CopyButton({ value, accent }: { value: string; accent: string }) {
   );
 }
 
-function WifiQRCode({ ssid, password, accent }: { ssid: string; password: string; accent: string }) {
+function WifiQRCode({ ssid, password, security, accent }: { ssid: string; password: string; security?: string; accent: string }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!ssid && !password) return;
     const escaped = (s: string) => s.replace(/[\\;,"]/g, c => `\\${c}`);
-    const wifiString = `WIFI:T:WPA;S:${escaped(ssid)};P:${escaped(password)};;`;
+    const sec = security || "WPA";
+    const wifiString = sec
+      ? `WIFI:T:${sec};S:${escaped(ssid)};P:${escaped(password)};;`
+      : `WIFI:T:;S:${escaped(ssid)};P:;;`;
     import("qrcode").then(QRCode => {
       QRCode.toDataURL(wifiString, { width: 180, margin: 1, color: { dark: "#1F2937", light: "#FFFFFF" } })
         .then(url => setDataUrl(url));
@@ -390,6 +393,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const parking      = g(arrival, "parking");
   const wifiName     = g(accommodation, "wifi_name");
   const wifiPass     = g(accommodation, "wifi_password");
+  const wifiSecurity = g(accommodation, "wifi_security");
   const welcomeMsg   = g(arrival, "welcome_message");
   const hostName     = g(contact, "host_name");
   const hostPhoto    = g(contact, "host_photo");
@@ -523,7 +527,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
                   <CopyButton value={wifiPass} accent={accent} />
                 </div>
               )}
-              {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} accent={accent} />}
+              {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} security={wifiSecurity} accent={accent} />}
             </Card>
           </div>
         )}

@@ -556,7 +556,19 @@ export function EditorForm() {
                 </select>
               )}
 
-              {field.type === "text" && !(activeModule.type === "tides" && field.key === "port_id") && (
+              {field.type === "text" && activeModule.type === "accommodation" && field.key === "wifi_security" && (
+                <select
+                  value={get("wifi_security") || "WPA"}
+                  onChange={e => set("wifi_security", e.target.value)}
+                  className={`${input} cursor-pointer`}
+                >
+                  <option value="WPA">WPA / WPA2 / WPA3 (recommandé)</option>
+                  <option value="WEP">WEP (anciens routeurs)</option>
+                  <option value="">Aucune (réseau ouvert)</option>
+                </select>
+              )}
+
+              {field.type === "text" && !(activeModule.type === "tides" && field.key === "port_id") && !(activeModule.type === "accommodation" && field.key === "wifi_security") && (
                 <input type="text" value={get(field.key)} onChange={e => set(field.key, e.target.value)}
                   placeholder={field.placeholder} className={input} />
               )}

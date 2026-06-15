@@ -182,12 +182,15 @@ function CopyRow({ label, value, accent }: { label: string; value: string; accen
 
 // ─── QR Code WiFi ─────────────────────────────────────────────────────────────
 
-function WifiQRCode({ ssid, password, accent }: { ssid: string; password: string; accent: string }) {
+function WifiQRCode({ ssid, password, security, accent }: { ssid: string; password: string; security?: string; accent: string }) {
   const [dataUrl, setDataUrl] = useState<string | null>(null);
   useEffect(() => {
     if (!ssid && !password) return;
     const escaped = (s: string) => s.replace(/[\\;,"]/g, c => `\\${c}`);
-    const wifiString = `WIFI:T:WPA;S:${escaped(ssid)};P:${escaped(password)};;`;
+    const sec = security || "WPA";
+    const wifiString = sec
+      ? `WIFI:T:${sec};S:${escaped(ssid)};P:${escaped(password)};;`
+      : `WIFI:T:;S:${escaped(ssid)};P:;;`;
     import("qrcode").then(QRCode => {
       QRCode.toDataURL(wifiString, { width: 180, margin: 1, color: { dark: "#1F2937", light: "#FFFFFF" } })
         .then(url => setDataUrl(url));
@@ -510,11 +513,12 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
   const tidesModule   = useMod(booklet, "tides");
   const weatherModule = useMod(booklet, "weather");
 
-  const wifiName    = g(accommodation, "wifi_name");
-  const wifiPass    = g(accommodation, "wifi_password");
-  const accessCode  = g(arrival, "access_code");
-  const checkinTime = g(arrival, "checkin_time");
-  const checkoutTime= g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
+  const wifiName     = g(accommodation, "wifi_name");
+  const wifiPass     = g(accommodation, "wifi_password");
+  const wifiSecurity = g(accommodation, "wifi_security");
+  const accessCode   = g(arrival, "access_code");
+  const checkinTime  = g(arrival, "checkin_time");
+  const checkoutTime = g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
 
   return (
     <>
@@ -554,7 +558,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
       <Drawer open={drawer === "wifi"} onClose={onClose} title={tr("wifi")} icon={<Wifi size={20} color={MODULE_COLORS.wifi} />} color={MODULE_COLORS.wifi}>
         <CopyRow label={tr("network")} value={wifiName} accent={accent} />
         <CopyRow label={tr("password")} value={wifiPass} accent={accent} />
-        {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} accent={accent} />}
+        {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} security={wifiSecurity} accent={accent} />}
       </Drawer>
 
       <Drawer open={drawer === "access"} onClose={onClose} title={tr("access_keys")} icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>
