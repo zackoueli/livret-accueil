@@ -125,6 +125,128 @@ function CopyButton({ value, accent }: { value: string; accent: string }) {
   );
 }
 
+function WifiQRCode({ ssid, password, accent }: { ssid: string; password: string; accent: string }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ssid && !password) return;
+    const escaped = (s: string) => s.replace(/[\\;,"]/g, c => `\\${c}`);
+    const wifiString = `WIFI:T:WPA;S:${escaped(ssid)};P:${escaped(password)};;`;
+    import("qrcode").then(QRCode => {
+      QRCode.toDataURL(wifiString, { width: 180, margin: 1, color: { dark: "#1F2937", light: "#FFFFFF" } })
+        .then(url => setDataUrl(url));
+    });
+  }, [ssid, password]);
+
+  if (!dataUrl) return null;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "16px 0 4px", gap: 8 }}>
+      <img src={dataUrl} alt="QR Code WiFi" width={160} height={160} style={{ borderRadius: 12, border: `2px solid ${accent}20` }} />
+      <p style={{ margin: 0, fontSize: 12, color: C.sub, display: "flex", alignItems: "center", gap: 5 }}>
+        <QrCode size={13} color={C.sub} />
+        Scanner pour se connecter
+      </p>
+    </div>
+  );
+}
+
+// ─── Marées (inline) ──────────────────────────────────────────────────────────
+
+function TidesSection({ portId, portName, note, accent, tr }: { portId: string; portName: string; note: string; accent: string; tr: (k: I18nKey) => string }) {
+  const [data, setData] = useState<{ tides: { type: string; time: string; height: string; coef?: string }[]; date: string } | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    if (!portId) return;
+    fetch(`/api/tides?portId=${portId}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setData)
+      .catch(() => setError(true));
+  }, [portId]);
+  if (error) return <Card><p style={{ margin: 0, padding: "14px 16px", fontSize: 13, color: C.sub }}>Impossible de charger les marées.</p></Card>;
+  if (!data) return <Card><p style={{ margin: 0, padding: "14px 16px", fontSize: 13, color: C.sub }}>Chargement...</p></Card>;
+  return (
+    <Card>
+      <div style={{ padding: "10px 16px 6px", borderBottom: `1px solid ${C.sep}` }}>
+        <p style={{ margin: 0, fontSize: 11, color: C.muted }}>{tr("tides_port")} · {portName || portId} — {data.date}</p>
+      </div>
+      {data.tides.map((t, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 16px", borderBottom: i < data.tides.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+          <IconBox color={t.type === "PM" ? accent : "#6B7280"}>
+            <Waves size={18} color={t.type === "PM" ? accent : "#6B7280"} />
+          </IconBox>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: "0 0 2px", fontSize: 11, color: C.sub }}>{t.type === "PM" ? tr("tides_high") : tr("tides_low")}{t.coef && ` · coeff. ${t.coef}`}</p>
+            <p style={{ margin: 0, fontSize: 20, fontWeight: 800, color: C.label, letterSpacing: -0.5 }}>{t.time}</p>
+          </div>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: C.sub }}>{t.height}</p>
+        </div>
+      ))}
+      {note && (
+        <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.sep}` }}>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+// ─── Météo (inline) ───────────────────────────────────────────────────────────
+
+function WeatherSection({ address, cityOverride, note, accent, tr }: { address: string; cityOverride: string; note: string; accent: string; tr: (k: I18nKey) => string }) {
+  const [data, setData] = useState<{
+    city: string; temperature: number; feelsLike: number; description: string; emoji: string;
+    windSpeed: number; humidity: number;
+    forecast: { dayLabel: string; tempMax: number; tempMin: number; emoji: string; precipProbability: number }[];
+  } | null>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    if (!address && !cityOverride) return;
+    const params = new URLSearchParams();
+    if (cityOverride) params.set("city", cityOverride);
+    else if (address) params.set("address", address);
+    fetch(`/api/weather?${params}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setData)
+      .catch(() => setError(true));
+  }, [address, cityOverride]);
+  if (!address && !cityOverride) return null;
+  if (error) return <Card><p style={{ margin: 0, padding: "14px 16px", fontSize: 13, color: C.sub }}>Impossible de charger la météo.</p></Card>;
+  if (!data) return <Card><p style={{ margin: 0, padding: "14px 16px", fontSize: 13, color: C.sub }}>{tr("weather_loading")}</p></Card>;
+  return (
+    <Card>
+      {/* Météo actuelle */}
+      <div style={{ display: "flex", alignItems: "center", gap: 16, padding: "16px 16px 12px", borderBottom: `1px solid ${C.sep}` }}>
+        <p style={{ margin: 0, fontSize: 40, lineHeight: 1 }}>{data.emoji}</p>
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: C.label, letterSpacing: -1 }}>{data.temperature}°</p>
+          <p style={{ margin: "2px 0 0", fontSize: 13, color: C.sub }}>{data.description} · {data.city}</p>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ margin: 0, fontSize: 11, color: C.muted }}>Ressenti {data.feelsLike}°</p>
+          <p style={{ margin: "2px 0 0", fontSize: 11, color: C.muted }}>Vent {data.windSpeed} km/h</p>
+          <p style={{ margin: "2px 0 0", fontSize: 11, color: C.muted }}>Humidité {data.humidity}%</p>
+        </div>
+      </div>
+      {/* Prévisions */}
+      {data.forecast.map((day, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 16px", borderBottom: i < data.forecast.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+          <p style={{ margin: 0, width: 34, fontSize: 13, fontWeight: 600, color: C.sub }}>{day.dayLabel}</p>
+          <p style={{ margin: 0, fontSize: 18 }}>{day.emoji}</p>
+          <div style={{ flex: 1, display: "flex", gap: 8, alignItems: "center" }}>
+            <span style={{ fontSize: 14, fontWeight: 700, color: C.label }}>{day.tempMax}°</span>
+            <span style={{ fontSize: 12, color: C.muted }}>{day.tempMin}°</span>
+          </div>
+          {day.precipProbability > 0 && <span style={{ fontSize: 11, color: "#3B82F6", fontWeight: 600 }}>{day.precipProbability}%</span>}
+        </div>
+      ))}
+      {note && (
+        <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.sep}` }}>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 function RowItem({ icon, title, subtitle, accent, last = false, onClick, chevron = false }: {
   icon: React.ReactNode; title: string; subtitle?: string; accent: string;
   last?: boolean; onClick?: () => void; chevron?: boolean;
@@ -392,7 +514,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 </div>
               )}
               {wifiPass && (
-                <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", borderBottom: `1px solid ${C.sep}` }}>
                   <IconBox color={accent}><Key size={18} color={accent} /></IconBox>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: 0, fontSize: 12, color: C.sub, marginBottom: 2 }}>{tr("password")}</p>
@@ -401,6 +523,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
                   <CopyButton value={wifiPass} accent={accent} />
                 </div>
               )}
+              {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} accent={accent} />}
             </Card>
           </div>
         )}
@@ -483,6 +606,8 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const pool          = useMod(booklet, "pool");
   const coworking     = useMod(booklet, "coworking");
   const accessibility = useMod(booklet, "accessibility");
+  const tidesModule   = useMod(booklet, "tides");
+  const weatherModule = useMod(booklet, "weather");
 
   const steps = g(arrival, "checkin_process").split("\n").filter(Boolean);
   const [checkinDone, setCheckinDone] = useState<Record<number, boolean>>({});
@@ -701,6 +826,22 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           </div>
         );
       })()}
+
+      {/* Marées */}
+      {tidesModule && g(tidesModule, "port_id") && (
+        <div style={{ marginBottom: 28 }}>
+          <SectionTitle>{tr("tides")}</SectionTitle>
+          <TidesSection portId={g(tidesModule, "port_id")} portName={g(tidesModule, "port_name")} note={g(tidesModule, "note")} accent={accent} tr={tr} />
+        </div>
+      )}
+
+      {/* Météo */}
+      {weatherModule && (
+        <div style={{ marginBottom: 28 }}>
+          <SectionTitle>{tr("weather")}</SectionTitle>
+          <WeatherSection address={booklet.address ?? ""} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} accent={accent} tr={tr} />
+        </div>
+      )}
     </div>
   );
 }

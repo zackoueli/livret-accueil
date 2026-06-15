@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, createContext, useContext } from "react";
+import { useState, useEffect, useMemo, createContext, useContext } from "react";
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
@@ -12,7 +12,7 @@ import {
   Flame, Zap, Droplets, Hospital, ConciergeBell, Wrench,
   Pill, Stethoscope, Store, Building2, WashingMachine, Users,
   Mailbox, Volume2, Cigarette, PartyPopper, ShoppingBag,
-  Home, LogOut,
+  Home, LogOut, QrCode, Sun, Droplet,
 } from "lucide-react";
 
 // ─── i18n Context ─────────────────────────────────────────────────────────────
@@ -180,6 +180,32 @@ function CopyRow({ label, value, accent }: { label: string; value: string; accen
   );
 }
 
+// ─── QR Code WiFi ─────────────────────────────────────────────────────────────
+
+function WifiQRCode({ ssid, password, accent }: { ssid: string; password: string; accent: string }) {
+  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ssid && !password) return;
+    const escaped = (s: string) => s.replace(/[\\;,"]/g, c => `\\${c}`);
+    const wifiString = `WIFI:T:WPA;S:${escaped(ssid)};P:${escaped(password)};;`;
+    import("qrcode").then(QRCode => {
+      QRCode.toDataURL(wifiString, { width: 180, margin: 1, color: { dark: "#1F2937", light: "#FFFFFF" } })
+        .then(url => setDataUrl(url));
+    });
+  }, [ssid, password]);
+
+  if (!dataUrl) return null;
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "20px 0 8px", gap: 10 }}>
+      <img src={dataUrl} alt="QR Code WiFi" width={160} height={160} style={{ borderRadius: 12, border: `2px solid ${accent}20` }} />
+      <p style={{ margin: 0, fontSize: 12, color: C.sub, display: "flex", alignItems: "center", gap: 5 }}>
+        <QrCode size={13} color={C.muted} />
+        Scanner pour se connecter
+      </p>
+    </div>
+  );
+}
+
 // ─── Bouton de grille ─────────────────────────────────────────────────────────
 
 function GridButton({ label, icon, color, onClick, wide = false }: {
@@ -218,6 +244,132 @@ function GridButton({ label, icon, color, onClick, wide = false }: {
   );
 }
 
+// ─── Marées ───────────────────────────────────────────────────────────────────
+
+function TidesDrawerContent({ portId, portName, note, tr, accent }: { portId: string; portName: string; note: string; tr: (k: I18nKey) => string; accent: string }) {
+  const [data, setData] = useState<{ tides: { type: string; time: string; height: string; coef?: string }[]; date: string } | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!portId) return;
+    fetch(`/api/tides?portId=${portId}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setData)
+      .catch(() => setError(true));
+  }, [portId]);
+
+  if (!portId) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Aucun port sélectionné.</p>;
+  if (error) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Impossible de charger les marées.</p>;
+  if (!data) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Chargement...</p>;
+
+  const name = portName || data.tides[0]?.type;
+
+  return (
+    <div>
+      <p style={{ margin: "0 0 14px", fontSize: 12, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>
+        {tr("tides_port")} · {name || portId}
+      </p>
+      <p style={{ margin: "0 0 16px", fontSize: 11, color: C.muted }}>{data.date}</p>
+      {data.tides.map((t, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 14, padding: "12px 0", borderBottom: i < data.tides.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+          <div style={{ width: 44, height: 44, borderRadius: "50%", background: t.type === "PM" ? `${accent}15` : `${C.blue}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Waves size={20} color={t.type === "PM" ? accent : C.muted} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: t.type === "PM" ? accent : C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>
+              {t.type === "PM" ? tr("tides_high") : tr("tides_low")}
+              {t.coef && <span style={{ marginLeft: 8, color: C.muted, fontWeight: 500 }}>{tr("tides_coef")} {t.coef}</span>}
+            </p>
+            <p style={{ margin: 0, fontSize: 24, fontWeight: 800, color: C.label, letterSpacing: -0.5 }}>{t.time}</p>
+          </div>
+          <p style={{ margin: 0, fontSize: 16, fontWeight: 600, color: C.sub }}>{t.height}</p>
+        </div>
+      ))}
+      {note && (
+        <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 12, background: `${accent}08` }}>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+        </div>
+      )}
+      <p style={{ margin: "16px 0 0", fontSize: 11, color: C.muted, textAlign: "center" }}>{tr("tides_source")}</p>
+    </div>
+  );
+}
+
+// ─── Météo ────────────────────────────────────────────────────────────────────
+
+function WeatherDrawerContent({ address, cityOverride, note, tr, accent }: { address: string; cityOverride: string; note: string; tr: (k: I18nKey) => string; accent: string }) {
+  const [data, setData] = useState<{
+    city: string; temperature: number; feelsLike: number; description: string; emoji: string;
+    windSpeed: number; humidity: number; uvIndex: number;
+    forecast: { dayLabel: string; tempMax: number; tempMin: number; emoji: string; precipProbability: number }[];
+  } | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!address && !cityOverride) return;
+    const params = new URLSearchParams();
+    if (cityOverride) params.set("city", cityOverride);
+    else if (address) params.set("address", address);
+    fetch(`/api/weather?${params}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setData)
+      .catch(() => setError(true));
+  }, [address, cityOverride]);
+
+  if (!address && !cityOverride) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Renseignez l'adresse du logement pour afficher la météo.</p>;
+  if (error) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Impossible de charger la météo.</p>;
+  if (!data) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>{tr("weather_loading")}</p>;
+
+  return (
+    <div>
+      {/* Température principale */}
+      <div style={{ textAlign: "center", padding: "12px 0 20px" }}>
+        <p style={{ margin: 0, fontSize: 56, lineHeight: 1 }}>{data.emoji}</p>
+        <p style={{ margin: "8px 0 0", fontSize: 48, fontWeight: 800, color: C.label, letterSpacing: -2 }}>{data.temperature}°</p>
+        <p style={{ margin: "4px 0 0", fontSize: 15, color: C.sub }}>{data.description}</p>
+        <p style={{ margin: "2px 0 0", fontSize: 12, color: C.muted }}>{data.city}</p>
+      </div>
+      {/* Infos secondaires */}
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 20 }}>
+        {[
+          { icon: <Thermometer size={16} color={accent} />, label: tr("weather_feels"), value: `${data.feelsLike}°` },
+          { icon: <Wind size={16} color={C.blue} />, label: tr("weather_wind"), value: `${data.windSpeed} km/h` },
+          { icon: <Droplet size={16} color="#06B6D4" />, label: tr("weather_humidity"), value: `${data.humidity}%` },
+        ].map((item, i) => (
+          <div key={i} style={{ background: C.bg, borderRadius: 12, padding: "10px 8px", textAlign: "center" }}>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>{item.icon}</div>
+            <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: C.label }}>{item.value}</p>
+            <p style={{ margin: "2px 0 0", fontSize: 10, color: C.muted, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.label}</p>
+          </div>
+        ))}
+      </div>
+      {/* Prévisions 5 jours */}
+      <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("weather_forecast")}</p>
+      {data.forecast.map((day, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: i < data.forecast.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+          <p style={{ margin: 0, width: 34, fontSize: 13, fontWeight: 600, color: C.sub }}>{day.dayLabel}</p>
+          <p style={{ margin: 0, fontSize: 20 }}>{day.emoji}</p>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <span style={{ fontSize: 13, fontWeight: 700, color: C.label }}>{day.tempMax}°</span>
+              <span style={{ fontSize: 12, color: C.muted }}>{day.tempMin}°</span>
+            </div>
+          </div>
+          {day.precipProbability > 0 && (
+            <span style={{ fontSize: 11, color: C.blue, fontWeight: 600 }}>{day.precipProbability}%</span>
+          )}
+        </div>
+      ))}
+      {note && (
+        <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 12, background: `${accent}08` }}>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+        </div>
+      )}
+      <p style={{ margin: "16px 0 0", fontSize: 11, color: C.muted, textAlign: "center" }}>{tr("weather_source")}</p>
+    </div>
+  );
+}
+
 // ─── PAGE ACCUEIL ─────────────────────────────────────────────────────────────
 
 function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: string; setDrawer: (id: string) => void }) {
@@ -233,6 +385,8 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const pool          = useMod(booklet, "pool");
   const coworking     = useMod(booklet, "coworking");
   const transport     = useMod(booklet, "transport");
+  const tidesModule   = useMod(booklet, "tides");
+  const weatherModule = useMod(booklet, "weather");
 
   const wifiName = g(accommodation, "wifi_name");
   const wifiPass = g(accommodation, "wifi_password");
@@ -258,6 +412,8 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
     { id: "pets",      label: tr("pets"),              icon: <Dog size={20} color="#fff" />,             color: MODULE_COLORS.pets,      show: !!petsModule },
     { id: "coworking", label: tr("coworking"),         icon: <Briefcase size={20} color="#fff" />,       color: MODULE_COLORS.coworking, show: !!coworking },
     { id: "transport", label: tr("transport"),         icon: <Bus size={20} color="#fff" />,             color: MODULE_COLORS.transport, show: !!transport },
+    { id: "tides",     label: tr("tides"),             icon: <Waves size={20} color="#fff" />,           color: "#0EA5E9",               show: !!(tidesModule && g(tidesModule, "port_id")) },
+    { id: "weather",   label: tr("weather"),           icon: <Sun size={20} color="#fff" />,             color: "#F59E0B",               show: !!weatherModule },
   ].filter(b => b.show);
 
   return (
@@ -351,6 +507,8 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
   const pool          = useMod(booklet, "pool");
   const coworking     = useMod(booklet, "coworking");
   const transport     = useMod(booklet, "transport");
+  const tidesModule   = useMod(booklet, "tides");
+  const weatherModule = useMod(booklet, "weather");
 
   const wifiName    = g(accommodation, "wifi_name");
   const wifiPass    = g(accommodation, "wifi_password");
@@ -396,6 +554,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
       <Drawer open={drawer === "wifi"} onClose={onClose} title={tr("wifi")} icon={<Wifi size={20} color={MODULE_COLORS.wifi} />} color={MODULE_COLORS.wifi}>
         <CopyRow label={tr("network")} value={wifiName} accent={accent} />
         <CopyRow label={tr("password")} value={wifiPass} accent={accent} />
+        {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} accent={accent} />}
       </Drawer>
 
       <Drawer open={drawer === "access"} onClose={onClose} title={tr("access_keys")} icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>
@@ -502,6 +661,14 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <InfoRow icon={<Car size={18} color={C.orange} />} label={tr("taxi")} value={g(transport, "taxi")} color={C.orange} />
         <InfoRow icon={<Bike size={18} color={C.green} />} label={tr("bikes")} value={g(transport, "bike")} color={C.green} />
         <InfoRow icon={<Plane size={18} color="#8B5CF6" />} label={tr("airport")} value={g(transport, "airport")} color="#8B5CF6" last />
+      </Drawer>
+
+      <Drawer open={drawer === "tides"} onClose={onClose} title={tr("tides")} icon={<Waves size={20} color="#0EA5E9" />} color="#0EA5E9">
+        <TidesDrawerContent portId={g(tidesModule, "port_id")} portName={g(tidesModule, "port_name")} note={g(tidesModule, "note")} tr={tr} accent="#0EA5E9" />
+      </Drawer>
+
+      <Drawer open={drawer === "weather"} onClose={onClose} title={tr("weather")} icon={<Sun size={20} color="#F59E0B" />} color="#F59E0B">
+        <WeatherDrawerContent address={booklet.address ?? ""} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} tr={tr} accent="#F59E0B" />
       </Drawer>
     </>
   );

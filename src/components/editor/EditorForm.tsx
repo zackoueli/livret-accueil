@@ -3,6 +3,7 @@
 import { useState, useRef } from "react";
 import { useEditorStore } from "@/store/editorStore";
 import { MODULE_META, MODULE_FIELDS, ACTIVITY_CATEGORIES, SERVICE_EMOJIS, parseActivities, parseServices, Activity, Service } from "@/lib/modules";
+import { PORTS } from "@/app/api/tides/route";
 import { EyeOff, ExternalLink, Plus, Trash2, ChevronDown, ChevronUp, ImagePlus, Loader2, X, GripVertical, Search } from "lucide-react";
 import { nanoid } from "nanoid";
 import { uploadImage } from "@/lib/upload";
@@ -515,7 +516,7 @@ export function EditorForm() {
 
         {/* Champs */}
         <div className="space-y-4">
-          {fields.map((field) => (
+          {fields.filter(field => !(activeModule.type === "tides" && field.key === "port_name")).map((field) => (
             <div key={field.key} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
               <label className="block text-sm font-semibold text-gray-700 mb-1">{field.label}</label>
               {field.hint && <p className="text-xs text-gray-400 mb-3 leading-relaxed">{field.hint}</p>}
@@ -538,7 +539,24 @@ export function EditorForm() {
                 </div>
               )}
 
-              {field.type === "text" && (
+              {field.type === "text" && activeModule.type === "tides" && field.key === "port_id" && (
+                <select
+                  value={get("port_id")}
+                  onChange={e => {
+                    const port = PORTS.find(p => p.id === e.target.value);
+                    set("port_id", e.target.value);
+                    if (port) set("port_name", port.name);
+                  }}
+                  className={`${input} cursor-pointer`}
+                >
+                  <option value="">— Choisir un port —</option>
+                  {PORTS.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              )}
+
+              {field.type === "text" && !(activeModule.type === "tides" && field.key === "port_id") && (
                 <input type="text" value={get(field.key)} onChange={e => set(field.key, e.target.value)}
                   placeholder={field.placeholder} className={input} />
               )}

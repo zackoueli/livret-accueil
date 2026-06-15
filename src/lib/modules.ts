@@ -39,6 +39,8 @@ export const MODULE_META: Record<ModuleType, ModuleMeta> = {
   experiences:   { label: "Expériences locales",    emoji: "🗺️", description: "Bons plans du propriétaire", optional: true },
   eco:           { label: "Éco-responsable",        emoji: "🌿", description: "Tri, économies d'énergie, gestes verts", optional: true },
   practical:     { label: "Infos pratiques",        emoji: "ℹ️", description: "Pharmacie, médecin, mairie, services", optional: true },
+  tides:         { label: "Marées",                 emoji: "🌊", description: "Horaires de marées du port le plus proche", optional: true },
+  weather:       { label: "Météo",                  emoji: "⛅", description: "Météo en temps réel pour le logement", optional: true },
 };
 
 // ── Champs par module ──────────────────────────────────────────────────────────
@@ -193,6 +195,19 @@ export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
     { key: "city_hall",  label: "Mairie & services",            placeholder: "Mairie ouverte lundi-vendredi 9h-17h.", type: "textarea" },
     { key: "laundry",    label: "Laverie",                      placeholder: "Laverie automatique rue de la Gare, ouverte 24h/24.", type: "textarea" },
   ],
+
+  tides: [
+    { key: "port_id",   label: "Port de référence", placeholder: "Sélectionnez un port...", type: "text",
+      hint: "Choisissez le port ou la plage la plus proche de votre logement" },
+    { key: "port_name", label: "Nom du port",       placeholder: "Brest", type: "text" },
+    { key: "note",      label: "Note pour les voyageurs", placeholder: "La plage est à 5 minutes à pied. Idéal pour la pêche à pied aux coefficients > 80.", type: "textarea" },
+  ],
+
+  weather: [
+    { key: "city_override", label: "Ville (optionnel)", placeholder: "Laissez vide pour utiliser l'adresse du logement", type: "text",
+      hint: "Par défaut, la météo est basée sur l'adresse du logement. Renseignez une ville uniquement si vous souhaitez afficher la météo d'un autre endroit." },
+    { key: "note", label: "Note météo", placeholder: "Le logement est situé à 300m de l'océan, pensez à prendre un coupe-vent.", type: "textarea" },
+  ],
 };
 
 // ── Modules principaux (toujours présents par défaut) ─────────────────────────
@@ -220,6 +235,8 @@ export const OPTIONAL_MODULES: ModuleType[] = [
   "experiences",
   "eco",
   "practical",
+  "tides",
+  "weather",
 ];
 
 // ── Formatage de l'heure HH:MM → HHhMM ───────────────────────────────────────

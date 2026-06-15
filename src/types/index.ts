@@ -38,7 +38,9 @@ export type ModuleType =
   | "accessibility" // ♿ Accessibilité
   | "experiences"   // 🗺️ Expériences locales
   | "eco"           // 🌿 Éco-responsable
-  | "practical";    // ℹ️ Infos pratiques
+  | "practical"     // ℹ️ Infos pratiques
+  | "tides"         // 🌊 Marées
+  | "weather";      // ⛅ Météo
 
 export interface BookletDocument {
   url: string;
