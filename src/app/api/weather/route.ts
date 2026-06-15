@@ -50,11 +50,38 @@ export interface WeatherData {
   }[];
 }
 
-async function geocode(query: string): Promise<{ lat: number; lon: number; name: string } | null> {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`;
+async function nominatimSearch(query: string): Promise<{ lat: number; lon: number; name: string } | null> {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1&countrycodes=fr`;
   const res = await fetch(url, {
     headers: { "User-Agent": "livret-accueil/1.0 (mathieu.wreizh@gmail.com)" },
   });
+  if (!res.ok) return null;
+  const data = await res.json();
+  if (!data[0]) return null;
+  const d = data[0];
+  const name = d.address?.city || d.address?.town || d.address?.village || d.address?.municipality || d.display_name.split(",")[0];
+  return { lat: parseFloat(d.lat), lon: parseFloat(d.lon), name };
+}
+
+async function geocode(query: string): Promise<{ lat: number; lon: number; name: string } | null> {
+  // Essai 1 : requête complète
+  const result = await nominatimSearch(query);
+  if (result) return result;
+
+  // Essai 2 : extraire ville ou code postal depuis l'adresse
+  // Format typique : "12 rue ..., 75001 Paris, France"
+  const cpCityMatch = query.match(/\b(\d{5})\s+([A-Za-zÀ-ÿ\s-]+)/);
+  if (cpCityMatch) {
+    const fallback = await nominatimSearch(`${cpCityMatch[1]} ${cpCityMatch[2].trim()}`);
+    if (fallback) return fallback;
+    // Essai 3 : juste le code postal
+    const cpOnly = await nominatimSearch(cpCityMatch[1]);
+    if (cpOnly) return cpOnly;
+  }
+
+  // Essai 4 : sans restriction pays
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=1&addressdetails=1`;
+  const res = await fetch(url, { headers: { "User-Agent": "livret-accueil/1.0 (mathieu.wreizh@gmail.com)" } });
   if (!res.ok) return null;
   const data = await res.json();
   if (!data[0]) return null;

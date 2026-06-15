@@ -158,48 +158,53 @@ export interface TidesData {
 }
 
 function parseTidesFromHtml(html: string): TideEntry[] {
-  // Les données sont dans les attributs data-ht et data-hm du premier jour (index 0)
-  // data-hm="09h41_t" → t = pleine mer (top), b = basse mer (bottom)
-  // data-ht="6,20m"
-  const tidesRaw: { time: string; height: string; isHigh: boolean }[] = [];
-  const flagRe = /data-ht="([^"]+)"\s+data-hm="([^"]+)"/g;
-  let match;
-  while ((match = flagRe.exec(html)) !== null) {
-    const height = match[1];
-    const hm = match[2]; // e.g. "09h41_t" or "04h01_b"
-    const time = hm.replace(/_[tb]$/, "");
-    const isHigh = hm.endsWith("_t");
-    tidesRaw.push({ time, height, isHigh });
+  // Extraire le bloc du premier jour depuis MareeJours_0
+  // Structure : id="MareeJours_0" ... <td>heures</td><td>hauteurs</td><td>coefs</td>
+  const dayMatch = html.match(/id="MareeJours_0"[^>]*>([\s\S]*?)<\/tr>/);
+  if (!dayMatch) return [];
+
+  const dayHtml = dayMatch[1];
+
+  // Extraire les 3 colonnes td (heures, hauteurs, coefficients)
+  const tds = [...dayHtml.matchAll(/<td>([\s\S]*?)<\/td>/g)].map(m => m[1]);
+  if (tds.length < 3) return [];
+
+  const timesHtml   = tds[0]; // <b>05h42</b><br>11h59<br><b>18h03</b>
+  const heightsHtml = tds[1]; // <b>6,86m</b><br>1,25m<br><b>7,07m</b>
+  const coefsHtml   = tds[2]; // <b>90</b><br>&nbsp;<br><b>93</b>
+
+  // Parser les heures : les <b> = PM, les textes sans <b> = BM
+  const timeEntries: { time: string; isHigh: boolean }[] = [];
+  const timeRe = /(<b>([^<]+)<\/b>|([0-9]{2}h[0-9]{2}))/g;
+  let m;
+  while ((m = timeRe.exec(timesHtml)) !== null) {
+    if (m[2]) timeEntries.push({ time: m[2], isHigh: true });  // dans <b>
+    else if (m[3]) timeEntries.push({ time: m[3], isHigh: false }); // texte brut
   }
 
-  // Les coefficients sont dans les <b> suivant les PM dans le tableau principal
-  // Pattern dans MareeJours: coef apparaît dans les <b> de la colonne Coeff. pour le jour 0
-  const coefs: string[] = [];
-  const coefRe = /<b>(\d+)<\/b>/g;
-  // On cherche dans le bloc MareeJours_0
-  const joursMatch = html.match(/id="MareeJours_0"[^<]*<th>[^<]*<\/th><td>([^<]*)<\/td><td>([^<]*)<\/td><td>([^<]*)<\/td>/);
-  if (joursMatch) {
-    const coefBlock = joursMatch[3];
-    const coefMatches = [...coefBlock.matchAll(/<b>(\d+)<\/b>/g)];
-    coefMatches.forEach(m => coefs.push(m[1]));
+  // Parser les hauteurs dans le même ordre
+  const heightEntries: string[] = [];
+  const heightRe = /(<b>([^<]+)<\/b>|([0-9]+,[0-9]+m))/g;
+  while ((m = heightRe.exec(heightsHtml)) !== null) {
+    heightEntries.push(m[2] || m[3]);
   }
 
-  // Dédupliquer : la page répète chaque PM/BM deux fois (tableau + détail)
-  const seen = new Set<string>();
+  // Parser les coefficients : <b>90</b> pour les PM, &nbsp; pour les BM
+  const coefMap: Map<number, string> = new Map();
+  const coefParts = coefsHtml.split(/<br\s*\/?>/);
+  coefParts.forEach((part, i) => {
+    const coefM = part.match(/<b>(\d+)<\/b>/);
+    if (coefM) coefMap.set(i, coefM[1]);
+  });
+
   const result: TideEntry[] = [];
-  let coefIdx = 0;
-  for (const t of tidesRaw) {
-    const key = `${t.time}_${t.isHigh}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
+  for (let i = 0; i < timeEntries.length; i++) {
     const entry: TideEntry = {
-      type: t.isHigh ? "PM" : "BM",
-      time: t.time,
-      height: t.height,
+      type: timeEntries[i].isHigh ? "PM" : "BM",
+      time: timeEntries[i].time,
+      height: heightEntries[i] ?? "",
     };
-    if (t.isHigh && coefs[coefIdx] !== undefined) {
-      entry.coef = coefs[coefIdx++];
-    }
+    if (coefMap.has(i)) entry.coef = coefMap.get(i);
     result.push(entry);
   }
   return result.sort((a, b) => a.time.localeCompare(b.time));
@@ -221,10 +226,17 @@ export async function GET(req: NextRequest) {
   }
 
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
     const res = await fetch(`https://maree.info/${portId}`, {
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; livret-accueil/1.0)" },
-      next: { revalidate: 1800 }, // cache 30 min
-    });
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "fr-FR,fr;q=0.9",
+      },
+      signal: controller.signal,
+      next: { revalidate: 1800 },
+    }).finally(() => clearTimeout(timeout));
     if (!res.ok) throw new Error(`maree.info returned ${res.status}`);
     const html = await res.text();
 
