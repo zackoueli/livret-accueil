@@ -197,7 +197,7 @@ export function AuthPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === "register" && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Prénom et nom</label>
+                  <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Prénom et nom</label>
                   <input
                     type="text"
                     value={form.name}
@@ -210,7 +210,7 @@ export function AuthPage() {
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
+                <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Email</label>
                 <input
                   type="email"
                   value={form.email}
@@ -222,7 +222,7 @@ export function AuthPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Mot de passe</label>
+                <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Mot de passe</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -241,7 +241,7 @@ export function AuthPage() {
 
               {mode === "register" && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Confirmer le mot de passe</label>
+                  <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Confirmer le mot de passe</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={form.confirmPassword}
