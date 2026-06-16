@@ -559,6 +559,11 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <CopyRow label={tr("network")} value={wifiName} accent={accent} />
         <CopyRow label={tr("password")} value={wifiPass} accent={accent} />
         {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} security={wifiSecurity} accent={accent} />}
+        {g(accommodation, "wifi_info") && (
+          <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 12, background: `${accent}08` }}>
+            <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{g(accommodation, "wifi_info")}</p>
+          </div>
+        )}
       </Drawer>
 
       <Drawer open={drawer === "access"} onClose={onClose} title={tr("access_keys")} icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>

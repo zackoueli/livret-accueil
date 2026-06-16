@@ -64,6 +64,7 @@ export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
     { key: "wifi_password", label: "Mot de passe WiFi",   placeholder: "motdepasse123",         type: "text" },
     { key: "wifi_security", label: "Type de sécurité WiFi", placeholder: "WPA",                 type: "text",
       hint: "WPA (par défaut, recommandé) — WEP (anciens routeurs) — Aucune (réseau ouvert)" },
+    { key: "wifi_info",    label: "Informations WiFi",     placeholder: "Le WiFi peut être lent aux heures de pointe. Pour les appels vidéo, préférez le réseau 5GHz.", type: "textarea" },
     { key: "services_list", label: "Services & équipements inclus", placeholder: "", type: "services",
       hint: "Ajoutez les services inclus (piscine, parking, BBQ...) avec icône et description courte." },
     { key: "heating",       label: "Chauffage",           placeholder: "Thermostat dans le couloir, régler à 20°C maximum.", type: "textarea" },

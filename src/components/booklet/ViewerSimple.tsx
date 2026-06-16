@@ -394,6 +394,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const wifiName     = g(accommodation, "wifi_name");
   const wifiPass     = g(accommodation, "wifi_password");
   const wifiSecurity = g(accommodation, "wifi_security");
+  const wifiInfo     = g(accommodation, "wifi_info");
   const welcomeMsg   = g(arrival, "welcome_message");
   const hostName     = g(contact, "host_name");
   const hostPhoto    = g(contact, "host_photo");
@@ -528,6 +529,11 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 </div>
               )}
               {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} security={wifiSecurity} accent={accent} />}
+              {wifiInfo && (
+                <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.sep}` }}>
+                  <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{wifiInfo}</p>
+                </div>
+              )}
             </Card>
           </div>
         )}
