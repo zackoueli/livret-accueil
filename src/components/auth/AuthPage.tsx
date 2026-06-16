@@ -256,7 +256,7 @@ export function AuthPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition-all disabled:opacity-50 shadow-lg shadow-orange-200 hover:shadow-orange-300 mt-1 text-sm">
+                className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition-all disabled:opacity-50 mt-1 text-sm">
                 {loading
                   ? "Chargement..."
                   : mode === "register"
@@ -265,9 +265,6 @@ export function AuthPage() {
               </button>
             </form>
 
-            <p className="text-center text-xs text-gray-400 mt-5">
-              Sans carte bancaire · Annulable à tout moment
-            </p>
           </div>
         </div>
       </div>
