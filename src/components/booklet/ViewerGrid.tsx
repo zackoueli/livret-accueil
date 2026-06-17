@@ -400,24 +400,26 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const hostPhoto = g(contact, "host_photo");
   const welcomeMsg = g(contact, "welcome_message") || g(arrival, "welcome_message");
 
+  const moduleOrder = (type: string) => booklet.modules.find(m => m.type === type)?.order ?? 999;
+
   const buttons = [
-    { id: "wifi",      label: tr("wifi"),             icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass) },
-    { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!accessCode },
-    { id: "horaires",  label: tr("schedule"),          icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime) },
-    { id: "rules",     label: tr("rules"),             icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules },
-    { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: !!(accommodation && (g(accommodation, "heating") || g(accommodation, "ac") || g(accommodation, "tv"))) },
-    { id: "kitchen",   label: tr("kitchen_equip"),     icon: <UtensilsCrossed size={20} color="#fff" />, color: MODULE_COLORS.kitchen,   show: !!kitchen },
-    { id: "cleaning",  label: tr("menage_dechets"),    icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")) },
-    { id: "safety",    label: tr("nav_safety"),        icon: <Shield size={20} color="#fff" />,          color: MODULE_COLORS.safety,    show: !!safety },
-    { id: "contact",   label: tr("contact"),           icon: <Phone size={20} color="#fff" />,           color: MODULE_COLORS.contact,   show: !!contact },
-    { id: "pool",      label: tr("pool"),              icon: <Waves size={20} color="#fff" />,           color: MODULE_COLORS.pool,      show: !!pool },
-    { id: "baby",      label: tr("baby"),              icon: <Baby size={20} color="#fff" />,            color: MODULE_COLORS.baby,      show: !!baby },
-    { id: "pets",      label: tr("pets"),              icon: <Dog size={20} color="#fff" />,             color: MODULE_COLORS.pets,      show: !!petsModule },
-    { id: "coworking", label: tr("coworking"),         icon: <Briefcase size={20} color="#fff" />,       color: MODULE_COLORS.coworking, show: !!coworking },
-    { id: "transport", label: tr("transport"),         icon: <Bus size={20} color="#fff" />,             color: MODULE_COLORS.transport, show: !!transport },
-    { id: "tides",     label: tr("tides"),             icon: <Waves size={20} color="#fff" />,           color: "#0EA5E9",               show: !!(tidesModule && g(tidesModule, "port_id")) },
-    { id: "weather",   label: tr("weather"),           icon: <Sun size={20} color="#fff" />,             color: "#F59E0B",               show: !!weatherModule },
-  ].filter(b => b.show);
+    { id: "wifi",      label: tr("wifi"),             icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass),                                                          order: moduleOrder("accommodation") },
+    { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!accessCode,                                                                      order: moduleOrder("arrival") - 0.1 },
+    { id: "horaires",  label: tr("schedule"),          icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime),                                                   order: moduleOrder("arrival") },
+    { id: "rules",     label: tr("rules"),             icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules,                                                                           order: moduleOrder("rules") },
+    { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: !!(accommodation && (g(accommodation, "heating") || g(accommodation, "ac") || g(accommodation, "tv"))), order: moduleOrder("accommodation") + 0.1 },
+    { id: "kitchen",   label: tr("kitchen_equip"),     icon: <UtensilsCrossed size={20} color="#fff" />, color: MODULE_COLORS.kitchen,   show: !!kitchen,                                                                         order: moduleOrder("kitchen") },
+    { id: "cleaning",  label: tr("menage_dechets"),    icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")),                                             order: moduleOrder("kitchen") + 0.1 },
+    { id: "safety",    label: tr("nav_safety"),        icon: <Shield size={20} color="#fff" />,          color: MODULE_COLORS.safety,    show: !!safety,                                                                          order: moduleOrder("safety") },
+    { id: "contact",   label: tr("contact"),           icon: <Phone size={20} color="#fff" />,           color: MODULE_COLORS.contact,   show: !!contact,                                                                         order: moduleOrder("contact") },
+    { id: "pool",      label: tr("pool"),              icon: <Waves size={20} color="#fff" />,           color: MODULE_COLORS.pool,      show: !!pool,                                                                            order: moduleOrder("pool") },
+    { id: "baby",      label: tr("baby"),              icon: <Baby size={20} color="#fff" />,            color: MODULE_COLORS.baby,      show: !!baby,                                                                            order: moduleOrder("baby") },
+    { id: "pets",      label: tr("pets"),              icon: <Dog size={20} color="#fff" />,             color: MODULE_COLORS.pets,      show: !!petsModule,                                                                      order: moduleOrder("pets") },
+    { id: "coworking", label: tr("coworking"),         icon: <Briefcase size={20} color="#fff" />,       color: MODULE_COLORS.coworking, show: !!coworking,                                                                       order: moduleOrder("coworking") },
+    { id: "transport", label: tr("transport"),         icon: <Bus size={20} color="#fff" />,             color: MODULE_COLORS.transport, show: !!transport,                                                                       order: moduleOrder("transport") },
+    { id: "tides",     label: tr("tides"),             icon: <Waves size={20} color="#fff" />,           color: "#0EA5E9",               show: !!(tidesModule && g(tidesModule, "port_id")),                                      order: moduleOrder("tides") },
+    { id: "weather",   label: tr("weather"),           icon: <Sun size={20} color="#fff" />,             color: "#F59E0B",               show: !!weatherModule,                                                                   order: moduleOrder("weather") },
+  ].filter(b => b.show).sort((a, b) => a.order - b.order);
 
   return (
     <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", display: "flex", flexDirection: "column", paddingBottom: TAB_BAR_H }}>
