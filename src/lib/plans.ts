@@ -18,21 +18,16 @@ export const PLAN_FEATURES: Record<Plan, PlanFeature[]> = {
     "booklets_pro",
     "template_grid",
     "all_modules",
-    "ai_import",
     "custom_slug",
     "folders",
-    "analytics",
     "hide_bunkly_badge",
   ],
   agency: [
-    "booklets_unlimited",
     "booklets_pro",
     "template_grid",
     "all_modules",
-    "ai_import",
     "custom_slug",
     "folders",
-    "analytics",
     "hide_bunkly_badge",
     "white_label",
   ],
@@ -43,9 +38,9 @@ export function planHasFeature(plan: Plan, feature: PlanFeature): boolean {
 }
 
 export const PLAN_LIMITS: Record<Plan, { booklets: number }> = {
-  free:   { booklets: 2 },
+  free:   { booklets: 1 },
   pro:    { booklets: 10 },
-  agency: { booklets: Infinity },
+  agency: { booklets: 20 },
 };
 
 export const PLANS_CONFIG = [
@@ -56,7 +51,7 @@ export const PLANS_CONFIG = [
     color: "#6b7280",
     description: "Pour découvrir Bunkly",
     features: [
-      { label: "2 livrets", included: true },
+      { label: "1 livret", included: true },
       { label: "Template Scroll", included: true },
       { label: "Modules de base", included: true },
       { label: "URL fixe Bunkly", included: true },
@@ -79,11 +74,11 @@ export const PLANS_CONFIG = [
       { label: "10 livrets", included: true },
       { label: "Tous les templates", included: true },
       { label: "Tous les modules", included: true },
-      { label: "Import IA", included: true },
       { label: "Dossiers", included: true },
-      { label: "Analytics", included: true },
       { label: "Slug personnalisé", included: true },
       { label: "Badge Bunkly masqué", included: true },
+      { label: "Import IA", included: false },
+      { label: "Analytics", included: false },
       { label: "White-label", included: false },
     ],
   },
@@ -95,15 +90,15 @@ export const PLANS_CONFIG = [
     color: "#6366f1",
     description: "Pour les conciergeries",
     features: [
-      { label: "Livrets illimités", included: true },
+      { label: "20 livrets", included: true },
       { label: "Tous les templates", included: true },
       { label: "Tous les modules", included: true },
-      { label: "Import IA", included: true },
       { label: "Dossiers", included: true },
-      { label: "Analytics", included: true },
       { label: "Slug personnalisé", included: true },
       { label: "Badge Bunkly masqué", included: true },
       { label: "White-label", included: true },
+      { label: "Import IA", included: false },
+      { label: "Analytics", included: false },
     ],
   },
 ];

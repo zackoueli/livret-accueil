@@ -104,7 +104,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
 
       {/* Import IA */}
       <button
-        onClick={() => can("ai_import") ? setShowImport(true) : openUpgrade("L'import IA est réservé au plan Pro")}
+        onClick={() => can("ai_import") ? setShowImport(true) : openUpgrade("L'import IA n'est pas disponible sur votre plan actuel")}
         className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border transition-colors ${
           can("ai_import")
             ? "border-orange-200 bg-orange-50 hover:bg-orange-100 text-orange-600"

@@ -425,7 +425,7 @@ function DashboardPageInner() {
                   </div>
                   <div>
                     <p className="font-semibold text-gray-800 text-sm">Débloquez toutes les fonctionnalités</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Import IA, dossiers, analytics, tous les templates… à partir de 9€/mois.</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Dossiers, tous les templates, modules optionnels… à partir de 9€/mois.</p>
                   </div>
                 </div>
                 <button
@@ -466,7 +466,7 @@ function DashboardPageInner() {
                         window.open(bookletUrl(booklet.slug), "_blank");
                       }}
                       onShare={() => setShareBooklet(booklet)}
-                      onAnalytics={() => setAnalyticsBooklet(booklet)}
+                      onAnalytics={() => can("analytics") ? setAnalyticsBooklet(booklet) : requirePlan("Les analytics sont réservés aux plans Pro et Agency")}
                       onDuplicate={() => handleDuplicate(booklet)}
                       onDelete={() => handleDelete(booklet.id)}
                       onMoveToFolder={(folderId) => handleMoveToFolder(booklet, folderId)}
