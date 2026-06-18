@@ -595,13 +595,14 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
       <Drawer open={drawer === "logement"} onClose={onClose} title={tr("le_logement")} icon={<Home size={20} color="#6366F1" />} color="#6366F1">
         <InfoRow icon={<Thermometer size={18} color={MODULE_COLORS.heating} />} label={tr("heating")} value={g(accommodation, "heating")} color={MODULE_COLORS.heating} />
         <InfoRow icon={<Wind size={18} color={MODULE_COLORS.ac} />} label={tr("ac")} value={g(accommodation, "ac")} color={MODULE_COLORS.ac} />
-        <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label={tr("tv")} value={g(accommodation, "tv")} color="#8B5CF6" last />
+        <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label={tr("tv")} value={g(accommodation, "tv")} color="#8B5CF6" />
+        <InfoRow icon={<WashingMachine size={18} color={C.blue} />} label={tr("appliances")} value={g(accommodation, "appliances")} color={C.blue} />
+        <InfoRow icon={<Mailbox size={18} color={C.orange} />} label={tr("mailbox")} value={g(accommodation, "checkin_code")} color={C.orange} />
+        <InfoRow icon={<Info size={18} color={C.muted} />} label={tr("other")} value={g(accommodation, "other")} color={C.muted} last />
       </Drawer>
 
       <Drawer open={drawer === "kitchen"} onClose={onClose} title={tr("kitchen_equip")} icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen}>
-        <InfoRow icon={<UtensilsCrossed size={18} color={MODULE_COLORS.kitchen} />} label={tr("kitchen_equip")} value={g(kitchen, "equipment")} color={MODULE_COLORS.kitchen} />
-        <InfoRow icon={<WashingMachine size={18} color={C.blue} />} label={tr("appliances")} value={g(accommodation, "appliances")} color={C.blue} />
-        <InfoRow icon={<Mailbox size={18} color={C.orange} />} label={tr("mailbox")} value={g(accommodation, "checkin_code")} color={C.orange} last />
+        <InfoRow icon={<UtensilsCrossed size={18} color={MODULE_COLORS.kitchen} />} label={tr("kitchen_equip")} value={g(kitchen, "equipment")} color={MODULE_COLORS.kitchen} last />
       </Drawer>
 
       <Drawer open={drawer === "cleaning"} onClose={onClose} title={tr("menage_dechets")} icon={<Sparkles size={20} color={MODULE_COLORS.cleaning} />} color={MODULE_COLORS.cleaning}>
