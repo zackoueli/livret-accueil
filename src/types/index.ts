@@ -103,6 +103,49 @@ export type BookletTranslations = Record<
   Record<string, Record<string, string>> // moduleId → { field: value }
 >;
 
+// ── Affiliation ────────────────────────────────────────────────────────────────
+
+export interface ReferralCode {
+  userId: string;
+  code: string;
+  createdAt: number;
+}
+
+export interface Referral {
+  id: string;
+  referrerId: string;
+  referredId: string;
+  code: string;
+  status: "pending" | "converted" | "expired";
+  createdAt: number;
+  convertedAt?: number;
+  expiresAt?: number;
+}
+
+export interface AffiliateCommission {
+  id: string;
+  referralId: string;
+  referrerId: string;
+  referredId: string;
+  stripeInvoiceId: string;
+  amount: number;
+  status: "pending" | "paid" | "cancelled";
+  createdAt: number;
+  paidAt?: number;
+  stripeTransferId?: string;
+}
+
+export interface AffiliateAccount {
+  userId: string;
+  stripeAccountId: string;
+  onboardingComplete: boolean;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+  totalEarned: number;
+  totalPaid: number;
+  createdAt: number;
+}
+
 export interface Booklet {
   id: string;
   userId: string;

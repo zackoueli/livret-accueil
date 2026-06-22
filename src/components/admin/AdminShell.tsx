@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, FileText, LogOut, Lock } from "lucide-react";
+import { LayoutDashboard, BookOpen, FileText, LogOut, Lock, Users2 } from "lucide-react";
 
 const ADMIN_EMAIL = "enzo.omnes@gmail.com";
 const ADMIN_PASSWORD = "Zunval2626";
@@ -13,6 +13,7 @@ const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/booklets", label: "Livrets", icon: BookOpen },
   { href: "/admin/blog", label: "Blog / SEO", icon: FileText },
+  { href: "/admin/affiliates", label: "Affiliés", icon: Users2 },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

@@ -1,8 +1,9 @@
 import { NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
-import { sendPurchaseConfirmation, sendSubscriptionExpired } from "@/lib/emails";
+import { sendPurchaseConfirmation, sendSubscriptionExpired, sendAffiliateCommissionEmail } from "@/lib/emails";
 
 export const runtime = "nodejs";
 
@@ -176,6 +177,42 @@ export async function POST(request: NextRequest) {
       break;
     }
 
+    case "invoice.paid": {
+      const invoice = event.data.object as Stripe.Invoice;
+      const subId =
+        (invoice as unknown as Record<string, Record<string, Record<string, string>>>)
+          .parent?.subscription_details?.subscription;
+      if (!subId) break;
+
+      const sub = await stripe.subscriptions.retrieve(subId);
+      const uid = getUid(sub);
+      if (!uid) break;
+
+      try {
+        await handleAffiliateCommission(invoice, uid);
+      } catch (e) {
+        console.error("[webhook] affiliate commission error:", e);
+      }
+      break;
+    }
+
+    case "account.updated": {
+      const account = event.data.object as Stripe.Account;
+      const snap = await adminDb
+        .collection("affiliate_accounts")
+        .where("stripeAccountId", "==", account.id)
+        .limit(1)
+        .get();
+      if (!snap.empty) {
+        await snap.docs[0].ref.update({
+          onboardingComplete: account.details_submitted,
+          chargesEnabled: account.charges_enabled,
+          payoutsEnabled: account.payouts_enabled,
+        });
+      }
+      break;
+    }
+
     case "invoice.payment_failed": {
       const invoice = event.data.object as Stripe.Invoice;
       // API 2026: invoice.subscription → invoice.parent.subscription_details.subscription
@@ -197,4 +234,91 @@ export async function POST(request: NextRequest) {
   }
 
   return new Response("ok", { status: 200 });
+}
+
+async function handleAffiliateCommission(invoice: Stripe.Invoice, referredId: string) {
+  // Idempotence : ne pas créer deux fois pour la même invoice
+  const existingComm = await adminDb
+    .collection("affiliate_commissions")
+    .where("stripeInvoiceId", "==", invoice.id)
+    .limit(1)
+    .get();
+  if (!existingComm.empty) return;
+
+  // Chercher un referral pour ce user
+  const pendingSnap = await adminDb
+    .collection("referrals")
+    .where("referredId", "==", referredId)
+    .where("status", "==", "pending")
+    .limit(1)
+    .get();
+
+  const convertedSnap = await adminDb
+    .collection("referrals")
+    .where("referredId", "==", referredId)
+    .where("status", "==", "converted")
+    .limit(1)
+    .get();
+
+  let referralDoc: FirebaseFirestore.QueryDocumentSnapshot | null = null;
+  const now = Date.now();
+
+  if (!pendingSnap.empty) {
+    // Premier paiement : convertir le referral
+    referralDoc = pendingSnap.docs[0];
+    const expiresAt = now + 365 * 24 * 60 * 60 * 1000; // 12 mois
+    await referralDoc.ref.update({ status: "converted", convertedAt: now, expiresAt });
+  } else if (!convertedSnap.empty) {
+    referralDoc = convertedSnap.docs[0];
+    const referralData = referralDoc.data();
+    // Vérifier la fenêtre de 12 mois
+    if (referralData.expiresAt && now > referralData.expiresAt) {
+      await referralDoc.ref.update({ status: "expired" });
+      return;
+    }
+  }
+
+  if (!referralDoc) return;
+
+  const referralData = referralDoc.data();
+  const commissionAmount = Math.floor((invoice.amount_paid ?? 0) * 0.15);
+  if (commissionAmount <= 0) return;
+
+  // Créer la commission
+  const commId = adminDb.collection("affiliate_commissions").doc().id;
+  await adminDb.collection("affiliate_commissions").doc(commId).set({
+    id: commId,
+    referralId: referralDoc.id,
+    referrerId: referralData.referrerId,
+    referredId,
+    stripeInvoiceId: invoice.id,
+    amount: commissionAmount,
+    status: "pending",
+    createdAt: now,
+  });
+
+  // Incrémenter totalEarned sur affiliate_accounts
+  await adminDb.collection("affiliate_accounts").doc(referralData.referrerId).set(
+    {
+      userId: referralData.referrerId,
+      totalEarned: FieldValue.increment(commissionAmount),
+      totalPaid: FieldValue.increment(0),
+    },
+    { merge: true }
+  );
+
+  // Email de notification au referrer
+  try {
+    const referrerDoc = await adminDb.collection("users").doc(referralData.referrerId).get();
+    const referrerData = referrerDoc.data();
+    if (referrerData?.email) {
+      await sendAffiliateCommissionEmail({
+        to: referrerData.email,
+        name: referrerData.displayName || "",
+        amount: commissionAmount,
+      });
+    }
+  } catch (e) {
+    console.error("[webhook] Failed to send commission email:", e);
+  }
 }

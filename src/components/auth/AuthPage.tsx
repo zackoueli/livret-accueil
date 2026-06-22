@@ -8,6 +8,7 @@ import toast from "react-hot-toast";
 import { Eye, EyeOff, BookOpen, Check } from "lucide-react";
 import { registerWithEmail, loginWithEmail, loginWithGoogle } from "@/lib/auth";
 import { useAuthStore } from "@/store/authStore";
+import { getRefCookie, setRefCookie, clearRefCookie, isValidCode } from "@/lib/referral";
 
 type Mode = "login" | "register";
 
@@ -20,6 +21,15 @@ export function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+
+  // Capture le code de parrainage depuis l'URL (?ref=XXX-XXXX)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref && isValidCode(ref)) {
+      setRefCookie(ref);
+    }
+  }, []);
 
   // Redirige dès que Firebase confirme la connexion (gère le cas COOP Google)
   useEffect(() => {
@@ -39,7 +49,9 @@ export function AuthPage() {
     setLoading(true);
     try {
       if (mode === "register") {
-        await registerWithEmail(form.email, form.password, form.name);
+        const refCode = getRefCookie() ?? undefined;
+        await registerWithEmail(form.email, form.password, form.name, refCode);
+        clearRefCookie();
       } else {
         await loginWithEmail(form.email, form.password);
       }

@@ -158,3 +158,37 @@ export async function sendSubscriptionExpired({
     html: layout(content),
   });
 }
+
+// ── 4. Nouvelle commission d'affiliation ──────────────────────────────────────
+
+export async function sendAffiliateCommissionEmail({
+  to, name, amount,
+}: { to: string; name: string; amount: number }) {
+  const euroAmount = (amount / 100).toFixed(2).replace(".", ",");
+
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#111827;">Nouvelle commission ! 💰</h1>
+    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+      Bonjour ${name || ""},<br><br>
+      Un utilisateur que vous avez parrainé vient de renouveler son abonnement Bunkly.
+      Une commission vous a été créditée.
+    </p>
+    <div style="background:#fff7ed;border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:0.5px;">Commission créditée</p>
+      <p style="margin:0;font-size:32px;font-weight:900;color:#111827;">${euroAmount} €</p>
+    </div>
+    <div style="text-align:center;">
+      ${btn("Voir mes gains →", `${APP_URL}/dashboard/affiliation`)}
+    </div>
+    <p style="margin:24px 0 0;font-size:13px;color:#9ca3af;text-align:center;">
+      Retrait disponible dès 30 € accumulés.
+    </p>
+  `;
+
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `+${euroAmount} € de commission Bunkly`,
+    html: layout(content),
+  });
+}
