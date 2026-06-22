@@ -11,8 +11,9 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { doc, getDoc, collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { doc, getDoc, setDoc, collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { generateReferralCode } from "@/lib/referral";
 import type { AffiliateCommission, Referral } from "@/types";
 
 interface ConnectStatus {
@@ -62,9 +63,16 @@ function AffiliationPageInner() {
     if (!user) return;
     setLoading(true);
     try {
-      // Code de parrainage
-      const codeDoc = await getDoc(doc(db, "referral_codes", user.uid));
-      if (codeDoc.exists()) setReferralCode(codeDoc.data().code);
+      // Code de parrainage — créer si absent (users inscrits avant le système d'affiliation)
+      const codeRef = doc(db, "referral_codes", user.uid);
+      const codeDoc = await getDoc(codeRef);
+      if (codeDoc.exists()) {
+        setReferralCode(codeDoc.data().code);
+      } else {
+        const newCode = generateReferralCode();
+        await setDoc(codeRef, { userId: user.uid, code: newCode, createdAt: Date.now() });
+        setReferralCode(newCode);
+      }
 
       // Statut Connect
       const statusRes = await fetch(`/api/affiliate/connect/status?userId=${user.uid}`);
