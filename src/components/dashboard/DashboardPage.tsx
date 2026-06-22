@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import {
   Plus, BookOpen, Eye, Pencil, Trash2, Share2, Lock,
   LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, HelpCircle,
-  Monitor, Smartphone, Search, ArrowRight, Star, Folder, FolderOpen, FolderPlus, X, Check, ChevronRight, AlertTriangle,
+  Monitor, Smartphone, Search, ArrowRight, Star, Folder, FolderOpen, FolderPlus, X, Check, ChevronRight, AlertTriangle, Gift,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -278,6 +278,14 @@ function DashboardPageInner() {
                 {profile?.displayName || user.email}
               </span>
               <Settings className="w-3.5 h-3.5 text-gray-400 hidden sm:block" />
+            </button>
+
+            <button
+              onClick={() => router.push(`/${locale}/dashboard/affiliation`)}
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors border border-green-100"
+              title="Programme d'affiliation">
+              <Gift className="w-3.5 h-3.5" />
+              Affiliation
             </button>
 
             <a
