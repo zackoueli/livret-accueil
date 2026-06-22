@@ -128,7 +128,7 @@ function AffiliationPageInner() {
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else toast.error("Erreur lors de la connexion bancaire");
+      else toast.error(data.error ?? "Erreur lors de la connexion bancaire");
     } catch {
       toast.error("Erreur réseau");
     } finally {

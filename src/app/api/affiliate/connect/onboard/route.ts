@@ -49,8 +49,8 @@ export async function POST(request: NextRequest) {
     });
 
     return Response.json({ url: accountLink.url });
-  } catch (err) {
+  } catch (err: any) {
     console.error("[affiliate/connect/onboard]", err);
-    return Response.json({ error: "Internal error" }, { status: 500 });
+    return Response.json({ error: err?.message ?? "Internal error" }, { status: 500 });
   }
 }
