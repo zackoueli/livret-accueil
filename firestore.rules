@@ -1,8 +1,64 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    // Users : lecture/écriture de son propre profil
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Livrets : lecture/écriture de ses propres livrets
+    match /booklets/{bookletId} {
+      allow read: if resource.data.isPublished == true
+                  || (request.auth != null && request.auth.uid == resource.data.userId);
+      allow write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Dossiers
+    match /folders/{folderId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    // Check-ins : lecture par le propriétaire du livret (via serveur), écriture publique
+    match /checkins/{checkinId} {
+      allow create: if true;
+      allow read: if request.auth != null;
+    }
+
+    // Analytics livrets : lecture publique en écriture serveur
+    match /booklet_analytics/{bookletId} {
+      allow read: if true;
+    }
+
+    // Articles blog : lecture publique
+    match /articles/{articleId} {
+      allow read: if true;
+    }
+
+    // ── Affiliation ──────────────────────────────────────────────────────────
+
+    // Code de parrainage : lecture/écriture de son propre code
+    match /referral_codes/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Referrals : lecture par le referrer ou le referred
+    match /referrals/{referralId} {
+      allow read: if request.auth != null
+                  && (request.auth.uid == resource.data.referrerId
+                   || request.auth.uid == resource.data.referredId);
+    }
+
+    // Commissions : lecture par le referrer uniquement
+    match /affiliate_commissions/{commissionId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.referrerId;
+    }
+
+    // Compte affilié : lecture/écriture de son propre compte
+    match /affiliate_accounts/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
     }
   }
 }
