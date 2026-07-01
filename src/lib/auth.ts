@@ -5,6 +5,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   updateProfile,
+  sendPasswordResetEmail as firebaseSendPasswordResetEmail,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
@@ -107,6 +108,10 @@ export async function loginWithGoogle() {
     }
     throw err;
   }
+}
+
+export async function resetPassword(email: string) {
+  await firebaseSendPasswordResetEmail(auth, email);
 }
 
 export async function signOut() {

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, BookOpen, Check } from "lucide-react";
-import { registerWithEmail, loginWithEmail, loginWithGoogle } from "@/lib/auth";
+import { registerWithEmail, loginWithEmail, loginWithGoogle, resetPassword } from "@/lib/auth";
 import { useAuthStore } from "@/store/authStore";
 import { getRefCookie, setRefCookie, clearRefCookie, isValidCode } from "@/lib/referral";
 
@@ -21,6 +21,7 @@ export function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
+  const [resetSent, setResetSent] = useState(false);
 
   // Capture le code de parrainage depuis l'URL (?ref=XXX-XXXX)
   useEffect(() => {
@@ -58,6 +59,20 @@ export function AuthPage() {
       // La redirection se fait via useEffect ci-dessus
     } catch (err: any) {
       toast.error(err.message);
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!form.email) return toast.error("Entrez votre email d'abord");
+    setLoading(true);
+    try {
+      await resetPassword(form.email);
+      setResetSent(true);
+      toast.success("Email de réinitialisation envoyé !");
+    } catch (err: any) {
+      toast.error(err.message);
+    } finally {
       setLoading(false);
     }
   };
@@ -250,6 +265,18 @@ export function AuthPage() {
                   </button>
                 </div>
               </div>
+
+              {mode === "login" && (
+                <div className="flex justify-end -mt-1">
+                  <button
+                    type="button"
+                    onClick={handleResetPassword}
+                    disabled={loading}
+                    className="text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors">
+                    {resetSent ? "Email envoyé ✓" : "Mot de passe oublié ?"}
+                  </button>
+                </div>
+              )}
 
               {mode === "register" && (
                 <div>
