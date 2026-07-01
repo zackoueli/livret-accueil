@@ -58,7 +58,18 @@ export function AuthPage() {
       }
       // La redirection se fait via useEffect ci-dessus
     } catch (err: any) {
-      toast.error(err.message);
+      const code = err?.code ?? "";
+      const messages: Record<string, string> = {
+        "auth/invalid-credential": "Email ou mot de passe incorrect.",
+        "auth/user-not-found": "Aucun compte trouvé avec cet email.",
+        "auth/wrong-password": "Mot de passe incorrect.",
+        "auth/email-already-in-use": "Un compte existe déjà avec cet email.",
+        "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères.",
+        "auth/invalid-email": "Adresse email invalide.",
+        "auth/too-many-requests": "Trop de tentatives. Réessayez dans quelques minutes.",
+        "auth/network-request-failed": "Erreur réseau. Vérifiez votre connexion.",
+      };
+      toast.error(messages[code] ?? "Une erreur est survenue. Réessayez.");
       setLoading(false);
     }
   };
