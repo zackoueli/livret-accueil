@@ -11,7 +11,7 @@ import {
   deleteField,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { Booklet, BookletModule, BookletTranslations, Folder, ModuleType } from "@/types";
+import { Booklet, BookletModule, BookletTranslations, Folder, ModuleType, Plan } from "@/types";
 
 // Firestore rejette les `undefined`.
 // - Au niveau racine : on utilise deleteField() pour supprimer le champ
@@ -36,11 +36,12 @@ function sanitizeForFirestore(
 import { nanoid } from "nanoid";
 import { getTemplate } from "./templates";
 
-export async function createBooklet(userId: string, title: string, contentTemplateId = "blank", layoutId = "simple"): Promise<string> {
+export async function createBooklet(userId: string, title: string, contentTemplateId = "blank", layoutId = "simple", ownerPlan: Plan = "free"): Promise<string> {
   const slug = nanoid(10);
   const tpl = getTemplate(contentTemplateId);
   const booklet: Omit<Booklet, "id"> = {
     userId,
+    ownerPlan,
     title,
     slug,
     templateId: layoutId,

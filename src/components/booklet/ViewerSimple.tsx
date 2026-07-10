@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, createContext, useContext } from "react";
-import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS } from "@/types";
+import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
 import {
@@ -330,8 +330,9 @@ function BookletHero({ booklet, accent }: { booklet: Booklet; accent: string }) 
   );
 }
 
-function BunklyCredit({ accent }: { accent: string }) {
+function BunklyCredit({ accent, ownerPlan }: { accent: string; ownerPlan?: Plan }) {
   const tr = useT();
+  if (ownerPlan === "pro" || ownerPlan === "agency") return null;
   return (
     <div style={{ textAlign: "center", padding: "24px 16px 12px" }}>
       <a href="https://bunkly.co" target="_blank" rel="noopener noreferrer"
@@ -349,7 +350,7 @@ function TabWithHero({ booklet, accent, children }: { booklet: Booklet; accent: 
       <div style={{ overflowY: "auto", flex: 1, touchAction: "pan-y" }}>
         <BookletHero booklet={booklet} accent={accent} />
         {children}
-        <BunklyCredit accent={accent} />
+        <BunklyCredit accent={accent} ownerPlan={booklet.ownerPlan} />
       </div>
     </div>
   );
@@ -597,7 +598,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
             <PhotoGallery images={arrival!.images!} />
           </div>
         )}
-        <BunklyCredit accent={accent} />
+        <BunklyCredit accent={accent} ownerPlan={booklet.ownerPlan} />
       </div>
     </div>
   );

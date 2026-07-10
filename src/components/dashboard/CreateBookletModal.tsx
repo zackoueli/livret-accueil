@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { X, Loader2, ArrowRight, Check } from "lucide-react";
+import { X, Loader2, ArrowRight, Check, Lock } from "lucide-react";
 import { TEMPLATES, BookletTemplate } from "@/lib/templates";
+import { usePlan } from "@/hooks/usePlan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
 
 interface Props {
   onClose: () => void;
@@ -54,11 +56,19 @@ function PhoneFrame({ url }: { url: string }) {
 }
 
 export function CreateBookletModal({ onClose, onCreate }: Props) {
+  const { templateCount } = usePlan();
   const [step, setStep] = useState<Step>("layout");
   const [selectedLayout, setSelectedLayout] = useState(LAYOUTS[0]);
   const [selected, setSelected] = useState<BookletTemplate>(TEMPLATES[0]);
   const [title, setTitle] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+
+  // "blank" est toujours accessible ; les modèles préremplis suivants sont limités par le plan
+  const unlockedIds = new Set([
+    "blank",
+    ...TEMPLATES.filter(t => t.id !== "blank").slice(0, Math.max(0, templateCount - 1)).map(t => t.id),
+  ]);
 
   const handleCreate = async () => {
     const t = title.trim() || selected.propertyName || "Mon livret";
@@ -161,19 +171,27 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {TEMPLATES.map(tpl => {
                 const isSelected = selected.id === tpl.id;
+                const isLocked = !unlockedIds.has(tpl.id);
                 return (
                   <button
                     key={tpl.id}
-                    onClick={() => setSelected(tpl)}
+                    onClick={() => isLocked ? setShowUpgrade(true) : setSelected(tpl)}
                     className={`relative text-left p-5 rounded-2xl border-2 transition-all ${
-                      isSelected
-                        ? "border-orange-400 bg-orange-50 shadow-sm"
-                        : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                      isLocked
+                        ? "border-gray-100 opacity-60"
+                        : isSelected
+                          ? "border-orange-400 bg-orange-50 shadow-sm"
+                          : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                     }`}
                   >
-                    {isSelected && (
+                    {isSelected && !isLocked && (
                       <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
                         <Check className="w-3 h-3 text-white" />
+                      </div>
+                    )}
+                    {isLocked && (
+                      <div className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
+                        <Lock className="w-2.5 h-2.5" /> Verrouillé
                       </div>
                     )}
                     <div className="w-full h-1.5 rounded-full mb-4" style={{ background: tpl.accentColor }} />
@@ -284,6 +302,13 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
           )}
         </div>
       </div>
+
+      {showUpgrade && (
+        <UpgradeModal
+          reason="Ce modèle est réservé à un plan supérieur"
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
     </div>
   );
 }

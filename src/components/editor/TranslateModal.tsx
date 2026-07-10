@@ -5,6 +5,8 @@ import { X, Languages, Loader2, Check, AlertCircle, Pencil, ChevronDown, Chevron
 import { Booklet, SupportedLang, SUPPORTED_LANGS, BookletTranslations } from "@/types";
 import { saveBookletTranslations } from "@/lib/booklets";
 import { useAuthStore } from "@/store/authStore";
+import { usePlan } from "@/hooks/usePlan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import toast from "react-hot-toast";
 
 const MONTHLY_LIMIT = 50_000;
@@ -19,8 +21,10 @@ type Tab = "auto" | "edit";
 
 export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
   const { user, profile } = useAuthStore();
+  const { translationLangLimit } = usePlan();
   const existingLangs = Object.keys(booklet.translations ?? {}) as SupportedLang[];
-  const [tab, setTab] = useState<Tab>("auto");
+  const [tab, setTab] = useState<Tab>(translationLangLimit === 0 ? "edit" : "auto");
+  const [showUpgrade, setShowUpgrade] = useState(false);
 
   // ── Onglet Auto ──────────────────────────────────────────────────────────────
   const [selected, setSelected] = useState<Set<SupportedLang>>(new Set(existingLangs));
@@ -50,8 +54,13 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
   const toggleLang = (code: SupportedLang) => {
     if (code === "fr") return;
     setSelected(prev => {
+      const isAdding = !prev.has(code);
+      if (isAdding && prev.size >= translationLangLimit) {
+        setShowUpgrade(true);
+        return prev;
+      }
       const next = new Set(prev);
-      next.has(code) ? next.delete(code) : next.add(code);
+      isAdding ? next.add(code) : next.delete(code);
       return next;
     });
   };
@@ -180,8 +189,8 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
         {/* Tabs */}
         <div className="flex gap-1 px-6 pt-4 shrink-0">
           <button
-            onClick={() => setTab("auto")}
-            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${tab === "auto" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
+            onClick={() => translationLangLimit === 0 ? setShowUpgrade(true) : setTab("auto")}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${tab === "auto" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"} ${translationLangLimit === 0 ? "opacity-50" : ""}`}>
             <Languages className="w-3.5 h-3.5" /> Traduction auto
           </button>
           <button
@@ -259,6 +268,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
                   />
                 </div>
               </div>
+              <p className="text-xs text-gray-400">{targetCount} / {translationLangLimit} langues automatiques utilisées sur votre plan</p>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-xs text-gray-400">
                   {charsUsed >= MONTHLY_LIMIT
@@ -348,6 +358,15 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
           </>
         )}
       </div>
+
+      {showUpgrade && (
+        <UpgradeModal
+          reason={translationLangLimit === 0
+            ? "La traduction automatique est réservée aux plans Starter, Pro et Agence"
+            : `Vous avez atteint la limite de ${translationLangLimit} langues automatiques de votre plan`}
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
     </div>
   );
 }

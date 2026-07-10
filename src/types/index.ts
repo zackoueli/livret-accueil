@@ -1,4 +1,4 @@
-export type Plan = "free" | "pro" | "agency";
+export type Plan = "free" | "starter" | "pro" | "agency";
 export type BillingPeriod = "monthly" | "yearly";
 
 export interface UserProfile {
@@ -149,6 +149,7 @@ export interface AffiliateAccount {
 export interface Booklet {
   id: string;
   userId: string;
+  ownerPlan?: Plan;
   templateId?: string;
   paletteId?: string;
   folderId?: string;

@@ -43,11 +43,12 @@ function btn(text: string, url: string, color = "#f97316") {
 export async function sendPurchaseConfirmation({
   to, name, plan, billingPeriod,
 }: { to: string; name: string; plan: string; billingPeriod: string }) {
-  const planLabel: Record<string, string> = { pro: "Pro", agency: "Agence" };
+  const planLabel: Record<string, string> = { starter: "Starter", pro: "Pro", agency: "Agence" };
   const periodLabel = billingPeriod === "yearly" ? "annuel" : "mensuel";
   const price: Record<string, Record<string, string>> = {
-    pro:    { monthly: "9€/mois", yearly: "69€/an" },
-    agency: { monthly: "29€/mois", yearly: "249€/an" },
+    starter: { monthly: "9€/mois", yearly: "69€/an" },
+    pro:     { monthly: "29€/mois", yearly: "222€/an" },
+    agency:  { monthly: "59€/mois", yearly: "453€/an" },
   };
 
   const content = `
@@ -61,18 +62,22 @@ export async function sendPurchaseConfirmation({
       <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:0.5px;">Votre plan inclut</p>
       ${plan === "agency" ? `
         <ul style="margin:0;padding-left:20px;font-size:14px;color:#374151;line-height:2;">
-          <li>Livrets illimités</li>
-          <li>Tous les templates</li>
-          <li>Import IA</li>
-          <li>Dossiers & Analytics</li>
+          <li>Jusqu'à 100 logements</li>
+          <li>Toutes les fonctionnalités Pro</li>
+          <li>Import IA & Analytics</li>
           <li>White-label</li>
+        </ul>` : plan === "pro" ? `
+        <ul style="margin:0;padding-left:20px;font-size:14px;color:#374151;line-height:2;">
+          <li>Jusqu'à 20 logements</li>
+          <li>Import IA & Analytics</li>
+          <li>QR code personnalisable</li>
+          <li>Badge Bunkly masqué</li>
         </ul>` : `
         <ul style="margin:0;padding-left:20px;font-size:14px;color:#374151;line-height:2;">
-          <li>Jusqu'à 10 livrets</li>
-          <li>Tous les templates</li>
-          <li>Import IA</li>
-          <li>Dossiers & Analytics</li>
-          <li>Badge Bunkly masqué</li>
+          <li>Jusqu'à 5 logements</li>
+          <li>3 modèles de livret</li>
+          <li>Slug personnalisé</li>
+          <li>Modules supplémentaires</li>
         </ul>`}
     </div>
     <div style="text-align:center;">

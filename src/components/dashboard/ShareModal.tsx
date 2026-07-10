@@ -6,6 +6,9 @@ import QRCodeStyling, { DotType, CornerSquareType, CornerDotType } from "qr-code
 import { Booklet } from "@/types";
 import toast from "react-hot-toast";
 import { bookletUrl } from "@/lib/url";
+import { usePlan } from "@/hooks/usePlan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
+import { Lock } from "lucide-react";
 
 const PRESET_COLORS = [
   { dark: "#1a1a1a", light: "#ffffff" },
@@ -33,9 +36,12 @@ const QR_STYLES: QRStyle[] = [
 ];
 
 export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: () => void }) {
+  const { can } = usePlan();
+  const canCustomizeQr = can("qr_custom");
   const containerRef = useRef<HTMLDivElement>(null);
   const qrRef = useRef<QRCodeStyling | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showUpgrade, setShowUpgrade] = useState(false);
   const [qrColor, setQrColor] = useState({ dark: booklet.accentColor, light: "#ffffff" });
   const [customDark, setCustomDark] = useState(booklet.accentColor);
   const [customLight, setCustomLight] = useState("#ffffff");
@@ -113,51 +119,60 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
             </div>
           </div>
 
-          {/* Style */}
-          <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Style</p>
-            <div className="grid grid-cols-5 gap-1.5">
-              {QR_STYLES.map((s) => (
-                <button key={s.id} onClick={() => setActiveStyle(s)}
-                  className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
-                    activeStyle.id === s.id
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-white text-gray-500 border-gray-200 hover:border-orange-300"
-                  }`}>
-                  {s.label}
-                </button>
-              ))}
-            </div>
-          </div>
+          {canCustomizeQr ? (
+            <>
+              {/* Style */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Style</p>
+                <div className="grid grid-cols-5 gap-1.5">
+                  {QR_STYLES.map((s) => (
+                    <button key={s.id} onClick={() => setActiveStyle(s)}
+                      className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                        activeStyle.id === s.id
+                          ? "bg-orange-500 text-white border-orange-500"
+                          : "bg-white text-gray-500 border-gray-200 hover:border-orange-300"
+                      }`}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-          {/* Couleur */}
-          <div>
-            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Couleur</p>
-            <div className="flex gap-2 flex-wrap mb-3">
-              {PRESET_COLORS.map((c) => (
-                <button key={c.dark} onClick={() => applyColor(c.dark, c.light)}
-                  title={c.dark}
-                  className={`w-8 h-8 rounded-lg border-2 transition-all hover:scale-110 ${
-                    qrColor.dark === c.dark ? "border-gray-400 scale-110" : "border-transparent"
-                  }`}
-                  style={{ backgroundColor: c.dark }} />
-              ))}
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500">Fond</span>
-                <input type="color" value={customLight}
-                  onChange={(e) => { setCustomLight(e.target.value); applyColor(customDark, e.target.value); }}
-                  className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
+              {/* Couleur */}
+              <div>
+                <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Couleur</p>
+                <div className="flex gap-2 flex-wrap mb-3">
+                  {PRESET_COLORS.map((c) => (
+                    <button key={c.dark} onClick={() => applyColor(c.dark, c.light)}
+                      title={c.dark}
+                      className={`w-8 h-8 rounded-lg border-2 transition-all hover:scale-110 ${
+                        qrColor.dark === c.dark ? "border-gray-400 scale-110" : "border-transparent"
+                      }`}
+                      style={{ backgroundColor: c.dark }} />
+                  ))}
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-500">Fond</span>
+                    <input type="color" value={customLight}
+                      onChange={(e) => { setCustomLight(e.target.value); applyColor(customDark, e.target.value); }}
+                      className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-gray-500">Motif</span>
+                    <input type="color" value={customDark}
+                      onChange={(e) => { setCustomDark(e.target.value); applyColor(e.target.value, customLight); }}
+                      className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
+                  </div>
+                </div>
               </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs text-gray-500">Motif</span>
-                <input type="color" value={customDark}
-                  onChange={(e) => { setCustomDark(e.target.value); applyColor(e.target.value, customLight); }}
-                  className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
-              </div>
-            </div>
-          </div>
+            </>
+          ) : (
+            <button onClick={() => setShowUpgrade(true)}
+              className="w-full flex items-center gap-2 justify-center text-xs font-semibold text-orange-600 bg-orange-50 hover:bg-orange-100 rounded-xl px-4 py-3 transition-colors">
+              <Lock className="w-3.5 h-3.5" /> Personnalisation du QR code réservée aux plans Pro et Agence
+            </button>
+          )}
 
           {/* URL */}
           <div className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3">
@@ -181,6 +196,13 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
           </div>
         </div>
       </div>
+
+      {showUpgrade && (
+        <UpgradeModal
+          reason="Personnalisation du QR code réservée aux plans Pro et Agence"
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
     </div>
   );
 }

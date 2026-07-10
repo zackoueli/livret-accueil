@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, createContext, useContext } from "react";
-import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS } from "@/types";
+import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
 import {
@@ -476,14 +476,15 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
             />
           ))}
         </div>
-        <BunklyCredit dark />
+        <BunklyCredit dark ownerPlan={booklet.ownerPlan} />
 
     </div>
   );
 }
 
-function BunklyCredit({ dark = false }: { dark?: boolean }) {
+function BunklyCredit({ dark = false, ownerPlan }: { dark?: boolean; ownerPlan?: Plan }) {
   const tr = useT();
+  if (ownerPlan === "pro" || ownerPlan === "agency") return null;
   const color = dark ? "rgba(255,255,255,0.35)" : C.muted;
   const bold  = dark ? "rgba(255,255,255,0.6)"  : C.sub;
   return (
@@ -802,7 +803,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
             </div>
           )}
         </div>
-        <BunklyCredit dark />
+        <BunklyCredit dark ownerPlan={booklet.ownerPlan} />
       </div>
 
       {/* Drawer activité */}
@@ -944,7 +945,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
             <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: "rgba(255,255,255,0.6)", fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
           )}
         </div>
-        <BunklyCredit dark />
+        <BunklyCredit dark ownerPlan={booklet.ownerPlan} />
       </div>
     </div>
   );

@@ -183,7 +183,7 @@ function DashboardPageInner() {
     if (!user) return;
     setCreating(true);
     try {
-      const id = await createBooklet(user.uid, title, contentTemplateId, layoutId);
+      const id = await createBooklet(user.uid, title, contentTemplateId, layoutId, plan);
       router.push(`/${locale}/editor/${id}`);
     } catch {
       toast.error("Erreur lors de la création");

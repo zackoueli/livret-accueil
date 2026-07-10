@@ -28,11 +28,19 @@ import { bookletUrl } from "@/lib/url";
 import { usePlan } from "@/hooks/usePlan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 
+const TIDES_WEATHER_TYPES: ModuleType[] = ["tides", "weather"];
+
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
   const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules, addModule } = useEditorStore();
   const [tab, setTab] = useState<"modules" | "appearance">("appearance");
-  const { isPaid } = usePlan();
+  const { isPaid, can } = usePlan();
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [upgradeReason, setUpgradeReason] = useState<string | undefined>(undefined);
+
+  const canAddModule = (type: ModuleType) => {
+    if (TIDES_WEATHER_TYPES.includes(type)) return can("tides_weather");
+    return can("all_modules");
+  };
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -97,17 +105,19 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">À ajouter</p>
                 {!isPaid && (
                   <span className="flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
-                    <Lock className="w-2.5 h-2.5" /> Pro
+                    <Lock className="w-2.5 h-2.5" /> Starter
                   </span>
                 )}
               </div>
               {OPTIONAL_MODULES.filter(t => !existingTypes.has(t)).map((type) => {
                 const meta = MODULE_META[type];
+                const unlocked = canAddModule(type);
+                const isTidesWeather = TIDES_WEATHER_TYPES.includes(type);
                 return (
-                  <div key={type} className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-1 transition-colors ${isPaid ? "hover:bg-gray-50" : "opacity-60"}`}>
+                  <div key={type} className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-1 transition-colors ${unlocked ? "hover:bg-gray-50" : "opacity-60"}`}>
                     <span className="text-base leading-none">{meta.emoji}</span>
                     <span className="flex-1 text-sm text-gray-500 truncate">{meta.label}</span>
-                    {isPaid ? (
+                    {unlocked ? (
                       <button
                         onClick={() => addModule(type)}
                         className="flex items-center gap-1 text-xs font-bold text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition-colors shrink-0">
@@ -115,9 +125,14 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
                       </button>
                     ) : (
                       <button
-                        onClick={() => setShowUpgrade(true)}
+                        onClick={() => {
+                          setUpgradeReason(isTidesWeather
+                            ? "Le module Marée & Météo est réservé aux plans Pro et Agence"
+                            : "Les modules optionnels sont réservés aux plans Starter, Pro et Agence");
+                          setShowUpgrade(true);
+                        }}
                         className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-orange-500 bg-gray-100 hover:bg-orange-50 px-2.5 py-1 rounded-lg transition-colors shrink-0">
-                        <Lock className="w-3 h-3" /> Pro
+                        <Lock className="w-3 h-3" /> {isTidesWeather ? "Pro" : "Starter"}
                       </button>
                     )}
                   </div>
@@ -128,7 +143,7 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
 
           {showUpgrade && (
             <UpgradeModal
-              reason="Les modules optionnels sont réservés aux plans Pro et Agency"
+              reason={upgradeReason}
               onClose={() => setShowUpgrade(false)}
             />
           )}
@@ -253,9 +268,12 @@ function AddressForm({ address, onChange, ibase }: { address: string; onChange: 
 
 function SidebarAppearance() {
   const { booklet, updateBookletField } = useEditorStore();
+  const { can } = usePlan();
+  const canCustomSlug = can("custom_slug");
   const [slugInput, setSlugInput] = useState("");
   const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken" | "too_short">("idle");
   const [uploading, setUploading] = useState(false);
+  const [showSlugUpgrade, setShowSlugUpgrade] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -436,24 +454,37 @@ function SidebarAppearance() {
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">URL du livret</label>
           <div className="relative">
             <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
-            <input type="text" value={slugInput} onChange={(e) => checkSlug(e.target.value)}
+            <input type="text" value={slugInput}
+              disabled={!canCustomSlug}
+              onChange={(e) => checkSlug(e.target.value)}
+              onClick={() => { if (!canCustomSlug) setShowSlugUpgrade(true); }}
               className={`w-full border rounded-xl pl-8 pr-8 py-2.5 text-sm focus:outline-none focus:ring-2 focus:border-transparent transition-colors ${
+                !canCustomSlug ? "bg-gray-50 text-gray-400 cursor-pointer" :
                 slugStatus === "available" ? "border-green-300 focus:ring-green-400" :
                 slugStatus === "taken" || slugStatus === "too_short" ? "border-red-300 focus:ring-red-400" :
                 "border-gray-200 focus:ring-orange-400"
               }`}
               placeholder="villa-les-pins" spellCheck={false} />
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              {slugStatus === "checking" && <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />}
-              {slugStatus === "available" && <Check className="w-3.5 h-3.5 text-green-500" />}
-              {(slugStatus === "taken" || slugStatus === "too_short") && <X className="w-3.5 h-3.5 text-red-400" />}
+              {!canCustomSlug && <Lock className="w-3.5 h-3.5 text-gray-300" />}
+              {canCustomSlug && slugStatus === "checking" && <Loader2 className="w-3.5 h-3.5 text-gray-400 animate-spin" />}
+              {canCustomSlug && slugStatus === "available" && <Check className="w-3.5 h-3.5 text-green-500" />}
+              {canCustomSlug && (slugStatus === "taken" || slugStatus === "too_short") && <X className="w-3.5 h-3.5 text-red-400" />}
             </div>
           </div>
           <p className={`text-xs mt-1.5 ${slugStatus === "available" ? "text-green-500" : slugStatus === "taken" || slugStatus === "too_short" ? "text-red-400" : "text-gray-400"}`}>
-            {slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : bookletUrl(slugInput || booklet.slug)}
+            {!canCustomSlug ? "Slug personnalisé réservé aux plans Starter, Pro et Agence" :
+              slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : bookletUrl(slugInput || booklet.slug)}
           </p>
         </div>
       </div>
+
+      {showSlugUpgrade && (
+        <UpgradeModal
+          reason="Le slug personnalisé est réservé aux plans Starter, Pro et Agence"
+          onClose={() => setShowSlugUpgrade(false)}
+        />
+      )}
     </div>
   );
 }

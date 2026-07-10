@@ -30,6 +30,23 @@ export async function POST(request: NextRequest) {
   const getUid = (obj: { metadata?: Stripe.Metadata | null }) =>
     obj.metadata?.firebaseUid ?? null;
 
+  // Dénormalise le plan de l'utilisateur sur tous ses livrets (badge Bunkly, etc.)
+  const syncOwnerPlan = async (uid: string, plan: string) => {
+    const bookletsSnap = await adminDb.collection("booklets").where("userId", "==", uid).get();
+    if (bookletsSnap.empty) return;
+    const batch = adminDb.batch();
+    for (const doc of bookletsSnap.docs) {
+      batch.update(doc.ref, { ownerPlan: plan });
+    }
+    await batch.commit();
+  };
+
+  const resolvePlanFromPriceId = (priceId: string | undefined): "starter" | "pro" | "agency" => {
+    if (priceId === process.env.STRIPE_PRICE_AGENCY_MONTHLY || priceId === process.env.STRIPE_PRICE_AGENCY_YEARLY) return "agency";
+    if (priceId === process.env.STRIPE_PRICE_STARTER_MONTHLY || priceId === process.env.STRIPE_PRICE_STARTER_YEARLY) return "starter";
+    return "pro";
+  };
+
   // API 2026-04-22.dahlia: current_period_end → billing_cycle_anchor
   const getEndDate = (sub: Stripe.Subscription): number =>
     (sub as unknown as Record<string, number>).billing_cycle_anchor ?? 0;
@@ -55,7 +72,7 @@ export async function POST(request: NextRequest) {
           : "monthly";
 
       const priceId = sub.items.data[0]?.price.id;
-      const newPlan = priceId === process.env.STRIPE_PRICE_AGENCY_MONTHLY || priceId === process.env.STRIPE_PRICE_AGENCY_YEARLY ? "agency" : "pro";
+      const newPlan = resolvePlanFromPriceId(priceId);
       console.log(`[webhook] updating user ${uid} to ${newPlan}, period: ${period}`);
       await adminDb.collection("users").doc(uid).set(
         {
@@ -67,6 +84,7 @@ export async function POST(request: NextRequest) {
         },
         { merge: true }
       );
+      await syncOwnerPlan(uid, newPlan);
       console.log(`[webhook] user ${uid} updated to ${newPlan} ✓`);
 
       // Email de confirmation — on lit email+nom depuis Firestore (après écriture) et depuis le customer Stripe en fallback
@@ -105,11 +123,12 @@ export async function POST(request: NextRequest) {
           : "monthly";
       const isActive = sub.status === "active" || sub.status === "trialing";
       const updatedPriceId = sub.items.data[0]?.price.id;
-      const updatedPlan = updatedPriceId === process.env.STRIPE_PRICE_AGENCY_MONTHLY || updatedPriceId === process.env.STRIPE_PRICE_AGENCY_YEARLY ? "agency" : "pro";
+      const updatedPlan = resolvePlanFromPriceId(updatedPriceId);
+      const finalPlan = isActive ? updatedPlan : "free";
 
       await adminDb.collection("users").doc(uid).set(
         {
-          plan: isActive ? updatedPlan : "free",
+          plan: finalPlan,
           billingPeriod: period,
           stripeSubscriptionId: sub.id,
           subscriptionStatus: sub.status,
@@ -117,6 +136,7 @@ export async function POST(request: NextRequest) {
         },
         { merge: true }
       );
+      await syncOwnerPlan(uid, finalPlan);
       break;
     }
 
@@ -138,6 +158,7 @@ export async function POST(request: NextRequest) {
         },
         { merge: true }
       );
+      await syncOwnerPlan(uid, "free");
 
       // Dépublier tous les livrets au-delà de la limite gratuite (2)
       try {

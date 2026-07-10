@@ -9,10 +9,16 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Missing parameters" }, { status: 400 });
   }
 
-  const isAgency = plan === "agency";
-  const priceId = isAgency
-    ? (billingPeriod === "yearly" ? process.env.STRIPE_PRICE_AGENCY_YEARLY! : process.env.STRIPE_PRICE_AGENCY_MONTHLY!)
-    : (billingPeriod === "yearly" ? process.env.STRIPE_PRICE_YEARLY! : process.env.STRIPE_PRICE_MONTHLY!);
+  const isYearly = billingPeriod === "yearly";
+  const PRICE_IDS: Record<string, { monthly?: string; yearly?: string }> = {
+    starter: { monthly: process.env.STRIPE_PRICE_STARTER_MONTHLY, yearly: process.env.STRIPE_PRICE_STARTER_YEARLY },
+    pro:     { monthly: process.env.STRIPE_PRICE_PRO_MONTHLY, yearly: process.env.STRIPE_PRICE_PRO_YEARLY },
+    agency:  { monthly: process.env.STRIPE_PRICE_AGENCY_MONTHLY, yearly: process.env.STRIPE_PRICE_AGENCY_YEARLY },
+  };
+  const priceId = isYearly ? PRICE_IDS[plan]?.yearly : PRICE_IDS[plan]?.monthly;
+  if (!priceId) {
+    return Response.json({ error: "Plan indisponible" }, { status: 400 });
+  }
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL;
   const localePath = locale ? `/${locale}` : "";

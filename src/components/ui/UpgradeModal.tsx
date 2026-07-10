@@ -27,7 +27,7 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
         <div className="flex items-start justify-between p-6 pb-4">
@@ -68,7 +68,7 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
         </div>
 
         {/* Plans */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 px-6 pb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 px-6 pb-6">
           {PLANS_CONFIG.map((plan) => {
             const isCurrent = plan.id === currentPlan;
             const price = billing === "yearly" ? plan.price.yearly : plan.price.monthly;

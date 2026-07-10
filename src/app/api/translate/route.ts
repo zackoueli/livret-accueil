@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import { getAuth } from "firebase-admin/auth";
+import { PLAN_TRANSLATION_LANGS } from "@/lib/plans";
+import { Plan } from "@/types";
 
 export const runtime = "nodejs";
 
@@ -41,6 +43,13 @@ export async function POST(request: NextRequest) {
   const userRef = adminDb.collection("users").doc(uid);
   const userSnap = await userRef.get();
   const userData = userSnap.data() ?? {};
+
+  const rawPlan = userData.plan as string;
+  const plan: Plan = (rawPlan === "actif" ? "pro" : (rawPlan as Plan)) || "free";
+  const langLimit = PLAN_TRANSLATION_LANGS[plan] ?? 0;
+  if (langLimit === 0) {
+    return Response.json({ error: "plan_limit", langLimit }, { status: 403 });
+  }
 
   const month = currentMonth();
   const storedMonth = userData.translationCharsMonth ?? "";

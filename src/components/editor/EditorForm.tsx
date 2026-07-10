@@ -11,6 +11,8 @@ import { useAuthStore } from "@/store/authStore";
 import { DndContext, closestCenter, PointerSensor, MouseSensor, TouchSensor, useSensor, useSensors, DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { usePlan } from "@/hooks/usePlan";
+import { UpgradeModal } from "@/components/ui/UpgradeModal";
 
 // ── Composant upload photo générique ─────────────────────────────────────────
 
@@ -293,6 +295,8 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
 function ActivityEditor({ value, onChange, bookletId }: { value: string; onChange: (v: string) => void; bookletId: string }) {
   const items = parseActivities(value);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [showUpgrade, setShowUpgrade] = useState(false);
+  const { activityLimit } = usePlan();
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
@@ -301,6 +305,10 @@ function ActivityEditor({ value, onChange, bookletId }: { value: string; onChang
   const save = (next: Activity[]) => onChange(JSON.stringify(next));
 
   const add = () => {
+    if (activityLimit !== null && items.length >= activityLimit) {
+      setShowUpgrade(true);
+      return;
+    }
     const item: Activity = {
       id: nanoid(), category: "restaurant", name: "", description: "",
       address: "", distance: "", phone: "", website: "", instagram: "",
@@ -351,6 +359,17 @@ function ActivityEditor({ value, onChange, bookletId }: { value: string; onChang
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-orange-200 text-orange-500 font-semibold text-sm hover:bg-orange-50 transition-colors">
         <Plus className="w-4 h-4" /> Ajouter un lieu
       </button>
+
+      {activityLimit !== null && (
+        <p className="text-xs text-gray-400 text-center">{items.length} / {activityLimit} activités utilisées</p>
+      )}
+
+      {showUpgrade && (
+        <UpgradeModal
+          reason={`Vous avez atteint la limite de ${activityLimit} activités de votre plan`}
+          onClose={() => setShowUpgrade(false)}
+        />
+      )}
     </div>
   );
 }
