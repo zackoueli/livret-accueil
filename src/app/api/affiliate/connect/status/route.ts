@@ -1,12 +1,17 @@
 import { NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, requireAuthUid } from "@/lib/firebase-admin";
 
 export async function GET(request: NextRequest) {
   try {
     const userId = request.nextUrl.searchParams.get("userId");
     if (!userId) {
       return Response.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    const authUid = await requireAuthUid(request);
+    if (!authUid || authUid !== userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const accountDoc = await adminDb.collection("affiliate_accounts").doc(userId).get();

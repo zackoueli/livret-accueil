@@ -31,9 +31,10 @@ function SettingsPageInner() {
     if (!user || !profile) return;
     setLoadingPlan(planId);
     try {
+      const token = await user.getIdToken();
       const res = await fetch("/api/stripe/create-checkout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ userId: user.uid, email: user.email, billingPeriod: billing, plan: planId, locale }),
       });
       const data = await res.json();
@@ -50,9 +51,10 @@ function SettingsPageInner() {
     if (!user) return;
     setLoadingPortal(true);
     try {
+      const token = await user.getIdToken();
       const res = await fetch("/api/stripe/portal", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ userId: user.uid, locale }),
       });
       const data = await res.json();

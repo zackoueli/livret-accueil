@@ -75,7 +75,10 @@ function AffiliationPageInner() {
       }
 
       // Statut Connect
-      const statusRes = await fetch(`/api/affiliate/connect/status?userId=${user.uid}`);
+      const statusToken = await user.getIdToken();
+      const statusRes = await fetch(`/api/affiliate/connect/status?userId=${user.uid}`, {
+        headers: { Authorization: `Bearer ${statusToken}` },
+      });
       const statusData = await statusRes.json();
       setConnectStatus(statusData);
 
@@ -121,9 +124,10 @@ function AffiliationPageInner() {
     if (!user) return;
     setLoadingConnect(true);
     try {
+      const token = await user.getIdToken();
       const res = await fetch("/api/affiliate/connect/onboard", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ userId: user.uid, email: user.email }),
       });
       const data = await res.json();
@@ -140,9 +144,10 @@ function AffiliationPageInner() {
     if (!user) return;
     setLoadingPayout(true);
     try {
+      const token = await user.getIdToken();
       const res = await fetch("/api/affiliate/payout", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         body: JSON.stringify({ userId: user.uid }),
       });
       const data = await res.json();

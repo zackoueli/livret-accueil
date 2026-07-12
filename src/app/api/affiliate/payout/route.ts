@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, requireAuthUid } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 
 const MIN_PAYOUT_CENTS = 3000; // €30
@@ -10,6 +10,11 @@ export async function POST(request: NextRequest) {
     const { userId } = await request.json();
     if (!userId) {
       return Response.json({ error: "Missing userId" }, { status: 400 });
+    }
+
+    const authUid = await requireAuthUid(request);
+    if (!authUid || authUid !== userId) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const accountDoc = await adminDb.collection("affiliate_accounts").doc(userId).get();

@@ -1,12 +1,17 @@
 import { NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, requireAuthUid } from "@/lib/firebase-admin";
 
 export async function POST(request: NextRequest) {
   const { userId, email, billingPeriod, plan, locale } = await request.json();
 
   if (!userId || !email || !billingPeriod) {
     return Response.json({ error: "Missing parameters" }, { status: 400 });
+  }
+
+  const authUid = await requireAuthUid(request);
+  if (!authUid || authUid !== userId) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   const isYearly = billingPeriod === "yearly";
