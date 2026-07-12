@@ -37,7 +37,7 @@ import { nanoid } from "nanoid";
 import { getTemplate } from "./templates";
 
 export async function createBooklet(userId: string, title: string, contentTemplateId = "blank", layoutId = "simple", ownerPlan: Plan = "free"): Promise<string> {
-  const slug = nanoid(10);
+  const slug = await generateUniqueSlug();
   const tpl = getTemplate(contentTemplateId);
   const booklet: Omit<Booklet, "id"> = {
     userId,
@@ -112,8 +112,17 @@ export async function moveBookletToFolder(bookletId: string, folderId: string | 
 
 // ── Booklets ───────────────────────────────────────────────────────────────────
 
+async function generateUniqueSlug(): Promise<string> {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const slug = nanoid(10);
+    const snap = await getDocs(query(collection(db, "booklets"), where("slug", "==", slug)));
+    if (snap.empty) return slug;
+  }
+  throw new Error("Impossible de générer un slug unique");
+}
+
 export async function duplicateBooklet(booklet: Booklet, title?: string): Promise<string> {
-  const newSlug = nanoid(10);
+  const newSlug = await generateUniqueSlug();
   const copy: Omit<Booklet, "id"> = {
     ...booklet,
     title: title?.trim() || `${booklet.title} (copie)`,
