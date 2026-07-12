@@ -1,6 +1,6 @@
 import {
   collection,
-  addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   doc,
@@ -54,7 +54,10 @@ export async function createBooklet(userId: string, title: string, contentTempla
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
-  const ref = await addDoc(collection(db, "booklets"), booklet);
+  // ID genere localement (pas d'aller-retour reseau) : un eventuel retry du SDK
+  // sur cette meme reference ecrase le meme document au lieu d'en creer un second.
+  const ref = doc(collection(db, "booklets"));
+  await setDoc(ref, booklet);
   return ref.id;
 }
 
@@ -93,7 +96,8 @@ export async function getUserFolders(userId: string): Promise<Folder[]> {
 
 export async function createFolder(userId: string, name: string, color: string): Promise<Folder> {
   const data = { userId, name, color, createdAt: Date.now() };
-  const ref = await addDoc(collection(db, "folders"), data);
+  const ref = doc(collection(db, "folders"));
+  await setDoc(ref, data);
   return { id: ref.id, ...data };
 }
 
@@ -130,6 +134,7 @@ export async function duplicateBooklet(booklet: Booklet, title?: string): Promis
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
-  const ref = await addDoc(collection(db, "booklets"), copy);
+  const ref = doc(collection(db, "booklets"));
+  await setDoc(ref, copy);
   return ref.id;
 }
