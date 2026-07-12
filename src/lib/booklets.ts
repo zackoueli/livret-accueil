@@ -113,12 +113,10 @@ export async function moveBookletToFolder(bookletId: string, folderId: string | 
 // ── Booklets ───────────────────────────────────────────────────────────────────
 
 async function generateUniqueSlug(): Promise<string> {
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const slug = nanoid(10);
-    const snap = await getDocs(query(collection(db, "booklets"), where("slug", "==", slug)));
-    if (snap.empty) return slug;
-  }
-  throw new Error("Impossible de générer un slug unique");
+  const res = await fetch("/api/booklets/generate-slug");
+  if (!res.ok) throw new Error("Impossible de générer un slug unique");
+  const data = await res.json();
+  return data.slug as string;
 }
 
 export async function duplicateBooklet(booklet: Booklet, title?: string): Promise<string> {
