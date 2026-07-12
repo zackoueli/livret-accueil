@@ -25,7 +25,7 @@ export default async function BookletPage({
   if (snap.empty) notFound();
 
   const doc = snap.docs[0];
-  const booklet = { id: doc.id, ...doc.data() } as Booklet;
+  const booklet = { ...doc.data(), id: doc.id } as Booklet;
 
   const effectiveBooklet = templateOverride
     ? { ...booklet, templateId: templateOverride }

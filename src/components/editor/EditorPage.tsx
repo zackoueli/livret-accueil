@@ -36,7 +36,7 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
       const snap = await getDoc(doc(db, "booklets", bookletId));
       if (cancelled) return;
       if (!snap.exists()) { router.push(`/${locale}/dashboard`); return; }
-      const data = { id: snap.id, ...snap.data() } as Booklet;
+      const data = { ...snap.data(), id: snap.id } as Booklet;
       if (data.userId !== user.uid) { router.push(`/${locale}/dashboard`); return; }
       setBooklet(data);
       // Sauvegarde immédiate si livret créé il y a moins de 10s (template prérempli)

@@ -68,11 +68,15 @@ export async function getUserBooklets(userId: string): Promise<Booklet[]> {
     orderBy("updatedAt", "desc")
   );
   const snap = await getDocs(q);
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Booklet));
+  return snap.docs.map((d) => ({ ...d.data(), id: d.id } as Booklet));
 }
 
 export async function updateBooklet(id: string, data: Partial<Booklet>) {
-  const clean = sanitizeForFirestore({ ...data, updatedAt: Date.now() } as Record<string, unknown>);
+  // Le champ `id` ne doit jamais etre persiste : c'est le nom du document, pas une donnee.
+  // S'il se glissait dans `clean`, une lecture ulterieure ({ id: snap.id, ...snap.data() })
+  // se ferait ecraser par cette valeur perimee et pointerait vers le mauvais document.
+  const { id: _omit, ...rest } = data as Record<string, unknown> & { id?: string };
+  const clean = sanitizeForFirestore({ ...rest, updatedAt: Date.now() });
   await updateDoc(doc(db, "booklets", id), clean);
 }
 
@@ -90,7 +94,7 @@ export async function getUserFolders(userId: string): Promise<Folder[]> {
   const q = query(collection(db, "folders"), where("userId", "==", userId));
   const snap = await getDocs(q);
   return snap.docs
-    .map((d) => ({ id: d.id, ...d.data() } as Folder))
+    .map((d) => ({ ...d.data(), id: d.id } as Folder))
     .sort((a, b) => a.createdAt - b.createdAt);
 }
 
@@ -125,8 +129,11 @@ async function generateUniqueSlug(): Promise<string> {
 
 export async function duplicateBooklet(booklet: Booklet, title?: string): Promise<string> {
   const newSlug = await generateUniqueSlug();
+  // `id` n'est jamais une donnee a persister (voir updateBooklet) : on l'exclut explicitement,
+  // le simple typage `Omit<Booklet, "id">` ne l'empeche pas de fuiter via `...booklet` a l'execution.
+  const { id: _omit, ...bookletData } = booklet;
   const copy: Omit<Booklet, "id"> = {
-    ...booklet,
+    ...bookletData,
     title: title?.trim() || `${booklet.title} (copie)`,
     slug: newSlug,
     isPublished: false,
