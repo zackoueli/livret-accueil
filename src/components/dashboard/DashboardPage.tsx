@@ -132,6 +132,7 @@ function DashboardPageInner() {
   const [loadingBooklets, setLoadingBooklets] = useState(true);
   const [creating, setCreating] = useState(false);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const duplicatingRef = useRef(false);
   const [showNewModal, setShowNewModal] = useState(false);
   const [shareBooklet, setShareBooklet] = useState<Booklet | null>(null);
   const [analyticsBooklet, setAnalyticsBooklet] = useState<Booklet | null>(null);
@@ -200,11 +201,12 @@ function DashboardPageInner() {
   };
 
   const handleDuplicate = async (booklet: Booklet) => {
-    if (duplicatingId) return;
-    const title = prompt("Nom du nouveau livret :", `${booklet.title} (copie)`);
-    if (!title) return;
-    setDuplicatingId(booklet.id);
+    if (duplicatingRef.current) return;
+    duplicatingRef.current = true;
     try {
+      const title = prompt("Nom du nouveau livret :", `${booklet.title} (copie)`);
+      if (!title) return;
+      setDuplicatingId(booklet.id);
       const newId = await duplicateBooklet(booklet, title);
       const updated = await getUserBooklets(user!.uid);
       setBooklets(updated);
@@ -214,6 +216,7 @@ function DashboardPageInner() {
       toast.error("Erreur lors de la duplication");
     } finally {
       setDuplicatingId(null);
+      duplicatingRef.current = false;
     }
   };
 

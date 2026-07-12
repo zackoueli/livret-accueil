@@ -1,6 +1,8 @@
 import { adminDb } from "@/lib/firebase-admin";
 import { nanoid } from "nanoid";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   for (let attempt = 0; attempt < 5; attempt++) {
     const slug = nanoid(10);

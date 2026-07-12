@@ -117,7 +117,7 @@ export async function moveBookletToFolder(bookletId: string, folderId: string | 
 // ── Booklets ───────────────────────────────────────────────────────────────────
 
 async function generateUniqueSlug(): Promise<string> {
-  const res = await fetch("/api/booklets/generate-slug");
+  const res = await fetch("/api/booklets/generate-slug", { cache: "no-store" });
   if (!res.ok) throw new Error("Impossible de générer un slug unique");
   const data = await res.json();
   return data.slug as string;
