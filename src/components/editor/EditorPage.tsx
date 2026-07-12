@@ -22,14 +22,19 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
   const router = useRouter();
   const locale = useLocale();
   const { user, loading: authLoading } = useAuthStore();
-  const { booklet, setBooklet, isDirty, setIsSaving, setIsDirty } = useEditorStore();
+  const { booklet, setBooklet, resetEditor, isDirty, setIsSaving, setIsDirty } = useEditorStore();
   const [mobileTab, setMobileTab] = useState<MobileTab>("modules");
 
   // Load booklet
   useEffect(() => {
     if (!user) return;
+    // Vide immédiatement le store partagé pour ne pas exposer/écraser le livret précédent
+    // pendant le chargement asynchrone (ex: navigation dashboard -> édition après duplication).
+    resetEditor();
+    let cancelled = false;
     const load = async () => {
       const snap = await getDoc(doc(db, "booklets", bookletId));
+      if (cancelled) return;
       if (!snap.exists()) { router.push(`/${locale}/dashboard`); return; }
       const data = { id: snap.id, ...snap.data() } as Booklet;
       if (data.userId !== user.uid) { router.push(`/${locale}/dashboard`); return; }
@@ -40,6 +45,7 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
       }
     };
     load();
+    return () => { cancelled = true; };
   }, [user, bookletId]);
 
   // Redirect if not logged in
@@ -48,7 +54,7 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
   }, [user, authLoading]);
 
   const save = useCallback(async () => {
-    if (!booklet || !isDirty) return;
+    if (!booklet || !isDirty || booklet.id !== bookletId) return;
     setIsSaving(true);
     try {
       await updateBooklet(booklet.id, booklet);
@@ -58,7 +64,7 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
     } finally {
       setIsSaving(false);
     }
-  }, [booklet, isDirty]);
+  }, [booklet, isDirty, bookletId]);
 
   if (!booklet) {
     return (

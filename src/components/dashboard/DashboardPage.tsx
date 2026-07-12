@@ -199,8 +199,10 @@ function DashboardPageInner() {
   };
 
   const handleDuplicate = async (booklet: Booklet) => {
+    const title = prompt("Nom du nouveau livret :", `${booklet.title} (copie)`);
+    if (!title) return;
     try {
-      const newId = await duplicateBooklet(booklet);
+      const newId = await duplicateBooklet(booklet, title);
       const updated = await getUserBooklets(user!.uid);
       setBooklets(updated);
       toast.success("Livret dupliqué !");

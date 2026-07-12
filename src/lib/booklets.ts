@@ -112,11 +112,11 @@ export async function moveBookletToFolder(bookletId: string, folderId: string | 
 
 // ── Booklets ───────────────────────────────────────────────────────────────────
 
-export async function duplicateBooklet(booklet: Booklet): Promise<string> {
+export async function duplicateBooklet(booklet: Booklet, title?: string): Promise<string> {
   const newSlug = nanoid(10);
   const copy: Omit<Booklet, "id"> = {
     ...booklet,
-    title: `${booklet.title} (copie)`,
+    title: title?.trim() || `${booklet.title} (copie)`,
     slug: newSlug,
     isPublished: false,
     viewCount: 0,

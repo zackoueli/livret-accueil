@@ -20,6 +20,7 @@ interface EditorState {
   updateBookletField: (field: keyof Booklet, value: any) => void;
   setIsSaving: (v: boolean) => void;
   setIsDirty: (v: boolean) => void;
+  resetEditor: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -139,4 +140,6 @@ export const useEditorStore = create<EditorState>((set) => ({
 
   setIsSaving: (isSaving) => set({ isSaving }),
   setIsDirty: (isDirty) => set({ isDirty }),
+
+  resetEditor: () => set({ booklet: null, activeModuleId: null, isDirty: false, isSaving: false }),
 }));
