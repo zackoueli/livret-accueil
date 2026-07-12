@@ -59,6 +59,7 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
     try {
       await updateBooklet(booklet.id, booklet);
       setIsDirty(false);
+      toast.success("Livret enregistré");
     } catch {
       toast.error("Erreur de sauvegarde");
     } finally {
