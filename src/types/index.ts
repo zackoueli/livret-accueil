@@ -12,6 +12,7 @@ export interface UserProfile {
   stripeSubscriptionId?: string;
   subscriptionStatus?: "active" | "canceled" | "past_due" | "trialing";
   subscriptionEndDate?: number;
+  cancelAtPeriodEnd?: boolean;
   createdAt: number;
   translationCharsUsed?: number;
   translationCharsMonth?: string; // "YYYY-MM"

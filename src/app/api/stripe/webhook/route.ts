@@ -81,6 +81,7 @@ export async function POST(request: NextRequest) {
           stripeSubscriptionId: sub.id,
           subscriptionStatus: sub.status,
           subscriptionEndDate: getEndDate(sub),
+          cancelAtPeriodEnd: sub.cancel_at_period_end,
         },
         { merge: true }
       );
@@ -133,6 +134,7 @@ export async function POST(request: NextRequest) {
           stripeSubscriptionId: sub.id,
           subscriptionStatus: sub.status,
           subscriptionEndDate: getEndDate(sub),
+          cancelAtPeriodEnd: sub.cancel_at_period_end,
         },
         { merge: true }
       );
@@ -155,6 +157,7 @@ export async function POST(request: NextRequest) {
           subscriptionStatus: "canceled",
           stripeSubscriptionId: null,
           subscriptionEndDate: getEndDate(sub),
+          cancelAtPeriodEnd: false,
         },
         { merge: true }
       );

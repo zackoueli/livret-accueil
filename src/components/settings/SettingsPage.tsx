@@ -26,6 +26,8 @@ function SettingsPageInner() {
   );
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [loadingPortal, setLoadingPortal] = useState(false);
+  const [loadingCancel, setLoadingCancel] = useState(false);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
 
   const handleUpgrade = async (planId: string) => {
     if (!user || !profile) return;
@@ -64,6 +66,55 @@ function SettingsPageInner() {
       toast.error("Erreur réseau");
     } finally {
       setLoadingPortal(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    if (!user) return;
+    setLoadingCancel(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/stripe/cancel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId: user.uid }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Abonnement résilié. Il restera actif jusqu'à la fin de la période en cours.");
+        setConfirmingCancel(false);
+        useAuthStore.getState().setProfile({ ...profile!, cancelAtPeriodEnd: true });
+      } else {
+        toast.error(data.error || "Erreur lors de la résiliation");
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    } finally {
+      setLoadingCancel(false);
+    }
+  };
+
+  const handleResume = async () => {
+    if (!user) return;
+    setLoadingCancel(true);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/stripe/resume", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId: user.uid }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Résiliation annulée, votre abonnement continue.");
+        useAuthStore.getState().setProfile({ ...profile!, cancelAtPeriodEnd: false });
+      } else {
+        toast.error(data.error || "Erreur lors de la réactivation");
+      }
+    } catch {
+      toast.error("Erreur réseau");
+    } finally {
+      setLoadingCancel(false);
     }
   };
 
@@ -141,24 +192,48 @@ function SettingsPageInner() {
               {profile.subscriptionStatus && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Statut</span>
-                  <span className={`text-sm font-semibold ${profile.subscriptionStatus === "active" ? "text-green-600" : profile.subscriptionStatus === "past_due" ? "text-red-500" : "text-gray-500"}`}>
-                    {profile.subscriptionStatus === "active" ? "Actif" : profile.subscriptionStatus === "past_due" ? "Paiement en attente" : profile.subscriptionStatus === "canceled" ? "Annulé" : profile.subscriptionStatus}
+                  <span className={`text-sm font-semibold ${profile.cancelAtPeriodEnd ? "text-amber-600" : profile.subscriptionStatus === "active" ? "text-green-600" : profile.subscriptionStatus === "past_due" ? "text-red-500" : "text-gray-500"}`}>
+                    {profile.cancelAtPeriodEnd ? "Résiliation programmée" : profile.subscriptionStatus === "active" ? "Actif" : profile.subscriptionStatus === "past_due" ? "Paiement en attente" : profile.subscriptionStatus === "canceled" ? "Annulé" : profile.subscriptionStatus}
                   </span>
                 </div>
               )}
               {subscriptionEndDate && (
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600 flex items-center gap-2"><Calendar className="w-4 h-4 text-gray-400" /> Prochain renouvellement</span>
+                  <span className="text-sm text-gray-600 flex items-center gap-2"><Calendar className="w-4 h-4 text-gray-400" /> {profile.cancelAtPeriodEnd ? "Accès jusqu'au" : "Prochain renouvellement"}</span>
                   <span className="text-sm font-semibold text-gray-900">{subscriptionEndDate}</span>
                 </div>
               )}
             </div>
-            <div className="mt-5 pt-5 border-t border-gray-100">
+            <div className="mt-5 pt-5 border-t border-gray-100 flex flex-wrap items-center gap-x-6 gap-y-3">
               <button onClick={handlePortal} disabled={loadingPortal}
                 className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-40">
                 <ExternalLink className="w-4 h-4" />
                 {loadingPortal ? "Chargement..." : "Gérer la facturation (Stripe)"}
               </button>
+
+              {profile.cancelAtPeriodEnd ? (
+                <button onClick={handleResume} disabled={loadingCancel}
+                  className="text-sm font-semibold text-orange-500 hover:text-orange-600 transition-colors disabled:opacity-40">
+                  {loadingCancel ? "..." : "Annuler la résiliation"}
+                </button>
+              ) : confirmingCancel ? (
+                <span className="flex items-center gap-3 text-sm">
+                  <span className="text-gray-500">Confirmer la résiliation ?</span>
+                  <button onClick={handleCancel} disabled={loadingCancel}
+                    className="font-semibold text-red-600 hover:text-red-700 transition-colors disabled:opacity-40">
+                    {loadingCancel ? "..." : "Oui, résilier"}
+                  </button>
+                  <button onClick={() => setConfirmingCancel(false)}
+                    className="font-semibold text-gray-400 hover:text-gray-600 transition-colors">
+                    Annuler
+                  </button>
+                </span>
+              ) : (
+                <button onClick={() => setConfirmingCancel(true)}
+                  className="text-sm font-semibold text-gray-400 hover:text-red-600 transition-colors">
+                  Résilier mon abonnement
+                </button>
+              )}
             </div>
           </section>
         )}
