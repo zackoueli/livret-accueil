@@ -16,8 +16,7 @@ export async function registerWithEmail(
   email: string,
   password: string,
   name: string,
-  refCode?: string,
-  referralSource?: UserProfile["referralSource"]
+  refCode?: string
 ) {
   const cred = await createUserWithEmailAndPassword(auth, email, password);
   await updateProfile(cred.user, { displayName: name });
@@ -28,7 +27,6 @@ export async function registerWithEmail(
     photoURL: null,
     plan: "free",
     createdAt: Date.now(),
-    ...(referralSource ? { referralSource } : {}),
   };
   await setDoc(doc(db, "users", cred.user.uid), profile);
 

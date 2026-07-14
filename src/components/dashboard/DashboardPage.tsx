@@ -20,6 +20,7 @@ import { bookletUrl } from "@/lib/url";
 import { CreateBookletModal } from "./CreateBookletModal";
 import { AnalyticsModal } from "./AnalyticsModal";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
+import { ReferralSourceModal } from "./ReferralSourceModal";
 import { usePlan } from "@/hooks/usePlan";
 
 const SERVICES = [
@@ -152,6 +153,8 @@ function DashboardPageInner() {
   const isExpired = profile?.subscriptionStatus === "canceled" && isFree;
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [dismissedReferralModal, setDismissedReferralModal] = useState(false);
+  const showReferralModal = !!user && !!profile && !profile.referralSource && !dismissedReferralModal;
 
   const requirePlan = (reason: string) => {
     setUpgradeReason(reason);
@@ -558,6 +561,11 @@ function DashboardPageInner() {
       {/* Upgrade modal */}
       {showUpgrade && (
         <UpgradeModal reason={upgradeReason} onClose={() => setShowUpgrade(false)} />
+      )}
+
+      {/* Referral source modal (nouvel utilisateur) */}
+      {showReferralModal && (
+        <ReferralSourceModal uid={user!.uid} onClose={() => setDismissedReferralModal(true)} />
       )}
 
       {/* Folder modal */}

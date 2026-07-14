@@ -20,7 +20,7 @@ export function AuthPage() {
   const [mode, setMode] = useState<Mode>("register");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "", referralSource: "" });
+  const [form, setForm] = useState({ name: "", email: "", password: "", confirmPassword: "" });
   const [resetSent, setResetSent] = useState(false);
 
   // Capture le code de parrainage depuis l'URL (?ref=XXX-XXXX)
@@ -51,13 +51,7 @@ export function AuthPage() {
     try {
       if (mode === "register") {
         const refCode = getRefCookie() ?? undefined;
-        await registerWithEmail(
-          form.email,
-          form.password,
-          form.name,
-          refCode,
-          (form.referralSource || undefined) as any
-        );
+        await registerWithEmail(form.email, form.password, form.name, refCode);
         clearRefCookie();
       } else {
         await loginWithEmail(form.email, form.password);
@@ -306,24 +300,6 @@ export function AuthPage() {
                     placeholder="••••••••"
                     autoComplete="new-password"
                   />
-                </div>
-              )}
-
-              {mode === "register" && (
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Comment nous avez-vous connus ?</label>
-                  <select
-                    value={form.referralSource}
-                    onChange={(e) => setForm({ ...form, referralSource: e.target.value })}
-                    className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent cursor-pointer">
-                    <option value="">— Choisir (optionnel) —</option>
-                    <option value="instagram">Instagram</option>
-                    <option value="facebook">Facebook</option>
-                    <option value="tiktok">TikTok</option>
-                    <option value="google">Recherche Google</option>
-                    <option value="word_of_mouth">Bouche à oreille</option>
-                    <option value="other">Autre</option>
-                  </select>
                 </div>
               )}
 
