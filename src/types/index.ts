@@ -1,6 +1,14 @@
 export type Plan = "free" | "starter" | "pro" | "agency";
 export type BillingPeriod = "monthly" | "yearly";
 
+export type ReferralSource =
+  | "instagram"
+  | "facebook"
+  | "tiktok"
+  | "google"
+  | "word_of_mouth"
+  | "other";
+
 export interface UserProfile {
   uid: string;
   email: string;
@@ -8,6 +16,7 @@ export interface UserProfile {
   photoURL: string | null;
   plan: Plan;
   billingPeriod?: BillingPeriod;
+  referralSource?: ReferralSource;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   subscriptionStatus?: "active" | "canceled" | "past_due" | "trialing";
