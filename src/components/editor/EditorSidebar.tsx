@@ -431,10 +431,11 @@ function SidebarAppearance() {
         {/* Template */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Design du livret</label>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {[
               { id: "simple", label: "Scroll", desc: "Vue défilante classique", emoji: "📜" },
               { id: "grid",   label: "Grille", desc: "App mobile avec drawers", emoji: "📱" },
+              { id: "pastel", label: "Pastel", desc: "Cartes douces et colorées", emoji: "🌸" },
             ].map((t) => {
               const isActive = (booklet.templateId ?? "simple") === t.id;
               return (

@@ -26,6 +26,12 @@ const LAYOUTS = [
     desc: "Interface style app mobile. Des boutons en grille ouvrent des fiches détaillées.",
     previewUrl: "https://app.bunkly.co/b/QKs4XkhmHr",
   },
+  {
+    id: "pastel",
+    label: "Pastel",
+    desc: "Style doux et coloré, cartes pastel façon app bien-être. Navigation par onglets en bas.",
+    previewUrl: "https://app.bunkly.co/b/9gM1r69Boa?templateOverride=pastel",
+  },
 ];
 
 function PhoneFrame({ url }: { url: string }) {
