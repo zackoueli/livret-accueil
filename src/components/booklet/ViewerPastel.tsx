@@ -476,16 +476,17 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
 
 // ─── PAGE ACTIVITÉS ───────────────────────────────────────────────────────────
 
-function PageArea({ booklet }: { booklet: Booklet }) {
+const CAT_TINT: Record<string, string> = { restaurant: C.peach, activity: C.blue, shop: C.green, transport: C.yellow, other: C.lilac };
+
+function PageArea({ booklet, onSelectAct }: { booklet: Booklet; onSelectAct: (a: Activity) => void }) {
   const tr = useT();
   const neighborhood = useMod(booklet, "neighborhood");
   const activities = parseActivities(g(neighborhood, "activities_list"));
   const places = neighborhood ? parsePlaces(g(neighborhood, "places")) : [];
   const mapAddress = encodeURIComponent(booklet.address || booklet.propertyName || "");
   const [activeFilter, setActiveFilter] = useState("all");
-  const [selectedAct, setSelectedAct] = useState<Activity | null>(null);
 
-  const catTint: Record<string, string> = { restaurant: C.peach, activity: C.blue, shop: C.green, transport: C.yellow, other: C.lilac };
+  const catTint = CAT_TINT;
   const catLabel: Record<string, string> = {
     restaurant: tr("cat_restaurant"), activity: tr("cat_activity"), shop: tr("cat_shop"),
     transport: tr("transport"), other: tr("places"),
@@ -529,7 +530,7 @@ function PageArea({ booklet }: { booklet: Booklet }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 16 }}>
           {filtered.map((act, i) => (
-            <button key={i} onClick={() => setSelectedAct(act)}
+            <button key={i} onClick={() => onSelectAct(act)}
               style={{ display: "flex", gap: 12, padding: "12px 14px", background: C.card, border: `1px solid ${C.sep}`, borderRadius: 18, cursor: "pointer", textAlign: "left" }}>
               <div style={{ width: 52, height: 52, borderRadius: 14, overflow: "hidden", background: catTint[act.category], flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
                 {act.photo ? <img src={act.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <MapPin size={20} color={C.ink} />}
@@ -570,30 +571,30 @@ function PageArea({ booklet }: { booklet: Booklet }) {
         )}
       </div>
       <BunklyCredit ownerPlan={booklet.ownerPlan} />
+    </div>
+  );
+}
 
-      {selectedAct && (
-        <div style={{ position: "fixed", inset: 0, zIndex: 300 }}>
-        <Sheet open={!!selectedAct} onClose={() => setSelectedAct(null)} tint={catTint[selectedAct.category]} icon={<MapPin size={18} color={C.ink} />} title={selectedAct.name}>
-          {selectedAct.photo && (
-            <div style={{ borderRadius: 18, overflow: "hidden", height: 160, marginBottom: 14 }}>
-              <img src={selectedAct.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            </div>
-          )}
-          {selectedAct.description && <p style={{ margin: "0 0 14px", fontSize: 13.5, color: C.sub, lineHeight: 1.65 }}>{selectedAct.description}</p>}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
-            {selectedAct.distance && <span style={{ fontSize: 12, color: C.sub, background: C.card, border: `1px solid ${C.sep}`, borderRadius: 20, padding: "4px 10px", fontWeight: 600 }}>📍 {selectedAct.distance}</span>}
-            {selectedAct.openHours && <span style={{ fontSize: 12, color: C.sub, background: C.card, border: `1px solid ${C.sep}`, borderRadius: 20, padding: "4px 10px", fontWeight: 600 }}>🕐 {selectedAct.openHours}</span>}
-            {selectedAct.priceRange && <span style={{ fontSize: 12, color: C.ink, fontWeight: 700, background: C.peach, borderRadius: 20, padding: "4px 10px" }}>{selectedAct.priceRange}</span>}
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            {selectedAct.phone && <a href={`tel:${selectedAct.phone}`} style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Phone size={14} /> {tr("call")}</a>}
-            {selectedAct.address && <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(selectedAct.address)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Navigation size={14} /> {tr("maps")}</a>}
-            {selectedAct.website && <a href={selectedAct.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Globe size={14} /> {tr("website")}</a>}
-          </div>
-        </Sheet>
+function ActivitySheetContent({ act, tr }: { act: Activity; tr: (k: I18nKey) => string }) {
+  return (
+    <>
+      {act.photo && (
+        <div style={{ borderRadius: 18, overflow: "hidden", height: 160, marginBottom: 14 }}>
+          <img src={act.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </div>
       )}
-    </div>
+      {act.description && <p style={{ margin: "0 0 14px", fontSize: 13.5, color: C.sub, lineHeight: 1.65 }}>{act.description}</p>}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
+        {act.distance && <span style={{ fontSize: 12, color: C.sub, background: C.card, border: `1px solid ${C.sep}`, borderRadius: 20, padding: "4px 10px", fontWeight: 600 }}>📍 {act.distance}</span>}
+        {act.openHours && <span style={{ fontSize: 12, color: C.sub, background: C.card, border: `1px solid ${C.sep}`, borderRadius: 20, padding: "4px 10px", fontWeight: 600 }}>🕐 {act.openHours}</span>}
+        {act.priceRange && <span style={{ fontSize: 12, color: C.ink, fontWeight: 700, background: C.peach, borderRadius: 20, padding: "4px 10px" }}>{act.priceRange}</span>}
+      </div>
+      <div style={{ display: "flex", gap: 8 }}>
+        {act.phone && <a href={`tel:${act.phone}`} style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Phone size={14} /> {tr("call")}</a>}
+        {act.address && <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(act.address)}`} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Navigation size={14} /> {tr("maps")}</a>}
+        {act.website && <a href={act.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Globe size={14} /> {tr("website")}</a>}
+      </div>
+    </>
   );
 }
 
@@ -735,12 +736,8 @@ function PageLogement({ booklet }: { booklet: Booklet }) {
 
 // ─── PAGE RÈGLES (classeur de cartes → bottom sheets) ────────────────────────
 
-function PageRules({ booklet }: { booklet: Booklet }) {
-  const tr = useT();
-  const rules = useMod(booklet, "rules");
-  const [sheet, setSheet] = useState<string | null>(null);
-
-  const cards = [
+function getRulesCards(rules: BookletModule | undefined, tr: (k: I18nKey) => string) {
+  return [
     { id: "persons", label: tr("persons"), icon: <Users size={18} color={C.ink} />, tint: C.blue,   value: g(rules, "max_guests") },
     { id: "smoking", label: tr("smoking"), icon: <Cigarette size={18} color={C.ink} />, tint: C.pink,   value: g(rules, "smoking") },
     { id: "pets",    label: tr("pets"),    icon: <Dog size={18} color={C.ink} />,    tint: C.peach,  value: g(rules, "pets") },
@@ -748,6 +745,12 @@ function PageRules({ booklet }: { booklet: Booklet }) {
     { id: "parties", label: tr("parties"), icon: <PartyPopper size={18} color={C.ink} />, tint: C.lilac,  value: g(rules, "parties") },
     { id: "other",   label: tr("other"),   icon: <Info size={18} color={C.ink} />,   tint: C.yellow, value: g(rules, "other") },
   ].filter(c => c.value);
+}
+
+function PageRules({ booklet, onSelectCard }: { booklet: Booklet; onSelectCard: (id: string) => void }) {
+  const tr = useT();
+  const rules = useMod(booklet, "rules");
+  const cards = getRulesCards(rules, tr);
 
   return (
     <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", paddingBottom: TAB_BAR_H, position: "relative" }}>
@@ -757,18 +760,10 @@ function PageRules({ booklet }: { booklet: Booklet }) {
       </div>
       <div style={{ padding: "0 16px 32px", display: "flex", flexDirection: "column", gap: 12 }}>
         {cards.map(c => (
-          <PastelCard key={c.id} tint={c.tint} icon={c.icon} title={c.label} onClick={() => setSheet(c.id)} />
+          <PastelCard key={c.id} tint={c.tint} icon={c.icon} title={c.label} onClick={() => onSelectCard(c.id)} />
         ))}
       </div>
       <BunklyCredit ownerPlan={booklet.ownerPlan} />
-
-      <div style={{ position: "fixed", inset: 0, zIndex: 300, pointerEvents: sheet ? "auto" : "none" }}>
-        {cards.map(c => (
-          <Sheet key={c.id} open={sheet === c.id} onClose={() => setSheet(null)} tint={c.tint} icon={c.icon} title={c.label}>
-            <InfoBlock label={c.label} value={c.value} />
-          </Sheet>
-        ))}
-      </div>
     </div>
   );
 }
@@ -887,15 +882,24 @@ function LangSelector({ booklet, lang, onSelect }: { booklet: Booklet; lang: Sup
 // ─── Contenu principal ────────────────────────────────────────────────────────
 
 function PastelContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
+  const tr = useT();
   const [tab, setTab] = useState<PastelTab>("home");
   const [sheet, setSheet] = useState<string | null>(null);
+  const [ruleSheet, setRuleSheet] = useState<string | null>(null);
+  const [selectedAct, setSelectedAct] = useState<Activity | null>(null);
   const [lang, setLang] = useState<SupportedLang>("fr");
   const booklet = useTranslatedBooklet(rawBooklet, lang);
+
+  const rules = useMod(booklet, "rules");
+  const rulesCards = getRulesCards(rules, tr);
+  const activeRuleCard = rulesCards.find(c => c.id === ruleSheet);
 
   const handleTabChange = (t: PastelTab) => {
     setTab(t);
     onTabChange?.(t);
   };
+
+  const anySheetOpen = !!sheet || !!ruleSheet || !!selectedAct;
 
   return (
     <LangCtx.Provider value={lang}>
@@ -905,15 +909,27 @@ function PastelContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet;
         <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, position: "relative" }}>
           {tab === "home"     && <PageHome     booklet={booklet} setSheet={setSheet} />}
           {tab === "logement" && <PageLogement booklet={booklet} />}
-          {tab === "rules"    && <PageRules    booklet={booklet} />}
-          {tab === "area"     && <PageArea     booklet={booklet} />}
+          {tab === "rules"    && <PageRules    booklet={booklet} onSelectCard={setRuleSheet} />}
+          {tab === "area"     && <PageArea     booklet={booklet} onSelectAct={setSelectedAct} />}
           {tab === "checkout" && <PageCheckout booklet={booklet} />}
         </div>
 
         <PastelTabBar active={tab} onSelect={handleTabChange} />
 
-        <div style={{ position: "absolute", inset: 0, zIndex: 300, pointerEvents: sheet ? "auto" : "none" }}>
+        <div style={{ position: "absolute", inset: 0, zIndex: 300, pointerEvents: anySheetOpen ? "auto" : "none" }}>
           <HomeSheets booklet={booklet} sheet={sheet} onClose={() => setSheet(null)} />
+
+          {activeRuleCard && (
+            <Sheet open={!!ruleSheet} onClose={() => setRuleSheet(null)} tint={activeRuleCard.tint} icon={activeRuleCard.icon} title={activeRuleCard.label}>
+              <InfoBlock label={activeRuleCard.label} value={activeRuleCard.value} />
+            </Sheet>
+          )}
+
+          {selectedAct && (
+            <Sheet open={!!selectedAct} onClose={() => setSelectedAct(null)} tint={CAT_TINT[selectedAct.category]} icon={<MapPin size={18} color={C.ink} />} title={selectedAct.name}>
+              <ActivitySheetContent act={selectedAct} tr={tr} />
+            </Sheet>
+          )}
         </div>
       </div>
     </LangCtx.Provider>
