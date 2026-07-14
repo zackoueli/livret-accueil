@@ -8,7 +8,18 @@ interface Stats {
   booklets: { total: number; thisMonth: number };
   views: number;
   mrr: number;
+  referralSources: Record<string, number>;
 }
+
+const REFERRAL_LABELS: Record<string, string> = {
+  instagram: "Instagram",
+  facebook: "Facebook",
+  tiktok: "TikTok",
+  google: "Recherche Google",
+  word_of_mouth: "Bouche à oreille",
+  other: "Autre",
+  unknown: "Non renseigné",
+};
 
 export function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
@@ -113,6 +124,30 @@ export function AdminDashboard() {
             <p className="text-xs text-gray-500 mt-0.5">Vues / livret</p>
           </div>
         </div>
+      </div>
+
+      {/* Sources d'acquisition */}
+      <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mt-8">
+        <p className="text-sm font-semibold text-white mb-5">D'où viennent nos utilisateurs</p>
+        {Object.entries(stats?.referralSources ?? {})
+          .sort((a, b) => b[1] - a[1])
+          .map(([source, count]) => {
+            const total = stats?.users.total || 1;
+            const pct = Math.round((count / total) * 100);
+            return (
+              <div key={source} className="mb-4 last:mb-0">
+                <div className="flex justify-between text-xs text-gray-400 mb-1.5">
+                  <span>{REFERRAL_LABELS[source] ?? source}</span>
+                  <span>{count} · {pct}%</span>
+                </div>
+                <div className="h-2 rounded-full bg-gray-800 overflow-hidden">
+                  <div className="h-full bg-orange-500 rounded-full transition-all duration-700"
+                    style={{ width: `${pct}%` }} />
+                </div>
+              </div>
+            );
+          })}
+        {loading && <p className="text-xs text-gray-500">Chargement...</p>}
       </div>
     </div>
   );

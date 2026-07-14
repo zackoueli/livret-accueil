@@ -8,10 +8,13 @@ export async function GET() {
   ]);
 
   let free = 0, actif = 0;
+  const referralSources: Record<string, number> = {};
   usersSnap.forEach((doc) => {
     const data = doc.data();
-    if (data.plan === "actif") actif++;
+    if (data.plan === "starter" || data.plan === "pro" || data.plan === "agency") actif++;
     else free++;
+    const source = data.referralSource || "unknown";
+    referralSources[source] = (referralSources[source] ?? 0) + 1;
   });
 
   let totalViews = 0;
@@ -19,13 +22,16 @@ export async function GET() {
     totalViews += doc.data().viewCount ?? 0;
   });
 
-  // MRR depuis Stripe (users actifs × prix mensuel)
-  // On calcule à partir des subscriptions actives en base
+  // MRR depuis Stripe (users actifs × prix mensuel équivalent)
+  const MONTHLY_PRICE: Record<string, number> = { starter: 900, pro: 2900, agency: 5900 };
+  const YEARLY_PRICE: Record<string, number> = { starter: 6900, pro: 22200, agency: 45300 };
   let mrr = 0;
   usersSnap.forEach((doc) => {
     const d = doc.data();
-    if (d.plan === "actif" && d.subscriptionStatus === "active") {
-      mrr += d.billingPeriod === "yearly" ? 990 / 12 : 990;
+    const isActive = d.subscriptionStatus === "active" || d.subscriptionStatus === "trialing";
+    if (!isActive) return;
+    if (d.plan === "starter" || d.plan === "pro" || d.plan === "agency") {
+      mrr += d.billingPeriod === "yearly" ? YEARLY_PRICE[d.plan] / 12 : MONTHLY_PRICE[d.plan];
     }
   });
 
@@ -44,5 +50,6 @@ export async function GET() {
     booklets: { total: bookletsSnap.size, thisMonth: bookletsThisMonth },
     views: totalViews,
     mrr: Math.round(mrr / 100),
+    referralSources,
   });
 }
