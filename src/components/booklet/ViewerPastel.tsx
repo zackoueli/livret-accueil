@@ -572,6 +572,7 @@ function PageArea({ booklet }: { booklet: Booklet }) {
       <BunklyCredit ownerPlan={booklet.ownerPlan} />
 
       {selectedAct && (
+        <div style={{ position: "fixed", inset: 0, zIndex: 300 }}>
         <Sheet open={!!selectedAct} onClose={() => setSelectedAct(null)} tint={catTint[selectedAct.category]} icon={<MapPin size={18} color={C.ink} />} title={selectedAct.name}>
           {selectedAct.photo && (
             <div style={{ borderRadius: 18, overflow: "hidden", height: 160, marginBottom: 14 }}>
@@ -590,6 +591,7 @@ function PageArea({ booklet }: { booklet: Booklet }) {
             {selectedAct.website && <a href={selectedAct.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Globe size={14} /> {tr("website")}</a>}
           </div>
         </Sheet>
+        </div>
       )}
     </div>
   );
@@ -760,7 +762,7 @@ function PageRules({ booklet }: { booklet: Booklet }) {
       </div>
       <BunklyCredit ownerPlan={booklet.ownerPlan} />
 
-      <div style={{ position: "absolute", inset: 0, zIndex: 300, pointerEvents: sheet ? "auto" : "none" }}>
+      <div style={{ position: "fixed", inset: 0, zIndex: 300, pointerEvents: sheet ? "auto" : "none" }}>
         {cards.map(c => (
           <Sheet key={c.id} open={sheet === c.id} onClose={() => setSheet(null)} tint={c.tint} icon={c.icon} title={c.label}>
             <InfoBlock label={c.label} value={c.value} />
