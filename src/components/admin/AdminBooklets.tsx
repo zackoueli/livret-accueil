@@ -10,6 +10,7 @@ interface BookletRow {
   propertyName: string;
   slug: string;
   userId: string;
+  userEmail: string;
   templateId: string;
   viewCount: number;
   createdAt: number;
@@ -41,6 +42,7 @@ export function AdminBooklets() {
       b.title.toLowerCase().includes(q) ||
       b.propertyName.toLowerCase().includes(q) ||
       b.userId.toLowerCase().includes(q) ||
+      b.userEmail.toLowerCase().includes(q) ||
       b.slug.toLowerCase().includes(q)
     );
   });
@@ -71,7 +73,7 @@ export function AdminBooklets() {
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" />
         <input
           value={search} onChange={(e) => setSearch(e.target.value)}
-          placeholder="Rechercher par titre, slug, userId..."
+          placeholder="Rechercher par titre, slug, email..."
           className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-gray-900 border border-gray-800 text-white text-sm focus:outline-none focus:border-indigo-500 placeholder:text-gray-600"
         />
       </div>
@@ -100,7 +102,7 @@ export function AdminBooklets() {
             className="grid grid-cols-[1fr_120px_80px_80px_80px_40px] gap-4 items-center px-5 py-3.5 border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
             <div className="min-w-0">
               <p className="font-semibold text-white text-sm truncate">{b.propertyName || b.title || "Sans titre"}</p>
-              <p className="text-xs text-gray-500 truncate mt-0.5">/b/{b.slug} · {b.userId.slice(0, 8)}…</p>
+              <p className="text-xs text-gray-500 truncate mt-0.5">/b/{b.slug} · {b.userEmail || `${b.userId.slice(0, 8)}…`}</p>
             </div>
             <span className="text-xs text-gray-400">{TEMPLATE_LABELS[b.templateId] ?? b.templateId}</span>
             <span className="text-sm font-semibold text-white flex items-center gap-1">
