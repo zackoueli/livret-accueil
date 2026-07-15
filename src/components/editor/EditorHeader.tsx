@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock, Languages, Crown } from "lucide-react";
+import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock, Languages, Crown, Share2 } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
 import { useEditorStore } from "@/store/editorStore";
@@ -12,6 +12,7 @@ import toast from "react-hot-toast";
 import { ImportListingModal } from "./ImportListingModal";
 import { TranslateModal } from "./TranslateModal";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
+import { ShareModal } from "@/components/dashboard/ShareModal";
 import { usePlan } from "@/hooks/usePlan";
 import { useAuthStore } from "@/store/authStore";
 import { PLAN_LIMITS } from "@/lib/plans";
@@ -23,6 +24,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
   const { booklet, isDirty, isSaving, updateBookletField } = useEditorStore();
   const [showImport, setShowImport] = useState(false);
   const [showTranslate, setShowTranslate] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [upgradeReason, setUpgradeReason] = useState("");
   const [publishing, setPublishing] = useState(false);
@@ -142,6 +144,15 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
         <Eye className="w-4 h-4" />
       </button>
 
+      {/* Partager */}
+      <button
+        onClick={() => setShowShare(true)}
+        title="Partager le livret"
+        className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors">
+        <Share2 className="w-4 h-4" />
+        <span className="hidden sm:inline">Partager</span>
+      </button>
+
       {/* Enregistrer */}
       {isDirty && (
         <button
@@ -191,6 +202,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
     {showUpgrade && (
       <UpgradeModal reason={upgradeReason} onClose={() => setShowUpgrade(false)} />
     )}
+    {showShare && <ShareModal booklet={booklet} onClose={() => setShowShare(false)} />}
     </>
   );
 }
