@@ -208,6 +208,116 @@ function CopyBlock({ label, value, tint }: { label: string; value: string; tint:
   );
 }
 
+// ─── Marées ───────────────────────────────────────────────────────────────────
+
+function TidesSheetContent({ portId, portName, note, tr }: { portId: string; portName: string; note: string; tr: (k: I18nKey) => string }) {
+  const [data, setData] = useState<{ tides: { type: string; time: string; height: string; coef?: string }[]; date: string } | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!portId) return;
+    fetch(`/api/tides?portId=${portId}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setData)
+      .catch(() => setError(true));
+  }, [portId]);
+
+  if (!portId) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Aucun port sélectionné.</p>;
+  if (error) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Impossible de charger les marées.</p>;
+  if (!data) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Chargement...</p>;
+
+  const name = portName || data.tides[0]?.type;
+
+  return (
+    <div>
+      <p style={{ margin: "0 0 4px", fontSize: 10.5, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>
+        {tr("tides_port")} · {name || portId}
+      </p>
+      <p style={{ margin: "0 0 14px", fontSize: 11, color: C.muted }}>{data.date}</p>
+      {data.tides.map((t, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: i < data.tides.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: t.type === "PM" ? C.blue : C.sep, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Waves size={18} color={C.ink} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: "0 0 2px", fontSize: 10.5, fontWeight: 700, color: t.type === "PM" ? C.ink : C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>
+              {t.type === "PM" ? tr("tides_high") : tr("tides_low")}
+              {t.coef && <span style={{ marginLeft: 8, color: C.muted, fontWeight: 500 }}>{tr("tides_coef")} {t.coef}</span>}
+            </p>
+            <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: C.ink, letterSpacing: -0.5 }}>{t.time}</p>
+          </div>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.sub }}>{t.height}</p>
+        </div>
+      ))}
+      {note && <InfoBlock label={tr("other")} value={note} />}
+      <p style={{ margin: "14px 0 0", fontSize: 11, color: C.muted, textAlign: "center" }}>{tr("tides_source")}</p>
+    </div>
+  );
+}
+
+// ─── Météo ────────────────────────────────────────────────────────────────────
+
+function WeatherSheetContent({ address, cityOverride, note, tr }: { address: string; cityOverride: string; note: string; tr: (k: I18nKey) => string }) {
+  const [data, setData] = useState<{
+    city: string; temperature: number; feelsLike: number; description: string; emoji: string;
+    windSpeed: number; humidity: number; uvIndex: number;
+    forecast: { dayLabel: string; tempMax: number; tempMin: number; emoji: string; precipProbability: number }[];
+  } | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    if (!address && !cityOverride) return;
+    const params = new URLSearchParams();
+    if (cityOverride) params.set("city", cityOverride);
+    else if (address) params.set("address", address);
+    fetch(`/api/weather?${params}`)
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(setData)
+      .catch(() => setError(true));
+  }, [address, cityOverride]);
+
+  if (!address && !cityOverride) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Renseignez l&apos;adresse du logement pour afficher la météo.</p>;
+  if (error) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Impossible de charger la météo.</p>;
+  if (!data) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>{tr("weather_loading")}</p>;
+
+  return (
+    <div>
+      <div style={{ textAlign: "center", padding: "8px 0 18px" }}>
+        <p style={{ margin: 0, fontSize: 52, lineHeight: 1 }}>{data.emoji}</p>
+        <p style={{ margin: "8px 0 0", fontSize: 44, fontWeight: 800, color: C.ink, letterSpacing: -2 }}>{data.temperature}°</p>
+        <p style={{ margin: "4px 0 0", fontSize: 14, color: C.sub, fontWeight: 600 }}>{data.description}</p>
+        <p style={{ margin: "2px 0 0", fontSize: 12, color: C.muted }}>{data.city}</p>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 8, marginBottom: 16 }}>
+        {[
+          { label: tr("weather_feels"), value: `${data.feelsLike}°` },
+          { label: tr("weather_wind"), value: `${data.windSpeed} km/h` },
+          { label: tr("weather_humidity"), value: `${data.humidity}%` },
+        ].map((item, i) => (
+          <div key={i} style={{ background: C.card, border: `1px solid ${C.sep}`, borderRadius: 14, padding: "10px 8px", textAlign: "center" }}>
+            <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.ink }}>{item.value}</p>
+            <p style={{ margin: "2px 0 0", fontSize: 9.5, color: C.muted, textTransform: "uppercase", letterSpacing: 0.5 }}>{item.label}</p>
+          </div>
+        ))}
+      </div>
+      <p style={{ margin: "0 0 8px", fontSize: 10.5, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("weather_forecast")}</p>
+      {data.forecast.map((day, i) => (
+        <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "9px 0", borderBottom: i < data.forecast.length - 1 ? `1px solid ${C.sep}` : "none" }}>
+          <p style={{ margin: 0, width: 32, fontSize: 12.5, fontWeight: 700, color: C.sub }}>{day.dayLabel}</p>
+          <p style={{ margin: 0, fontSize: 18 }}>{day.emoji}</p>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 6 }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: C.ink }}>{day.tempMax}°</span>
+            <span style={{ fontSize: 12, color: C.muted }}>{day.tempMin}°</span>
+          </div>
+          {day.precipProbability > 0 && <span style={{ fontSize: 11, color: C.sub, fontWeight: 700 }}>{day.precipProbability}%</span>}
+        </div>
+      ))}
+      {note && <div style={{ marginTop: 8 }}><InfoBlock label={tr("other")} value={note} /></div>}
+      <p style={{ margin: "8px 0 0", fontSize: 11, color: C.muted, textAlign: "center" }}>{tr("weather_source")}</p>
+    </div>
+  );
+}
+
 // ─── PAGE ACCUEIL ─────────────────────────────────────────────────────────────
 
 function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: string) => void }) {
@@ -463,12 +573,11 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
       </Sheet>
 
       <Sheet open={sheet === "tides"} onClose={onClose} tint={C.blue} icon={<Waves size={18} color={C.ink} />} title={tr("tides")}>
-        <InfoBlock label={tr("tides_port")} value={g(tidesModule, "port_name") || g(tidesModule, "port_id")} />
-        <InfoBlock label={tr("other")} value={g(tidesModule, "note")} />
+        <TidesSheetContent portId={g(tidesModule, "port_id")} portName={g(tidesModule, "port_name")} note={g(tidesModule, "note")} tr={tr} />
       </Sheet>
 
       <Sheet open={sheet === "weather"} onClose={onClose} tint={C.yellow} icon={<Sun size={18} color={C.ink} />} title={tr("weather")}>
-        <InfoBlock label={tr("other")} value={g(weatherModule, "note")} />
+        <WeatherSheetContent address={booklet.address ?? ""} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} tr={tr} />
       </Sheet>
     </>
   );
