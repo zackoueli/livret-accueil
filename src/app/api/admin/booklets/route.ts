@@ -23,7 +23,7 @@ export async function GET() {
       templateId: d.templateId ?? "moderne",
       viewCount: d.viewCount ?? 0,
       createdAt: d.createdAt ?? 0,
-      published: d.published ?? false,
+      published: d.isPublished ?? false,
     };
   });
   return NextResponse.json(booklets);
