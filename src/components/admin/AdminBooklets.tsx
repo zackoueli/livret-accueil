@@ -60,10 +60,10 @@ export function AdminBooklets() {
   };
 
   return (
-    <div className="p-8">
-      <div className="flex items-center justify-between mb-8">
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="flex items-center justify-between mb-6 md:mb-8">
         <div>
-          <h1 className="text-2xl font-black text-white">Livrets</h1>
+          <h1 className="text-xl sm:text-2xl font-black text-white">Livrets</h1>
           <p className="text-gray-500 text-sm mt-1">{booklets.length} livrets au total</p>
         </div>
       </div>
@@ -78,8 +78,8 @@ export function AdminBooklets() {
         />
       </div>
 
-      {/* Table */}
-      <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
+      {/* Table (desktop) */}
+      <div className="hidden sm:block bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
         <div className="grid grid-cols-[1fr_120px_80px_80px_80px_40px] gap-4 px-5 py-3 border-b border-gray-800 text-xs font-semibold text-gray-500 uppercase tracking-wide">
           <span>Livret</span>
           <span>Template</span>
@@ -125,6 +125,53 @@ export function AdminBooklets() {
                 className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-red-900/40 transition-colors">
                 <Trash2 className="w-3.5 h-3.5 text-red-500" />
               </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Cards (mobile) */}
+      <div className="sm:hidden space-y-3">
+        {loading && (
+          <div className="py-16 text-center text-gray-600 text-sm">Chargement…</div>
+        )}
+
+        {!loading && filtered.length === 0 && (
+          <div className="py-16 text-center text-gray-600 text-sm">Aucun livret trouvé</div>
+        )}
+
+        {filtered.map((b) => (
+          <div key={b.id} className="bg-gray-900 rounded-2xl border border-gray-800 p-4">
+            <div className="flex items-start justify-between gap-3 mb-3">
+              <div className="min-w-0">
+                <p className="font-semibold text-white text-sm truncate">{b.propertyName || b.title || "Sans titre"}</p>
+                <p className="text-xs text-gray-500 truncate mt-0.5">/b/{b.slug}</p>
+                <p className="text-xs text-gray-500 truncate">{b.userEmail || `${b.userId.slice(0, 8)}…`}</p>
+              </div>
+              <div className="flex items-center gap-1 shrink-0">
+                {b.slug && (
+                  <a href={bookletUrl(b.slug)} target="_blank" rel="noopener noreferrer"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-700 transition-colors">
+                    <ExternalLink className="w-4 h-4 text-gray-400" />
+                  </a>
+                )}
+                <button onClick={() => handleDelete(b.id)} disabled={deleting === b.id}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-900/40 transition-colors">
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-gray-400 bg-gray-800 px-2 py-1 rounded-full">{TEMPLATE_LABELS[b.templateId] ?? b.templateId}</span>
+              <span className="text-gray-300 bg-gray-800 px-2 py-1 rounded-full flex items-center gap-1">
+                <Eye className="w-3 h-3 text-gray-500" /> {b.viewCount}
+              </span>
+              <span className={`font-bold px-2 py-1 rounded-full ${b.published ? "bg-emerald-900/50 text-emerald-400" : "bg-gray-800 text-gray-500"}`}>
+                {b.published ? "Publié" : "Non publié"}
+              </span>
+              <span className="text-gray-500 ml-auto">
+                {b.createdAt ? new Date(b.createdAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" }) : "—"}
+              </span>
             </div>
           </div>
         ))}

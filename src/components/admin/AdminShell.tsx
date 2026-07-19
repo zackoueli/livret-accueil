@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, LogOut, Lock, Users2 } from "lucide-react";
+import { LayoutDashboard, BookOpen, LogOut, Lock, Users2, Menu, X } from "lucide-react";
 
 const ADMIN_EMAIL = "enzo.omnes@gmail.com";
 const ADMIN_PASSWORD = "Zunval2626";
@@ -21,7 +21,12 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [navOpen, setNavOpen] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setNavOpen(false);
+  }, [pathname]);
 
   useEffect(() => {
     setAuthed(sessionStorage.getItem(SESSION_KEY) === "1");
@@ -87,10 +92,22 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex bg-gray-950 text-white">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-950 text-white">
+      {/* Topbar mobile */}
+      <div className="md:hidden flex items-center justify-between px-4 py-3.5 border-b border-gray-800 bg-gray-900 sticky top-0 z-40">
+        <div>
+          <p className="font-bold text-white text-sm">Livret Admin</p>
+          <p className="text-[11px] text-gray-500">Panel de gestion</p>
+        </div>
+        <button onClick={() => setNavOpen(v => !v)}
+          className="w-9 h-9 flex items-center justify-center rounded-xl bg-gray-800 text-white">
+          {navOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+        </button>
+      </div>
+
       {/* Sidebar */}
-      <aside className="w-56 shrink-0 flex flex-col border-r border-gray-800 bg-gray-900">
-        <div className="px-5 py-5 border-b border-gray-800">
+      <aside className={`${navOpen ? "flex" : "hidden"} md:flex w-full md:w-56 shrink-0 flex-col border-r border-gray-800 bg-gray-900 md:min-h-screen`}>
+        <div className="hidden md:block px-5 py-5 border-b border-gray-800">
           <p className="font-bold text-white">Livret Admin</p>
           <p className="text-xs text-gray-500 mt-0.5">Panel de gestion</p>
         </div>
@@ -117,7 +134,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main */}
-      <main className="flex-1 overflow-auto">
+      <main className="flex-1 overflow-auto min-w-0">
         {children}
       </main>
     </div>

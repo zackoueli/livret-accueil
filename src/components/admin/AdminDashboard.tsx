@@ -35,29 +35,29 @@ export function AdminDashboard() {
   const Card = ({
     label, value, sub, icon: Icon, color,
   }: { label: string; value: string | number; sub?: string; icon: React.ElementType; color: string }) => (
-    <div className="bg-gray-900 rounded-2xl p-5 border border-gray-800">
-      <div className="flex items-start justify-between mb-3">
+    <div className="bg-gray-900 rounded-2xl p-4 sm:p-5 border border-gray-800 min-w-0">
+      <div className="flex items-start justify-between mb-3 gap-2">
         <p className="text-sm text-gray-400">{label}</p>
-        <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${color}`}>
+        <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${color}`}>
           <Icon className="w-4 h-4 text-white" />
         </div>
       </div>
-      <p className="text-3xl font-black text-white mb-1">{loading ? "—" : value}</p>
-      {sub && <p className="text-xs text-gray-500">{sub}</p>}
+      <p className="text-2xl sm:text-3xl font-black text-white mb-1 truncate">{loading ? "—" : value}</p>
+      {sub && <p className="text-xs text-gray-500 truncate">{sub}</p>}
     </div>
   );
 
   const pctActif = stats ? Math.round((stats.users.actif / (stats.users.total || 1)) * 100) : 0;
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-2xl font-black text-white">Dashboard</h1>
+    <div className="p-4 sm:p-6 md:p-8">
+      <div className="mb-6 md:mb-8">
+        <h1 className="text-xl sm:text-2xl font-black text-white">Dashboard</h1>
         <p className="text-gray-500 text-sm mt-1">Vue d'ensemble de la plateforme</p>
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6 md:mb-8">
         <Card label="Utilisateurs totaux" value={stats?.users.total ?? 0} sub={`${stats?.users.free ?? 0} free · ${stats?.users.actif ?? 0} actifs`} icon={Users} color="bg-indigo-600" />
         <Card label="Plan Actif" value={stats?.users.actif ?? 0} sub={`${pctActif}% de conversion`} icon={UserCheck} color="bg-emerald-600" />
         <Card label="Livrets créés" value={stats?.booklets.total ?? 0} sub={`+${stats?.booklets.thisMonth ?? 0} ce mois`} icon={BookOpen} color="bg-violet-600" />
@@ -65,21 +65,21 @@ export function AdminDashboard() {
       </div>
 
       {/* MRR */}
-      <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mb-8">
+      <div className="bg-gray-900 rounded-2xl p-4 sm:p-6 border border-gray-800 mb-6 md:mb-8">
         <div className="flex items-center justify-between mb-4">
           <div>
             <p className="text-sm text-gray-400 mb-1">MRR estimé</p>
-            <p className="text-4xl font-black text-white">{loading ? "—" : `${stats?.mrr ?? 0} €`}</p>
+            <p className="text-3xl sm:text-4xl font-black text-white">{loading ? "—" : `${stats?.mrr ?? 0} €`}</p>
           </div>
-          <div className="w-12 h-12 rounded-2xl bg-amber-600 flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-white" />
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-amber-600 flex items-center justify-center shrink-0">
+            <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
           </div>
         </div>
         <p className="text-xs text-gray-500">Basé sur les abonnements actifs en base (9,90 €/mois ou équivalent annuel)</p>
       </div>
 
       {/* Répartition plans */}
-      <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800">
+      <div className="bg-gray-900 rounded-2xl p-4 sm:p-6 border border-gray-800">
         <p className="text-sm font-semibold text-white mb-5">Répartition des plans</p>
         <div className="flex items-center gap-4 mb-4">
           <div className="flex-1">
@@ -106,28 +106,28 @@ export function AdminDashboard() {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-3 gap-3 pt-5 border-t border-gray-800">
+        <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-3 pt-5 border-t border-gray-800">
           <div className="text-center">
-            <p className="text-2xl font-black text-white">{pctActif}%</p>
-            <p className="text-xs text-gray-500 mt-0.5">Taux conversion</p>
+            <p className="text-lg sm:text-2xl font-black text-white">{pctActif}%</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Taux conversion</p>
           </div>
           <div className="text-center border-x border-gray-800">
-            <p className="text-2xl font-black text-white">
+            <p className="text-lg sm:text-2xl font-black text-white">
               {stats ? (stats.booklets.total / (stats.users.total || 1)).toFixed(1) : "—"}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">Livrets / user</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Livrets / user</p>
           </div>
           <div className="text-center">
-            <p className="text-2xl font-black text-white">
+            <p className="text-lg sm:text-2xl font-black text-white">
               {stats && stats.booklets.total > 0 ? Math.round(stats.views / stats.booklets.total) : "—"}
             </p>
-            <p className="text-xs text-gray-500 mt-0.5">Vues / livret</p>
+            <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5">Vues / livret</p>
           </div>
         </div>
       </div>
 
       {/* Sources d'acquisition */}
-      <div className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mt-8">
+      <div className="bg-gray-900 rounded-2xl p-4 sm:p-6 border border-gray-800 mt-6 md:mt-8">
         <p className="text-sm font-semibold text-white mb-5">D'où viennent nos utilisateurs</p>
         {Object.entries(stats?.referralSources ?? {})
           .sort((a, b) => b[1] - a[1])

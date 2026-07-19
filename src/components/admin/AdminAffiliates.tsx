@@ -82,12 +82,12 @@ export function AdminAffiliates() {
   }
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold text-white mb-8">Affiliés</h1>
+    <div className="p-4 sm:p-6 md:p-8">
+      <h1 className="text-xl sm:text-2xl font-bold text-white mb-6 md:mb-8">Affiliés</h1>
 
       {/* Stats globales */}
-      <div className="grid grid-cols-3 gap-4 mb-8">
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 md:mb-8">
+        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-2">
             <Users2 className="w-4 h-4 text-indigo-400" />
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Affiliés</span>
@@ -95,14 +95,14 @@ export function AdminAffiliates() {
           <p className="text-2xl font-black text-white">{accounts.length}</p>
           <p className="text-xs text-gray-500 mt-0.5">{referrals.length} parrainages total</p>
         </div>
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
+        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-2">
             <Clock className="w-4 h-4 text-amber-400" />
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">En attente</span>
           </div>
           <p className="text-2xl font-black text-white">{fmt(totalPending)}</p>
         </div>
-        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-5">
+        <div className="bg-gray-900 rounded-2xl border border-gray-800 p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-2">
             <Wallet className="w-4 h-4 text-green-400" />
             <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Versé</span>
@@ -111,8 +111,8 @@ export function AdminAffiliates() {
         </div>
       </div>
 
-      {/* Tableau affiliés */}
-      <div className="bg-gray-900 rounded-2xl border border-gray-800 mb-8 overflow-hidden">
+      {/* Tableau affiliés (desktop) */}
+      <div className="hidden sm:block bg-gray-900 rounded-2xl border border-gray-800 mb-8 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-800">
           <h2 className="text-sm font-bold text-white">Liste des affiliés</h2>
         </div>
@@ -163,11 +163,46 @@ export function AdminAffiliates() {
         </div>
       </div>
 
+      {/* Liste affiliés (mobile) */}
+      <div className="sm:hidden mb-6">
+        <h2 className="text-sm font-bold text-white mb-3">Liste des affiliés</h2>
+        {accounts.length === 0 ? (
+          <p className="text-center text-gray-500 text-sm py-8">Aucun affilié pour l'instant</p>
+        ) : (
+          <div className="space-y-3">
+            {accounts.map((acc) => (
+              <div key={acc.userId} className="bg-gray-900 rounded-2xl border border-gray-800 p-4">
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-white truncate">{acc.displayName ?? "—"}</p>
+                    <p className="text-xs text-gray-500 truncate">{acc.email ?? acc.userId}</p>
+                  </div>
+                  <span className={`text-xs font-bold px-2 py-1 rounded-full shrink-0 ${
+                    acc.payoutsEnabled
+                      ? "bg-green-900/30 text-green-400"
+                      : acc.onboardingComplete
+                      ? "bg-amber-900/30 text-amber-400"
+                      : "bg-gray-800 text-gray-500"
+                  }`}>
+                    {acc.payoutsEnabled ? "Actif" : acc.onboardingComplete ? "En vérif." : "Non connecté"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-gray-400">
+                  <span>{acc.referralCount} filleuls</span>
+                  <span>{fmt(acc.totalEarned ?? 0)} gagné</span>
+                  <span>{fmt(acc.totalPaid ?? 0)} versé</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Log des commissions */}
       <div className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-800 flex items-center justify-between">
+        <div className="px-4 sm:px-6 py-4 border-b border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <h2 className="text-sm font-bold text-white">Commissions</h2>
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
             {["all", "pending", "paid", "cancelled"].map((s) => (
               <button
                 key={s}
@@ -182,7 +217,9 @@ export function AdminAffiliates() {
             ))}
           </div>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Desktop table */}
+        <div className="hidden sm:block overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-800">
@@ -241,6 +278,53 @@ export function AdminAffiliates() {
               )}
             </tbody>
           </table>
+        </div>
+
+        {/* Mobile cards */}
+        <div className="sm:hidden divide-y divide-gray-800">
+          {filteredCommissions.length === 0 ? (
+            <p className="text-center text-gray-500 text-sm py-8">Aucune commission</p>
+          ) : (
+            filteredCommissions.map((comm) => {
+              const account = accounts.find((a) => a.userId === comm.referrerId);
+              return (
+                <div key={comm.id} className="p-4">
+                  <div className="flex items-start justify-between gap-3 mb-2">
+                    <div className="min-w-0">
+                      <p className="text-sm text-gray-300 truncate">
+                        {account?.email ?? comm.referrerId.slice(0, 8) + "..."}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {new Date(comm.createdAt).toLocaleDateString("fr-FR")}
+                      </p>
+                    </div>
+                    <p className="text-sm font-semibold text-white shrink-0">{fmt(comm.amount)}</p>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${STATUS_BADGE[comm.status] ?? ""}`}>
+                      {STATUS_LABEL[comm.status] ?? comm.status}
+                    </span>
+                    <div className="flex items-center gap-3">
+                      {comm.status !== "paid" && (
+                        <button
+                          onClick={() => updateCommissionStatus(comm.id, "paid")}
+                          className="text-xs text-green-400 hover:text-green-300 font-semibold flex items-center gap-1">
+                          <CheckCircle2 className="w-3 h-3" /> Payée
+                        </button>
+                      )}
+                      {comm.status !== "cancelled" && (
+                        <button
+                          onClick={() => updateCommissionStatus(comm.id, "cancelled")}
+                          className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1">
+                          <XCircle className="w-3 h-3" /> Annuler
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </div>
