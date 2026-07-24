@@ -38,6 +38,34 @@ function btn(text: string, url: string, color = "#f97316") {
   return `<a href="${url}" style="display:inline-block;background:${color};color:#fff;font-weight:700;font-size:15px;padding:14px 28px;border-radius:14px;text-decoration:none;margin-top:8px;">${text}</a>`;
 }
 
+// ── 0. Confirmation de création de compte ─────────────────────────────────────
+
+export async function sendWelcomeEmail({
+  to, name,
+}: { to: string; name: string }) {
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#111827;">Bienvenue sur Bunkly ! 👋</h1>
+    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+      Bonjour ${name || ""},<br><br>
+      Votre compte Bunkly a bien été créé. Vous pouvez dès maintenant créer votre premier livret d'accueil
+      et le partager avec vos voyageurs.
+    </p>
+    <div style="text-align:center;">
+      ${btn("Créer mon premier livret →", `${APP_URL}/dashboard`)}
+    </div>
+    <p style="margin:24px 0 0;font-size:13px;color:#9ca3af;text-align:center;">
+      Une question ? Répondez à cet email ou écrivez-nous à <a href="mailto:hello@bunkly.co" style="color:#f97316;">hello@bunkly.co</a>
+    </p>
+  `;
+
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: "Bienvenue sur Bunkly — votre compte est créé",
+    html: layout(content),
+  });
+}
+
 // ── 1. Confirmation d'achat ────────────────────────────────────────────────────
 
 export async function sendPurchaseConfirmation({
