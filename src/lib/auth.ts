@@ -30,6 +30,16 @@ export async function registerWithEmail(
   };
   await setDoc(doc(db, "users", cred.user.uid), profile);
 
+  try {
+    await fetch("/api/notify-signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, name, provider: "email" }),
+    });
+  } catch {
+    // non-bloquant
+  }
+
   // Générer un code de parrainage pour ce nouvel utilisateur
   const code = generateReferralCode();
   await setDoc(doc(db, "referral_codes", cred.user.uid), {
@@ -79,6 +89,20 @@ export async function loginWithGoogle() {
 
     // Générer le code de parrainage si c'est un nouveau user Google
     if (!existing.exists()) {
+      try {
+        await fetch("/api/notify-signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            email: result.user.email,
+            name: result.user.displayName,
+            provider: "google",
+          }),
+        });
+      } catch {
+        // non-bloquant
+      }
+
       const code = generateReferralCode();
       await setDoc(doc(db, "referral_codes", result.user.uid), {
         userId: result.user.uid,
