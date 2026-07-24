@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Search, Eye, Trash2, ExternalLink } from "lucide-react";
 import { bookletUrl } from "@/lib/url";
+import { adminFetch } from "@/lib/adminFetch";
 
 interface BookletRow {
   id: string;
@@ -30,7 +31,7 @@ export function AdminBooklets() {
   const [deleting, setDeleting] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/admin/booklets")
+    adminFetch("/api/admin/booklets")
       .then((r) => r.json())
       .then((d) => { setBooklets(d); setLoading(false); })
       .catch(() => setLoading(false));
@@ -50,7 +51,7 @@ export function AdminBooklets() {
   const handleDelete = async (id: string) => {
     if (!confirm("Supprimer ce livret définitivement ?")) return;
     setDeleting(id);
-    await fetch("/api/admin/booklets", {
+    await adminFetch("/api/admin/booklets", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),

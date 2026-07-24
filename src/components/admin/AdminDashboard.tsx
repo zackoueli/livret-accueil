@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Users, BookOpen, Eye, TrendingUp, UserCheck, UserX } from "lucide-react";
+import { adminFetch } from "@/lib/adminFetch";
 
 interface Stats {
   users: { free: number; actif: number; total: number };
@@ -26,7 +27,7 @@ export function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/stats")
+    adminFetch("/api/admin/stats")
       .then((r) => r.json())
       .then((d) => { setStats(d); setLoading(false); })
       .catch(() => setLoading(false));

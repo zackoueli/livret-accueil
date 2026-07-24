@@ -1,7 +1,11 @@
 import { NextRequest } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { adminDb, requireAdmin } from "@/lib/firebase-admin";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!(await requireAdmin(request))) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     const [accountsSnap, commissionsSnap, referralsSnap] = await Promise.all([
       adminDb.collection("affiliate_accounts").get(),
@@ -38,6 +42,10 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
+  if (!(await requireAdmin(request))) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   try {
     const { commissionId, status } = await request.json();
     if (!commissionId || !status) {

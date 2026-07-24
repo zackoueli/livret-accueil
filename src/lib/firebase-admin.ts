@@ -31,3 +31,26 @@ export async function requireAuthUid(request: NextRequest): Promise<string | nul
     return null;
   }
 }
+
+// Liste des emails autorisés à accéder au panel admin, définie côté serveur
+// uniquement (jamais dans du code client / bundle JS).
+const ADMIN_EMAILS = (process.env.ADMIN_EMAILS || "")
+  .split(",")
+  .map((e) => e.trim().toLowerCase())
+  .filter(Boolean);
+
+// Verifie le Firebase ID token du header Authorization et confirme que
+// l'appelant fait partie des admins autorisés (ADMIN_EMAILS). A utiliser sur
+// toute route API sous /api/admin/*.
+export async function requireAdmin(request: NextRequest): Promise<boolean> {
+  const authHeader = request.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) return false;
+  try {
+    const decoded = await adminAuth.verifyIdToken(token);
+    const email = decoded.email?.toLowerCase();
+    return !!email && ADMIN_EMAILS.includes(email);
+  } catch {
+    return false;
+  }
+}

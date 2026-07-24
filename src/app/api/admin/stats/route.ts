@@ -1,7 +1,11 @@
-import { NextResponse } from "next/server";
-import { adminDb } from "@/lib/firebase-admin";
+import { NextRequest, NextResponse } from "next/server";
+import { adminDb, requireAdmin } from "@/lib/firebase-admin";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  if (!(await requireAdmin(request))) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const [usersSnap, bookletsSnap] = await Promise.all([
     adminDb.collection("users").get(),
     adminDb.collection("booklets").get(),

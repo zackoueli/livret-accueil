@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Users2, TrendingUp, Wallet, CheckCircle2, Clock, XCircle } from "lucide-react";
 import type { AffiliateAccount, AffiliateCommission, Referral } from "@/types";
+import { adminFetch } from "@/lib/adminFetch";
 
 type EnrichedAccount = AffiliateAccount & {
   email: string | null;
@@ -40,7 +41,7 @@ export function AdminAffiliates() {
   async function fetchData() {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/affiliates");
+      const res = await adminFetch("/api/admin/affiliates");
       const data = await res.json();
       setAccounts(data.accounts ?? []);
       setCommissions(data.commissions ?? []);
@@ -51,7 +52,7 @@ export function AdminAffiliates() {
   }
 
   const updateCommissionStatus = async (id: string, status: string) => {
-    await fetch("/api/admin/affiliates", {
+    await adminFetch("/api/admin/affiliates", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ commissionId: id, status }),

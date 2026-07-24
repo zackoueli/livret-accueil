@@ -3,16 +3,16 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, LogOut, Lock, Users2, Menu, X } from "lucide-react";
-
-const ADMIN_EMAIL = "enzo.omnes@gmail.com";
-const ADMIN_PASSWORD = "Zunval2626";
-const SESSION_KEY = "admin_auth";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { LayoutDashboard, BookOpen, LogOut, Lock, Users2, Tag, Menu, X } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { adminFetch } from "@/lib/adminFetch";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/booklets", label: "Livrets", icon: BookOpen },
   { href: "/admin/affiliates", label: "Affiliés", icon: Users2 },
+  { href: "/admin/promo-codes", label: "Codes promo", icon: Tag },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -21,6 +21,7 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const pathname = usePathname();
 
@@ -29,23 +30,41 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
   }, [pathname]);
 
   useEffect(() => {
-    setAuthed(sessionStorage.getItem(SESSION_KEY) === "1");
-    setLoading(false);
+    return onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        setAuthed(false);
+        setLoading(false);
+        return;
+      }
+      const res = await adminFetch("/api/admin/check");
+      setAuthed(res.ok);
+      setLoading(false);
+    });
   }, []);
 
-  const login = (e: React.FormEvent) => {
+  const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-      sessionStorage.setItem(SESSION_KEY, "1");
-      setAuthed(true);
-      setError("");
-    } else {
+    setSubmitting(true);
+    setError("");
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      const res = await adminFetch("/api/admin/check");
+      if (!res.ok) {
+        await signOut(auth);
+        setError("Ce compte n'a pas les droits admin");
+        setAuthed(false);
+      } else {
+        setAuthed(true);
+      }
+    } catch {
       setError("Identifiants incorrects");
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const logout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
+  const logout = async () => {
+    await signOut(auth);
     setAuthed(false);
   };
 
@@ -81,8 +100,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               />
             </div>
             {error && <p className="text-red-400 text-sm">{error}</p>}
-            <button type="submit"
-              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors">
+            <button type="submit" disabled={submitting}
+              className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors disabled:opacity-50">
               Se connecter
             </button>
           </form>
