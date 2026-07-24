@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { X, Check, Zap, Crown, Lock } from "lucide-react";
+import toast from "react-hot-toast";
 import { PLANS_CONFIG } from "@/lib/plans";
 import { usePlan } from "@/hooks/usePlan";
+import { useAuthStore } from "@/store/authStore";
 
 interface UpgradeModalProps {
   onClose: () => void;
@@ -15,14 +16,30 @@ interface UpgradeModalProps {
 
 export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
   const [billing, setBilling] = useState<"monthly" | "yearly">("yearly");
-  const router = useRouter();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const locale = useLocale();
   const { plan: currentPlan } = usePlan();
+  const { user, profile } = useAuthStore();
 
-  const handleSelect = (planId: string) => {
+  const handleSelect = async (planId: string) => {
     if (planId === "free") { onClose(); return; }
-    router.push(`/${locale}/dashboard/settings?upgrade=${planId}&billing=${billing}`);
-    onClose();
+    if (!user || !profile) return;
+    setLoadingPlan(planId);
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/stripe/create-checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId: user.uid, email: user.email, billingPeriod: billing, plan: planId, locale }),
+      });
+      const data = await res.json();
+      if (data.url) window.location.href = data.url;
+      else toast.error("Erreur lors de la création de la session");
+    } catch {
+      toast.error("Erreur réseau");
+    } finally {
+      setLoadingPlan(null);
+    }
   };
 
   return (
@@ -138,7 +155,7 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
                 {/* CTA */}
                 <button
                   onClick={() => handleSelect(plan.id)}
-                  disabled={isCurrent}
+                  disabled={isCurrent || loadingPlan !== null}
                   className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                     plan.popular
                       ? "bg-orange-500 hover:bg-orange-600 text-white"
@@ -147,7 +164,9 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
                         : "bg-gray-100 hover:bg-gray-200 text-gray-700"
                   }`}
                   style={plan.id === "agency" ? { background: plan.color } : {}}>
-                  {isCurrent ? "Plan actuel" : plan.id === "free" ? "Continuer gratuitement" : `Choisir ${plan.name}`}
+                  {loadingPlan === plan.id
+                    ? "Redirection..."
+                    : isCurrent ? "Plan actuel" : plan.id === "free" ? "Continuer gratuitement" : `Choisir ${plan.name}`}
                 </button>
               </div>
             );
