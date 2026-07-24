@@ -103,8 +103,8 @@ export const PLANS_CONFIG = [
   {
     id: "starter" as Plan,
     name: "Starter",
-    price: { monthly: 9, yearly: 5.75 },
-    yearlyTotal: 69,
+    price: { monthly: 9, yearly: 7.5 },
+    yearlyTotal: 90,
     color: "#f97316",
     popular: true,
     description: "Pour les hôtes sérieux",
@@ -123,8 +123,8 @@ export const PLANS_CONFIG = [
   {
     id: "pro" as Plan,
     name: "Pro",
-    price: { monthly: 29, yearly: 18.5 },
-    yearlyTotal: 222,
+    price: { monthly: 29, yearly: 24 },
+    yearlyTotal: 288,
     color: "#6366f1",
     description: "Pour les hôtes qui veulent tout",
     features: [
@@ -143,8 +143,8 @@ export const PLANS_CONFIG = [
   {
     id: "agency" as Plan,
     name: "Agence",
-    price: { monthly: 59, yearly: 37.75 },
-    yearlyTotal: 453,
+    price: { monthly: 59, yearly: 49 },
+    yearlyTotal: 588,
     color: "#111827",
     description: "Pour les conciergeries",
     features: [

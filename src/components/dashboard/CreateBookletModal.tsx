@@ -62,7 +62,8 @@ function PhoneFrame({ url }: { url: string }) {
 }
 
 export function CreateBookletModal({ onClose, onCreate }: Props) {
-  const { templateCount } = usePlan();
+  const { templateCount, can } = usePlan();
+  const canUseAllLayouts = can("template_grid");
   const [step, setStep] = useState<Step>("layout");
   const [selectedLayout, setSelectedLayout] = useState(LAYOUTS[0]);
   const [selected, setSelected] = useState<BookletTemplate>(TEMPLATES[0]);
@@ -128,30 +129,38 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
             <div className="grid grid-cols-2 gap-5">
               {LAYOUTS.map(layout => {
                 const isSelected = selectedLayout.id === layout.id;
+                const isLocked = layout.id !== "simple" && !canUseAllLayouts;
                 return (
                   <button
                     key={layout.id}
-                    onClick={() => setSelectedLayout(layout)}
+                    onClick={() => isLocked ? setShowUpgrade(true) : setSelectedLayout(layout)}
                     className={`relative flex flex-col rounded-2xl border-2 overflow-hidden transition-all text-left ${
-                      isSelected
-                        ? "border-orange-400 shadow-md shadow-orange-100"
-                        : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
+                      isLocked
+                        ? "border-gray-100 opacity-60"
+                        : isSelected
+                          ? "border-orange-400 shadow-md shadow-orange-100"
+                          : "border-gray-200 hover:border-gray-300 hover:shadow-sm"
                     }`}
                   >
                     {/* Checkmark */}
-                    {isSelected && (
+                    {isSelected && !isLocked && (
                       <div className="absolute top-2.5 right-2.5 z-10 w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center shadow">
                         <Check className="w-3.5 h-3.5 text-white" />
                       </div>
                     )}
+                    {isLocked && (
+                      <div className="absolute top-2.5 right-2.5 z-10 flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
+                        <Lock className="w-2.5 h-2.5" /> Verrouillé
+                      </div>
+                    )}
 
                     {/* Phone preview */}
-                    <div className={`w-full p-5 pb-3 transition-colors ${isSelected ? "bg-orange-50" : "bg-gray-50"}`}>
+                    <div className={`w-full p-5 pb-3 transition-colors ${isSelected && !isLocked ? "bg-orange-50" : "bg-gray-50"}`}>
                       <PhoneFrame url={layout.previewUrl} />
                     </div>
 
                     {/* Label */}
-                    <div className={`px-4 py-3 border-t transition-colors ${isSelected ? "border-orange-200 bg-white" : "border-gray-100 bg-white"}`}>
+                    <div className={`px-4 py-3 border-t transition-colors ${isSelected && !isLocked ? "border-orange-200 bg-white" : "border-gray-100 bg-white"}`}>
                       <p className="font-bold text-sm text-gray-900 mb-0.5">{layout.label}</p>
                       <p className="text-xs text-gray-500 leading-relaxed">{layout.desc}</p>
                     </div>
