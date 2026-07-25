@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -12,6 +12,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function BookletLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr">
@@ -22,7 +28,7 @@ export default function BookletLayout({ children }: { children: React.ReactNode 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body>
+      <body style={{ margin: 0, background: "#000" }}>
         {children}
         <script
           dangerouslySetInnerHTML={{
