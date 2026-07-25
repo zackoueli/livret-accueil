@@ -22,7 +22,14 @@ export default function BookletLayout({ children }: { children: React.ReactNode 
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <link rel="manifest" href="/manifest.json" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.addEventListener("load", () => setTimeout(() => window.scrollTo(0, 1), 0));`,
+          }}
+        />
+      </body>
     </html>
   );
 }
