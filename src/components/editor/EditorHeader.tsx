@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { ArrowLeft, Eye, Save, Loader2, Globe, Sparkles, Lock, Languages, Crown, Share2, MoreVertical } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
@@ -21,6 +21,7 @@ import { BookletTranslations } from "@/types";
 export function EditorHeader({ onSave }: { onSave: () => void }) {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("editor");
   const { booklet, isDirty, isSaving, updateBookletField } = useEditorStore();
   const [showImport, setShowImport] = useState(false);
   const [showTranslate, setShowTranslate] = useState(false);
@@ -55,7 +56,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
 
   const togglePublish = async () => {
     if (!booklet.isPublished && !canPublish) {
-      openUpgrade(`Limite de ${limit} livret${limit > 1 ? "s" : ""} publiés atteinte`);
+      openUpgrade(t("publishLimit", { limit }));
       return;
     }
     setPublishing(true);
@@ -66,7 +67,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       await updateBooklet(booklet.id, { ...booklet, isPublished: newVal });
       if (newVal) setPublishedCount(c => c + 1);
       else setPublishedCount(c => c - 1);
-      toast.success(newVal ? "Livret publié ! Vos voyageurs peuvent y accéder." : "Livret dépublié");
+      toast.success(newVal ? t("publishedToast") : t("unpublishedToast"));
     } finally {
       setPublishing(false);
     }
@@ -92,7 +93,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
         onClick={() => router.push(`/${locale}/dashboard`)}
         className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-900 transition-colors mr-1 shrink-0">
         <ArrowLeft className="w-4 h-4" />
-        <span className="hidden sm:inline">Mes livrets</span>
+        <span className="hidden sm:inline">{t("backToBooklets")}</span>
       </button>
 
       {/* Logo + titre */}
@@ -109,35 +110,35 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       <div className="hidden lg:flex items-center gap-3 shrink-0">
         {!isPaid && (
           <button
-            onClick={() => openUpgrade("Passez Pro pour débloquer toutes les fonctionnalités")}
+            onClick={() => openUpgrade(t("proReason"))}
             className="flex items-center gap-1.5 text-sm font-semibold px-4 py-2 rounded-xl bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white shadow-sm transition-all">
             <Crown className="w-3.5 h-3.5" />
-            Passer Pro
+            {t("proCta")}
           </button>
         )}
 
         <button
-          onClick={() => can("ai_import") ? setShowImport(true) : openUpgrade("L'import IA n'est pas disponible sur votre plan actuel")}
+          onClick={() => can("ai_import") ? setShowImport(true) : openUpgrade(t("importLocked"))}
           className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border transition-colors ${
             can("ai_import")
               ? "border-orange-200 bg-orange-50 hover:bg-orange-100 text-orange-600"
               : "border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-400"
           }`}>
           <Sparkles className="w-4 h-4" />
-          <span>Importer</span>
+          <span>{t("import")}</span>
           {!can("ai_import") && <Lock className="w-3 h-3" />}
         </button>
 
         <button
-          onClick={() => canTranslate ? setShowTranslate(true) : openUpgrade("La traduction automatique est réservée au plan Pro")}
-          title={canTranslate ? "Traduire le livret" : "Fonctionnalité Pro"}
+          onClick={() => canTranslate ? setShowTranslate(true) : openUpgrade(t("translateLocked"))}
+          title={canTranslate ? t("translateTitle") : t("proFeature")}
           className={`flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border transition-colors ${
             canTranslate
               ? "border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600"
               : "border-gray-200 bg-gray-50 hover:bg-gray-100 text-gray-400"
           }`}>
           <Languages className="w-4 h-4" />
-          <span>Traduire</span>
+          <span>{t("translate")}</span>
           {!canTranslate && <Lock className="w-3 h-3" />}
           {canTranslate && booklet.translations && Object.keys(booklet.translations).length > 0 && (
             <span className="flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold">
@@ -148,17 +149,17 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
 
         <button
           onClick={() => window.open(bookletUrl(booklet.slug), "_blank")}
-          title="Voir le livret en ligne"
+          title={t("viewOnline")}
           className="flex items-center gap-1.5 text-sm font-medium p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors">
           <Eye className="w-4 h-4" />
         </button>
 
         <button
           onClick={() => setShowShare(true)}
-          title="Partager le livret"
+          title={t("share")}
           className="flex items-center gap-1.5 text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-600 transition-colors">
           <Share2 className="w-4 h-4" />
-          <span>Partager</span>
+          <span>{t("share")}</span>
         </button>
       </div>
 
@@ -167,7 +168,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
         <button
           ref={menuBtnRef}
           onClick={openMenu}
-          title="Plus d'actions"
+          title={t("moreActions")}
           className="flex items-center justify-center p-2 rounded-xl border border-gray-200 hover:bg-gray-50 text-gray-500 transition-colors">
           <MoreVertical className="w-4 h-4" />
         </button>
@@ -183,7 +184,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
             ? <Loader2 className="w-4 h-4 animate-spin" />
             : <Save className="w-4 h-4" />
           }
-          <span className="hidden sm:inline">Enregistrer</span>
+          <span className="hidden sm:inline">{t("save")}</span>
         </button>
       )}
 
@@ -191,7 +192,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
       <button
         onClick={togglePublish}
         disabled={publishing}
-        title={!canPublish ? `Limite de ${limit} livret${limit > 1 ? "s" : ""} publiés atteinte` : undefined}
+        title={!canPublish ? t("publishLimit", { limit }) : undefined}
         className={`flex items-center gap-2 text-sm font-semibold px-3 sm:px-5 py-2 rounded-xl transition-colors disabled:opacity-60 shrink-0 ${
           booklet.isPublished
             ? "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
@@ -206,7 +207,7 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
             : <Globe className="w-4 h-4" />
         }
         <span className="hidden sm:inline">
-          {booklet.isPublished ? "Publié" : "Publier"}
+          {booklet.isPublished ? t("published") : t("publish")}
         </span>
       </button>
     </header>
@@ -220,21 +221,21 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
           style={{ top: menuPos.top, right: menuPos.right }}>
           {!isPaid && (
             <button
-              onClick={() => { openUpgrade("Passez Pro pour débloquer toutes les fonctionnalités"); setShowMenu(false); }}
+              onClick={() => { openUpgrade(t("proReason")); setShowMenu(false); }}
               className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-orange-600 hover:bg-orange-50 transition-colors">
-              <Crown className="w-4 h-4" /> Passer Pro
+              <Crown className="w-4 h-4" /> {t("proCta")}
             </button>
           )}
           <button
-            onClick={() => { can("ai_import") ? setShowImport(true) : openUpgrade("L'import IA n'est pas disponible sur votre plan actuel"); setShowMenu(false); }}
+            onClick={() => { can("ai_import") ? setShowImport(true) : openUpgrade(t("importLocked")); setShowMenu(false); }}
             className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-            <Sparkles className="w-4 h-4 text-gray-400" /> Importer
+            <Sparkles className="w-4 h-4 text-gray-400" /> {t("import")}
             {!can("ai_import") && <Lock className="w-3 h-3 ml-auto text-gray-400" />}
           </button>
           <button
-            onClick={() => { canTranslate ? setShowTranslate(true) : openUpgrade("La traduction automatique est réservée au plan Pro"); setShowMenu(false); }}
+            onClick={() => { canTranslate ? setShowTranslate(true) : openUpgrade(t("translateLocked")); setShowMenu(false); }}
             className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-            <Languages className="w-4 h-4 text-gray-400" /> Traduire
+            <Languages className="w-4 h-4 text-gray-400" /> {t("translate")}
             {!canTranslate && <Lock className="w-3 h-3 ml-auto text-gray-400" />}
             {canTranslate && booklet.translations && Object.keys(booklet.translations).length > 0 && (
               <span className="ml-auto flex items-center justify-center w-4 h-4 rounded-full bg-blue-500 text-white text-[10px] font-bold">
@@ -245,12 +246,12 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
           <button
             onClick={() => { window.open(bookletUrl(booklet.slug), "_blank"); setShowMenu(false); }}
             className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-            <Eye className="w-4 h-4 text-gray-400" /> Aperçu
+            <Eye className="w-4 h-4 text-gray-400" /> {t("preview")}
           </button>
           <button
             onClick={() => { setShowShare(true); setShowMenu(false); }}
             className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-            <Share2 className="w-4 h-4 text-gray-400" /> Partager
+            <Share2 className="w-4 h-4 text-gray-400" /> {t("share")}
           </button>
         </div>
       </>

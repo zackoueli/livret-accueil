@@ -1464,7 +1464,7 @@ function useQrCode(url: string) {
 
 function useTranslatedBooklet(booklet: Booklet, lang: SupportedLang): Booklet {
   return useMemo(() => {
-    if (lang === "fr" || !booklet.translations?.[lang]) return booklet;
+    if (lang === (booklet.defaultLang ?? "fr") || !booklet.translations?.[lang]) return booklet;
     const tr = booklet.translations[lang]!;
     return {
       ...booklet,
@@ -1497,7 +1497,7 @@ function LangSelector({ booklet, lang, onSelect }: {
 }) {
   const [open, setOpen] = useState(false);
   const available = SUPPORTED_LANGS.filter(
-    l => l.code === "fr" || booklet.translations?.[l.code] !== undefined
+    l => l.code === (booklet.defaultLang ?? "fr") || booklet.translations?.[l.code] !== undefined
   );
   if (available.length <= 1) return null;
 
@@ -1547,7 +1547,7 @@ function LangSelector({ booklet, lang, onSelect }: {
 
 function ViewerContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   const [tab, setTab] = useState<Tab>("home");
-  const [lang, setLang] = useState<SupportedLang>("fr");
+  const [lang, setLang] = useState<SupportedLang>(rawBooklet.defaultLang ?? "fr");
   const booklet = useTranslatedBooklet(rawBooklet, lang);
   const accent = booklet.accentColor || C.blue;
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { X, Sparkles, Loader2, ClipboardPaste } from "lucide-react";
 import { useEditorStore } from "@/store/editorStore";
 import toast from "react-hot-toast";
@@ -40,13 +41,14 @@ const FIELD_MAP: Record<string, FieldMapping> = {
 };
 
 export function ImportListingModal({ onClose }: ImportListingModalProps) {
+  const t = useTranslations("editor");
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const { booklet, updateModule, updateBookletField } = useEditorStore();
 
   const handleImport = async () => {
     if (!booklet || text.trim().length < 20) {
-      toast.error("Collez une description plus longue.");
+      toast.error(t("importTooShort"));
       return;
     }
 
@@ -91,13 +93,13 @@ export function ImportListingModal({ onClose }: ImportListingModalProps) {
       }
 
       if (filledCount === 0) {
-        toast("Aucune information extraite. Essayez avec un texte plus détaillé.", { icon: "⚠️" });
+        toast(t("noneExtracted"), { icon: "⚠️" });
       } else {
-        toast.success(`${filledCount} champ${filledCount > 1 ? "s" : ""} rempli${filledCount > 1 ? "s" : ""} automatiquement !`);
+        toast.success(t("filledCount", { count: filledCount }));
         onClose();
       }
     } catch {
-      toast.error("Erreur lors de l'extraction. Réessayez.");
+      toast.error(t("extractError"));
     } finally {
       setLoading(false);
     }
@@ -113,8 +115,8 @@ export function ImportListingModal({ onClose }: ImportListingModalProps) {
               <Sparkles className="w-5 h-5 text-orange-500" />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900">Importer depuis une annonce</h2>
-              <p className="text-xs text-gray-500">Airbnb, Booking, VRBO ou autre</p>
+              <h2 className="font-semibold text-gray-900">{t("importTitle")}</h2>
+              <p className="text-xs text-gray-500">{t("importSubtitle")}</p>
             </div>
           </div>
           <button
@@ -127,27 +129,27 @@ export function ImportListingModal({ onClose }: ImportListingModalProps) {
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-6 py-5 space-y-4">
           <p className="text-sm text-gray-600">
-            Copiez-collez la description de votre annonce ci-dessous. L&apos;IA extraira automatiquement les informations pour remplir votre livret.
+            {t("importIntro")}
           </p>
 
           <div className="relative">
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
-              placeholder="Copiez ici le texte de votre annonce Airbnb ou Booking...&#10;&#10;Exemple : « Bienvenue dans notre appartement lumineux de 60m²... WiFi : MonReseau / motdepasse123... Arrivée à partir de 16h... »"
+              placeholder={t("importPlaceholder")}
               rows={12}
               className="w-full text-sm border border-gray-200 rounded-xl p-4 resize-none focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder:text-gray-400"
             />
             <div className="absolute bottom-3 right-3 text-xs text-gray-300">
-              {text.length} caractères
+              {t("charsCount", { count: text.length })}
             </div>
           </div>
 
           <div className="bg-orange-50 rounded-xl p-4 text-xs text-orange-700 space-y-1">
-            <p className="font-medium">✨ Comment ça marche</p>
-            <p>• Seuls les champs <strong>vides</strong> seront remplis — vos données existantes sont préservées</p>
-            <p>• Plus votre description est détaillée, mieux c&apos;est</p>
-            <p>• Vous pouvez modifier les champs après import</p>
+            <p className="font-medium">{t("howTitle")}</p>
+            <p>{t("how1")}</p>
+            <p>{t("how2")}</p>
+            <p>{t("how3")}</p>
           </div>
         </div>
 
@@ -156,16 +158,16 @@ export function ImportListingModal({ onClose }: ImportListingModalProps) {
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors">
-            Annuler
+            {t("cancel")}
           </button>
           <button
             onClick={handleImport}
             disabled={loading || text.trim().length < 20}
             className="flex items-center gap-2 px-5 py-2.5 bg-orange-500 hover:bg-orange-600 disabled:opacity-50 text-white text-sm font-semibold rounded-xl transition-colors">
             {loading ? (
-              <><Loader2 className="w-4 h-4 animate-spin" />Extraction en cours...</>
+              <><Loader2 className="w-4 h-4 animate-spin" />{t("extracting")}</>
             ) : (
-              <><ClipboardPaste className="w-4 h-4" />Remplir automatiquement</>
+              <><ClipboardPaste className="w-4 h-4" />{t("fillAuto")}</>
             )}
           </button>
         </div>

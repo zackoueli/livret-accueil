@@ -40,7 +40,7 @@ function parsePlaces(raw: string) {
 
 function useTranslatedBooklet(booklet: Booklet, lang: SupportedLang): Booklet {
   return useMemo(() => {
-    if (lang === "fr" || !booklet.translations?.[lang]) return booklet;
+    if (lang === (booklet.defaultLang ?? "fr") || !booklet.translations?.[lang]) return booklet;
     const tr = booklet.translations[lang]!;
     return {
       ...booklet,
@@ -962,7 +962,7 @@ function FlagImg({ code, size = 20 }: { code: string; size?: number }) {
 
 function LangSelector({ booklet, lang, onSelect }: { booklet: Booklet; lang: SupportedLang; onSelect: (l: SupportedLang) => void }) {
   const [open, setOpen] = useState(false);
-  const available = SUPPORTED_LANGS.filter(l => l.code === "fr" || booklet.translations?.[l.code] !== undefined);
+  const available = SUPPORTED_LANGS.filter(l => l.code === (booklet.defaultLang ?? "fr") || booklet.translations?.[l.code] !== undefined);
   if (available.length <= 1) return null;
   const current = available.find(l => l.code === lang) ?? available[0];
 
@@ -996,7 +996,7 @@ function PastelContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet;
   const [sheet, setSheet] = useState<string | null>(null);
   const [ruleSheet, setRuleSheet] = useState<string | null>(null);
   const [selectedAct, setSelectedAct] = useState<Activity | null>(null);
-  const [lang, setLang] = useState<SupportedLang>("fr");
+  const [lang, setLang] = useState<SupportedLang>(rawBooklet.defaultLang ?? "fr");
   const booklet = useTranslatedBooklet(rawBooklet, lang);
 
   const rules = useMod(booklet, "rules");

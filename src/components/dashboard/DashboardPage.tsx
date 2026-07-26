@@ -13,7 +13,7 @@ import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
 import { getUserBooklets, createBooklet, deleteBooklet, duplicateBooklet, getUserFolders, createFolder, updateFolder, deleteFolder, moveBookletToFolder } from "@/lib/booklets";
 import { signOut } from "@/lib/auth";
-import { Booklet, Folder as FolderType } from "@/types";
+import { Booklet, Folder as FolderType, SupportedLang } from "@/types";
 import { ShareModal } from "./ShareModal";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import { bookletUrl } from "@/lib/url";
@@ -168,7 +168,7 @@ function DashboardPageInner() {
     if (!user) return;
     setCreating(true);
     try {
-      const id = await createBooklet(user.uid, title, contentTemplateId, layoutId, plan);
+      const id = await createBooklet(user.uid, title, contentTemplateId, layoutId, plan, locale as SupportedLang);
       router.push(`/${locale}/editor/${id}`);
     } catch {
       toast.error(t("createError"));

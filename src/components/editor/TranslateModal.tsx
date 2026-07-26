@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { X, Languages, Loader2, Check, AlertCircle, Pencil, ChevronDown, ChevronUp } from "lucide-react";
 import { Booklet, SupportedLang, SUPPORTED_LANGS, BookletTranslations } from "@/types";
 import { saveBookletTranslations } from "@/lib/booklets";
@@ -20,8 +21,13 @@ interface Props {
 type Tab = "auto" | "edit";
 
 export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
+  const t = useTranslations("editor");
+  const tMeta = useTranslations("moduleMeta");
   const { user, profile } = useAuthStore();
   const { translationLangLimit } = usePlan();
+  // Langue de rédaction du livret : c'est la source, elle ne se traduit pas
+  const sourceLang: SupportedLang = booklet.defaultLang ?? "fr";
+  const sourceMeta = SUPPORTED_LANGS.find(l => l.code === sourceLang);
   const existingLangs = Object.keys(booklet.translations ?? {}) as SupportedLang[];
   const [tab, setTab] = useState<Tab>(translationLangLimit === 0 ? "edit" : "auto");
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -52,7 +58,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
   }, [booklet.translations]);
 
   const toggleLang = (code: SupportedLang) => {
-    if (code === "fr") return;
+    if (code === sourceLang) return;
     setSelected(prev => {
       const isAdding = !prev.has(code);
       if (isAdding && prev.size >= translationLangLimit) {
@@ -66,7 +72,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
   };
 
   const handleTranslate = async () => {
-    const targets = Array.from(selected).filter(l => l !== "fr");
+    const targets = Array.from(selected).filter(l => l !== sourceLang);
     if (targets.length === 0) return;
     setLoading(true);
 
@@ -100,7 +106,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
         if (res.status === 429) {
           const body = await res.json();
           setCharsUsed(body.charsUsed ?? MONTHLY_LIMIT);
-          toast.error(`Limite mensuelle de ${MONTHLY_LIMIT.toLocaleString()} caractères atteinte`);
+          toast.error(t("monthlyLimitToast", { limit: MONTHLY_LIMIT.toLocaleString() }));
           setProgress(p => ({ ...p, [lang]: "error" }));
           continue;
         }
@@ -125,13 +131,13 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
       await saveBookletTranslations(booklet.id, allTranslations);
       setEditData(allTranslations);
       onTranslated(allTranslations);
-      toast.success("Traductions enregistrées !");
+      toast.success(t("translationsSaved"));
       // Basculer sur l'onglet édition pour affiner
       setTab("edit");
-      setEditLang(Array.from(selected).filter(l => l !== "fr")[0] ?? null);
+      setEditLang(Array.from(selected).filter(l => l !== sourceLang)[0] ?? null);
     } catch (e) {
       console.error("[TranslateModal] save error:", e);
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("translationsSaveError"));
     }
     setLoading(false);
   };
@@ -141,10 +147,10 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
     try {
       await saveBookletTranslations(booklet.id, editData);
       onTranslated(editData);
-      toast.success("Modifications enregistrées !");
+      toast.success(t("editsSaved"));
     } catch (e) {
       console.error("[TranslateModal] save edit error:", e);
-      toast.error("Erreur lors de la sauvegarde");
+      toast.error(t("translationsSaveError"));
     }
     setSavingEdit(false);
   };
@@ -162,8 +168,9 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
     }));
   };
 
-  const targetCount = Array.from(selected).filter(l => l !== "fr").length;
+  const targetCount = Array.from(selected).filter(l => l !== sourceLang).length;
   const translatedLangs = Object.keys(editData) as SupportedLang[];
+  const filledFieldsCount = Object.values(booklet.modules.reduce((acc, m) => ({ ...acc, ...m.content }), {})).filter(v => v && typeof v === "string" && (v as string).trim()).length;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -177,7 +184,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
             <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center">
               <Languages className="w-4 h-4 text-orange-500" />
             </div>
-            <h2 className="text-base font-bold text-gray-900">Traductions</h2>
+            <h2 className="text-base font-bold text-gray-900">{t("translationsTitle")}</h2>
           </div>
           {!loading && (
             <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400">
@@ -191,13 +198,13 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
           <button
             onClick={() => translationLangLimit === 0 ? setShowUpgrade(true) : setTab("auto")}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${tab === "auto" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"} ${translationLangLimit === 0 ? "opacity-50" : ""}`}>
-            <Languages className="w-3.5 h-3.5" /> Traduction auto
+            <Languages className="w-3.5 h-3.5" /> {t("autoTab")}
           </button>
           <button
             onClick={() => setTab("edit")}
             disabled={translatedLangs.length === 0}
             className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-colors disabled:opacity-40 ${tab === "edit" ? "bg-orange-500 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}>
-            <Pencil className="w-3.5 h-3.5" /> Modifier manuellement
+            <Pencil className="w-3.5 h-3.5" /> {t("editTab")}
             {translatedLangs.length > 0 && (
               <span className={`text-xs px-1.5 py-0.5 rounded-full ${tab === "edit" ? "bg-white/20 text-white" : "bg-gray-200 text-gray-500"}`}>
                 {translatedLangs.length}
@@ -211,33 +218,33 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
           <>
             <div className="px-6 py-3 border-b border-gray-100 shrink-0">
               <p className="text-xs text-gray-500">
-                <span className="font-semibold text-gray-700">Source :</span> 🇫🇷 Français
-                {" · "}{booklet.modules.filter(m => m.enabled).length} modules
-                {" · "}{Object.values(booklet.modules.reduce((acc, m) => ({ ...acc, ...m.content }), {})).filter(v => v && typeof v === "string" && (v as string).trim()).length} champs
+                <span className="font-semibold text-gray-700">{t("sourceLabel")}</span> {sourceMeta?.flag} {sourceMeta?.label}
+                {" · "}{t("modulesShort", { count: booklet.modules.filter(m => m.enabled).length })}
+                {" · "}{t("fieldsShort", { count: filledFieldsCount })}
               </p>
             </div>
             <div className="px-6 py-5 grid grid-cols-2 gap-3 overflow-y-auto">
               {SUPPORTED_LANGS.map(lang => {
-                const isFr = lang.code === "fr";
+                const isSource = lang.code === sourceLang;
                 const isSelected = selected.has(lang.code);
                 const state = progress[lang.code];
                 return (
                   <button
                     key={lang.code}
-                    onClick={() => !loading && !isFr && toggleLang(lang.code)}
-                    disabled={isFr || loading}
+                    onClick={() => !loading && !isSource && toggleLang(lang.code)}
+                    disabled={isSource || loading}
                     className={`relative flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all text-left ${
-                      isFr ? "border-gray-200 bg-gray-50 opacity-50 cursor-default"
+                      isSource ? "border-gray-200 bg-gray-50 opacity-50 cursor-default"
                         : isSelected ? "border-orange-400 bg-orange-50"
                         : "border-gray-200 hover:border-gray-300 bg-white"
                     }`}>
                     <span className="text-xl">{lang.flag}</span>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-800">{lang.label}</p>
-                      {isFr && <p className="text-xs text-gray-400">Source</p>}
-                      {!isFr && editData[lang.code] && <p className="text-xs text-green-500">Traduit</p>}
+                      {isSource && <p className="text-xs text-gray-400">{t("sourceTag")}</p>}
+                      {!isSource && editData[lang.code] && <p className="text-xs text-green-500">{t("translatedTag")}</p>}
                     </div>
-                    {!isFr && (
+                    {!isSource && (
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
                         state === "done" ? "bg-green-500" : state === "error" ? "bg-red-400" :
                         state === "loading" ? "bg-orange-100" : isSelected ? "bg-orange-500" : "bg-gray-100"
@@ -256,9 +263,9 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
               {/* Quota bar */}
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-400">Quota mensuel</span>
+                  <span className="text-xs text-gray-400">{t("monthlyQuota")}</span>
                   <span className={`text-xs font-medium ${charsUsed >= MONTHLY_LIMIT ? "text-red-500" : charsUsed >= MONTHLY_LIMIT * 0.8 ? "text-orange-500" : "text-gray-500"}`}>
-                    {charsUsed.toLocaleString()} / {MONTHLY_LIMIT.toLocaleString()} car.
+                    {charsUsed.toLocaleString()} / {MONTHLY_LIMIT.toLocaleString()} {t("charsShort")}
                   </span>
                 </div>
                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
@@ -268,18 +275,18 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-400">{targetCount} / {translationLangLimit} langues automatiques utilisées sur votre plan</p>
+              <p className="text-xs text-gray-400">{t("langsUsed", { count: targetCount, limit: translationLangLimit })}</p>
               <div className="flex items-center justify-between gap-3">
                 <p className="text-xs text-gray-400">
                   {charsUsed >= MONTHLY_LIMIT
-                    ? "Limite atteinte — réinitialisée le 1er du mois"
-                    : targetCount === 0 ? "Sélectionnez au moins une langue" : `${targetCount} langue${targetCount > 1 ? "s" : ""} sélectionnée${targetCount > 1 ? "s" : ""}`}
+                    ? t("quotaReached")
+                    : targetCount === 0 ? t("selectOneLang") : t("selectedLangs", { count: targetCount })}
                 </p>
                 <button
                   onClick={handleTranslate}
                   disabled={loading || targetCount === 0 || charsUsed >= MONTHLY_LIMIT}
                   className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50">
-                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Traduction...</> : <><Languages className="w-4 h-4" /> Traduire</>}
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("translating")}</> : <><Languages className="w-4 h-4" /> {t("translateBtn")}</>}
                 </button>
               </div>
             </div>
@@ -319,9 +326,9 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
                     <button
                       onClick={() => setExpandedModule(isExpanded ? null : mod.id)}
                       className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
-                      <span className="text-sm font-semibold text-gray-700 capitalize">{mod.type}</span>
+                      <span className="text-sm font-semibold text-gray-700">{tMeta(`${mod.type}.label`)}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400">{fields.length} champs</span>
+                        <span className="text-xs text-gray-400">{t("fieldsShort", { count: fields.length })}</span>
                         {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
                       </div>
                     </button>
@@ -335,7 +342,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
                               value={modTranslations[field] ?? ""}
                               onChange={e => updateField(editLang, mod.id, field, e.target.value)}
                               rows={2}
-                              placeholder="Traduction..."
+                              placeholder={t("translationPlaceholder")}
                               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none"
                             />
                           </div>
@@ -352,7 +359,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
                 onClick={handleSaveEdit}
                 disabled={savingEdit}
                 className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50">
-                {savingEdit ? <><Loader2 className="w-4 h-4 animate-spin" /> Sauvegarde...</> : <><Check className="w-4 h-4" /> Enregistrer</>}
+                {savingEdit ? <><Loader2 className="w-4 h-4 animate-spin" /> {t("savingBtn")}</> : <><Check className="w-4 h-4" /> {t("saveBtn")}</>}
               </button>
             </div>
           </>
@@ -362,8 +369,8 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
       {showUpgrade && (
         <UpgradeModal
           reason={translationLangLimit === 0
-            ? "La traduction automatique est réservée aux plans Starter, Pro et Agence"
-            : `Vous avez atteint la limite de ${translationLangLimit} langues automatiques de votre plan`}
+            ? t("autoLockedReason")
+            : t("langLimitReason", { limit: translationLangLimit })}
           onClose={() => setShowUpgrade(false)}
         />
       )}

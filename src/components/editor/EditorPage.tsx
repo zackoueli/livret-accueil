@@ -2,7 +2,7 @@
 
 import { useEffect, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { updateBooklet } from "@/lib/booklets";
@@ -21,6 +21,7 @@ type MobileTab = "modules" | "edit" | "preview";
 export function EditorPage({ bookletId }: { bookletId: string }) {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("editor");
   const { user, loading: authLoading } = useAuthStore();
   const { booklet, setBooklet, resetEditor, isDirty, setIsSaving, setIsDirty } = useEditorStore();
   const [mobileTab, setMobileTab] = useState<MobileTab>("modules");
@@ -59,9 +60,9 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
     try {
       await updateBooklet(booklet.id, booklet);
       setIsDirty(false);
-      toast.success("Livret enregistré");
+      toast.success(t("saved"));
     } catch {
-      toast.error("Erreur de sauvegarde");
+      toast.error(t("saveError"));
     } finally {
       setIsSaving(false);
     }
@@ -72,7 +73,7 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <div className="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin" />
-          <p className="text-sm text-gray-400">Chargement du livret...</p>
+          <p className="text-sm text-gray-400">{t("loading")}</p>
         </div>
       </div>
     );
@@ -99,9 +100,9 @@ export function EditorPage({ bookletId }: { bookletId: string }) {
       {/* ── Mobile bottom nav ── */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-gray-100 flex h-14">
         {([
-          { tab: "modules", icon: LayoutList, label: "Modules" },
-          { tab: "edit",    icon: PenLine,    label: "Édition" },
-          { tab: "preview", icon: Eye,        label: "Aperçu" },
+          { tab: "modules", icon: LayoutList, label: t("tabModules") },
+          { tab: "edit",    icon: PenLine,    label: t("tabEdit") },
+          { tab: "preview", icon: Eye,        label: t("tabPreview") },
         ] as { tab: MobileTab; icon: React.ElementType; label: string }[]).map(({ tab, icon: Icon, label }) => (
           <button
             key={tab}

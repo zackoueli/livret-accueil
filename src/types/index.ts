@@ -171,6 +171,8 @@ export interface Booklet {
   propertyName: string;
   address?: string;
   modules: BookletModule[];
+  /** Langue dans laquelle le contenu de base du livret est rédigé (langue de l'interface à la création) */
+  defaultLang?: SupportedLang;
   isPublished: boolean;
   viewCount?: number;
   translations?: Partial<BookletTranslations>;

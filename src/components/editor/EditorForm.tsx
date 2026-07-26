@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { useEditorStore } from "@/store/editorStore";
 import { MODULE_META, MODULE_FIELDS, ACTIVITY_CATEGORIES, SERVICE_EMOJIS, parseActivities, parseServices, Activity, Service } from "@/lib/modules";
 import { PORTS } from "@/app/api/tides/route";
@@ -24,6 +25,7 @@ function PhotoUploader({ bookletId, storagePath, value, onChange, aspectRatio = 
   aspectRatio?: string;
   circular?: boolean;
 }) {
+  const t = useTranslations("editor");
   const { user } = useAuthStore();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -60,11 +62,11 @@ function PhotoUploader({ bookletId, storagePath, value, onChange, aspectRatio = 
         <img src={value} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
           <button onClick={() => inputRef.current?.click()}
-            className="p-1.5 rounded-lg bg-white/90 text-gray-700 hover:bg-white transition-colors" title="Changer">
+            className="p-1.5 rounded-lg bg-white/90 text-gray-700 hover:bg-white transition-colors" title={t("change")}>
             <ImagePlus className="w-3.5 h-3.5" />
           </button>
           <button onClick={() => onChange("")}
-            className="p-1.5 rounded-lg bg-white/90 text-red-400 hover:bg-white hover:text-red-600 transition-colors" title="Supprimer">
+            className="p-1.5 rounded-lg bg-white/90 text-red-400 hover:bg-white hover:text-red-600 transition-colors" title={t("deletePhoto")}>
             <X className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -90,8 +92,8 @@ function PhotoUploader({ bookletId, storagePath, value, onChange, aspectRatio = 
           : <>
               <ImagePlus className={`${circular ? "w-4 h-4" : "w-5 h-5"} text-gray-400`} />
               {!circular && <>
-                <span className="text-xs text-gray-500 font-medium">Glisser une photo ou cliquer</span>
-                <span className="text-xs text-gray-300">JPG, PNG, WebP · max 10 Mo</span>
+                <span className="text-xs text-gray-500 font-medium">{t("dropPhoto")}</span>
+                <span className="text-xs text-gray-300">{t("photoFormats10")}</span>
               </>}
             </>
         }
@@ -105,6 +107,7 @@ function PhotoUploader({ bookletId, storagePath, value, onChange, aspectRatio = 
 // ── Recherche Google Places ───────────────────────────────────────────────────
 
 function PlacesSearch({ onSelect }: { onSelect: (data: Partial<Activity>) => void }) {
+  const t = useTranslations("editor");
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<{ placeId: string; name: string; address: string; rating?: number }[]>([]);
   const [loading, setLoading] = useState(false);
@@ -139,23 +142,23 @@ function PlacesSearch({ onSelect }: { onSelect: (data: Partial<Activity>) => voi
 
   return (
     <div className="mb-3 p-3 bg-blue-50 rounded-xl border border-blue-100">
-      <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">🔍 Recherche automatique</p>
+      <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">{t("placesSearch")}</p>
       <div className="flex gap-2">
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
           onKeyDown={e => e.key === "Enter" && search()}
-          placeholder="Ex : Saut en parachute Perpignan..."
+          placeholder={t("placesPlaceholder")}
           className="flex-1 text-sm border border-blue-200 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
         />
         <button onClick={search} disabled={loading || !query.trim()}
           className="flex items-center gap-1.5 px-3 py-2 bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold rounded-lg disabled:opacity-50 transition-colors">
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-          Chercher
+          {t("searchBtn")}
         </button>
       </div>
       {searched && !loading && results.length === 0 && (
-        <p className="text-xs text-gray-400 mt-2">Aucun résultat trouvé.</p>
+        <p className="text-xs text-gray-400 mt-2">{t("noResults")}</p>
       )}
       {results.length > 0 && (
         <div className="mt-2 space-y-1">
@@ -168,7 +171,7 @@ function PlacesSearch({ onSelect }: { onSelect: (data: Partial<Activity>) => voi
               </div>
               {loadingId === r.placeId
                 ? <Loader2 className="w-4 h-4 animate-spin text-blue-400 shrink-0" />
-                : <span className="text-xs text-blue-500 font-semibold shrink-0">Sélectionner →</span>
+                : <span className="text-xs text-blue-500 font-semibold shrink-0">{t("select")}</span>
               }
             </button>
           ))}
@@ -189,6 +192,8 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
   bookletId: string;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const t = useTranslations("editor");
+  const catLabel = (v: string) => t(`cat${v.charAt(0).toUpperCase()}${v.slice(1)}` as "catOther");
   const catEmoji = ACTIVITY_CATEGORIES.find(c => c.value === item.category)?.emoji ?? "📍";
 
   return (
@@ -204,13 +209,13 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
         </button>
         <span className="text-xl">{catEmoji}</span>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-gray-800 truncate">{item.name || "Nouveau lieu"}</p>
+          <p className="text-sm font-semibold text-gray-800 truncate">{item.name || t("newPlace")}</p>
           <p className="text-xs text-gray-400 truncate">
-            {ACTIVITY_CATEGORIES.find(c => c.value === item.category)?.label}
+            {catLabel(item.category)}
             {item.distance && ` · ${item.distance}`}
           </p>
         </div>
-        {item.recommended && <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">★ Coup de cœur</span>}
+        {item.recommended && <span className="text-xs font-bold text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">{t("recommended")}</span>}
         <button onClick={(e) => { e.stopPropagation(); onRemove(); }} className="p-1 text-gray-300 hover:text-red-400 transition-colors">
           <Trash2 className="w-4 h-4" />
         </button>
@@ -221,40 +226,40 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
         <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
           <PlacesSearch onSelect={patch => onUpdate(patch)} />
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Catégorie</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{t("category")}</label>
             <div className="flex flex-wrap gap-2">
               {ACTIVITY_CATEGORIES.map(cat => (
                 <button key={cat.value}
                   onClick={() => onUpdate({ category: cat.value as Activity["category"] })}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${item.category === cat.value ? "bg-orange-500 text-white" : "bg-white text-gray-600 border border-gray-200"}`}>
-                  {cat.emoji} {cat.label}
+                  {cat.emoji} {catLabel(cat.value)}
                 </button>
               ))}
             </div>
           </div>
 
-          <Field label="Nom du lieu *" value={item.name} onChange={v => onUpdate({ name: v })} placeholder="Le Bistrot de la Place" />
+          <Field label={t("placeName")} value={item.name} onChange={v => onUpdate({ name: v })} placeholder={t("placeNamePlaceholder")} />
 
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Photo</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{t("photo")}</label>
             <PhotoUploader bookletId={bookletId} storagePath="activities" value={item.photo} onChange={url => onUpdate({ photo: url })} aspectRatio="16/9" />
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Description</label>
+            <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{t("description")}</label>
             <textarea value={item.description} onChange={e => onUpdate({ description: e.target.value })}
-              placeholder="Notre coup de cœur pour les soirées romantiques..." rows={2} className={`${input} resize-none`} />
+              placeholder={t("descriptionPlaceholder")} rows={2} className={`${input} resize-none`} />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Field label="Adresse" value={item.address} onChange={v => onUpdate({ address: v })} placeholder="5 rue de la Paix" />
-            <Field label="Distance" value={item.distance} onChange={v => onUpdate({ distance: v })} placeholder="5 min à pied" />
+            <Field label={t("addressLabel")} value={item.address} onChange={v => onUpdate({ address: v })} placeholder={t("addressPlaceholder")} />
+            <Field label={t("distance")} value={item.distance} onChange={v => onUpdate({ distance: v })} placeholder={t("distancePlaceholder")} />
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <Field label="Horaires" value={item.openHours} onChange={v => onUpdate({ openHours: v })} placeholder="12h-14h · 19h-22h" />
+            <Field label={t("hours")} value={item.openHours} onChange={v => onUpdate({ openHours: v })} placeholder={t("hoursPlaceholder")} />
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Prix</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{t("price")}</label>
               <div className="flex gap-1">
                 {["€", "€€", "€€€"].map(p => (
                   <button key={p} onClick={() => onUpdate({ priceRange: item.priceRange === p ? "" : p })}
@@ -266,14 +271,14 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
             </div>
           </div>
 
-          <Field label="Téléphone" value={item.phone} onChange={v => onUpdate({ phone: v })} placeholder="+33 5 56 XX XX XX" type="tel" />
+          <Field label={t("phone")} value={item.phone} onChange={v => onUpdate({ phone: v })} placeholder="+33 5 56 XX XX XX" type="tel" />
 
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">Site web</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-1.5">{t("website")}</label>
               <UrlField value={item.website} onChange={v => onUpdate({ website: v })} placeholder="https://..." />
             </div>
-            <Field label="Instagram" value={item.instagram} onChange={v => onUpdate({ instagram: v })} placeholder="@bistrotdelaplace" />
+            <Field label={t("instagram")} value={item.instagram} onChange={v => onUpdate({ instagram: v })} placeholder="@bistrotdelaplace" />
           </div>
 
           <label className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-100 cursor-pointer">
@@ -282,8 +287,8 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
               {item.recommended && <span className="text-white text-xs font-bold">✓</span>}
             </div>
             <div>
-              <p className="text-sm font-semibold text-gray-700">★ Coup de cœur</p>
-              <p className="text-xs text-gray-400">Affiché en premier avec un badge</p>
+              <p className="text-sm font-semibold text-gray-700">{t("recommended")}</p>
+              <p className="text-xs text-gray-400">{t("recommendedDesc")}</p>
             </div>
           </label>
         </div>
@@ -293,6 +298,7 @@ function SortableActivityItem({ item, expanded, onToggle, onRemove, onUpdate, bo
 }
 
 function ActivityEditor({ value, onChange, bookletId }: { value: string; onChange: (v: string) => void; bookletId: string }) {
+  const t = useTranslations("editor");
   const items = parseActivities(value);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -334,8 +340,8 @@ function ActivityEditor({ value, onChange, bookletId }: { value: string; onChang
       {items.length === 0 && (
         <div className="text-center py-8 bg-gray-50 rounded-xl border border-dashed border-gray-200">
           <p className="text-2xl mb-2">📍</p>
-          <p className="text-sm text-gray-400">Aucune recommandation ajoutée</p>
-          <p className="text-xs text-gray-300 mt-1">Restaurants, activités, commerces...</p>
+          <p className="text-sm text-gray-400">{t("noActivities")}</p>
+          <p className="text-xs text-gray-300 mt-1">{t("activitiesHint")}</p>
         </div>
       )}
 
@@ -357,16 +363,16 @@ function ActivityEditor({ value, onChange, bookletId }: { value: string; onChang
 
       <button onClick={add}
         className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-orange-200 text-orange-500 font-semibold text-sm hover:bg-orange-50 transition-colors">
-        <Plus className="w-4 h-4" /> Ajouter un lieu
+        <Plus className="w-4 h-4" /> {t("addPlace")}
       </button>
 
       {activityLimit !== null && (
-        <p className="text-xs text-gray-400 text-center">{items.length} / {activityLimit} activités utilisées</p>
+        <p className="text-xs text-gray-400 text-center">{t("activitiesUsed", { count: items.length, limit: activityLimit })}</p>
       )}
 
       {showUpgrade && (
         <UpgradeModal
-          reason={`Vous avez atteint la limite de ${activityLimit} activités de votre plan`}
+          reason={t("activityLimitReason", { limit: activityLimit ?? 0 })}
           onClose={() => setShowUpgrade(false)}
         />
       )}
@@ -377,6 +383,7 @@ function ActivityEditor({ value, onChange, bookletId }: { value: string; onChang
 // ── Éditeur de services ───────────────────────────────────────────────────────
 
 function ServiceEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useTranslations("editor");
   const items = parseServices(value);
   const save = (next: Service[]) => onChange(JSON.stringify(next));
 
@@ -389,7 +396,7 @@ function ServiceEditor({ value, onChange }: { value: string; onChange: (v: strin
       {items.length === 0 && (
         <div className="text-center py-6 bg-gray-50 rounded-xl border border-dashed border-gray-200">
           <p className="text-2xl mb-1">🏊</p>
-          <p className="text-sm text-gray-400">Piscine, parking, BBQ, terrasse...</p>
+          <p className="text-sm text-gray-400">{t("servicesEmpty")}</p>
         </div>
       )}
 
@@ -403,9 +410,9 @@ function ServiceEditor({ value, onChange }: { value: string; onChange: (v: strin
 
           <div className="flex-1 grid grid-cols-2 gap-2">
             <input type="text" value={item.name} onChange={e => update(item.id, { name: e.target.value })}
-              placeholder="Nom (ex: Piscine)" className={`${input} text-sm`} />
+              placeholder={t("serviceName")} className={`${input} text-sm`} />
             <input type="text" value={item.description} onChange={e => update(item.id, { description: e.target.value })}
-              placeholder="Détail (ex: 8h – 22h)" className={`${input} text-sm`} />
+              placeholder={t("serviceDetail")} className={`${input} text-sm`} />
           </div>
 
           <button onClick={() => remove(item.id)} className="p-1 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">
@@ -416,7 +423,7 @@ function ServiceEditor({ value, onChange }: { value: string; onChange: (v: strin
 
       <button onClick={add}
         className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-orange-200 text-orange-500 font-semibold text-sm hover:bg-orange-50 transition-colors">
-        <Plus className="w-4 h-4" /> Ajouter un service
+        <Plus className="w-4 h-4" /> {t("addService")}
       </button>
     </div>
   );
@@ -427,6 +434,7 @@ function ServiceEditor({ value, onChange }: { value: string; onChange: (v: strin
 const input = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder-gray-300";
 
 function UrlField({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
+  const t = useTranslations("editor");
   const isValid = !value || /^https?:\/\/.+\..+/.test(value);
 
   const handleBlur = () => {
@@ -455,11 +463,11 @@ function UrlField({ value, onChange, placeholder }: { value: string; onChange: (
           </div>
         )}
       </div>
-      {!isValid && <p className="text-xs text-red-400">URL invalide — doit commencer par https://</p>}
+      {!isValid && <p className="text-xs text-red-400">{t("invalidUrl")}</p>}
       {value && isValid && (
         <a href={value} target="_blank" rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-xs text-orange-500 hover:text-orange-700">
-          <ExternalLink className="w-3 h-3" /> Vérifier le lien
+          <ExternalLink className="w-3 h-3" /> {t("checkLink")}
         </a>
       )}
     </div>
@@ -481,6 +489,9 @@ function Field({ label, value, onChange, placeholder, type = "text" }: {
 // ── Composant principal ───────────────────────────────────────────────────────
 
 export function EditorForm() {
+  const t = useTranslations("editor");
+  const tMeta = useTranslations("moduleMeta");
+  const tF = useTranslations("moduleFields");
   const { booklet, activeModuleId, updateModule } = useEditorStore();
 
   if (!booklet) return null;
@@ -492,7 +503,7 @@ export function EditorForm() {
       <div className="flex-1 flex items-center justify-center" style={{ backgroundColor: "#ebebeb" }}>
         <div className="text-center">
           <p className="text-4xl mb-3">👈</p>
-          <p className="text-gray-500 text-sm">Sélectionnez un module à gauche</p>
+          <p className="text-gray-500 text-sm">{t("selectModule")}</p>
         </div>
       </div>
     );
@@ -505,8 +516,8 @@ export function EditorForm() {
           <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-3">
             <EyeOff className="w-7 h-7 text-gray-300" />
           </div>
-          <p className="text-gray-500 text-sm font-medium">Module désactivé</p>
-          <p className="text-gray-400 text-xs mt-1">Activez-le dans la liste pour l'éditer</p>
+          <p className="text-gray-500 text-sm font-medium">{t("moduleDisabled")}</p>
+          <p className="text-gray-400 text-xs mt-1">{t("enableHint")}</p>
         </div>
       </div>
     );
@@ -528,17 +539,19 @@ export function EditorForm() {
             {meta.emoji}
           </div>
           <div>
-            <h2 className="font-bold text-gray-900 text-lg">{meta.label}</h2>
-            <p className="text-sm text-gray-400">{meta.description}</p>
+            <h2 className="font-bold text-gray-900 text-lg">{tMeta(`${activeModule.type}.label`)}</h2>
+            <p className="text-sm text-gray-400">{tMeta(`${activeModule.type}.description`)}</p>
           </div>
         </div>
 
         {/* Champs */}
         <div className="space-y-4">
-          {fields.filter(field => !(activeModule.type === "tides" && field.key === "port_name")).map((field) => (
+          {fields.filter(field => !(activeModule.type === "tides" && field.key === "port_name")).map((field) => {
+            const fPlaceholder = field.placeholder ? tF(`${activeModule.type}.${field.key}.placeholder`) : "";
+            return (
             <div key={field.key} className="bg-white rounded-2xl border border-gray-100 p-5 shadow-sm">
-              <label className="block text-sm font-semibold text-gray-700 mb-1">{field.label}</label>
-              {field.hint && <p className="text-xs text-gray-400 mb-3 leading-relaxed">{field.hint}</p>}
+              <label className="block text-sm font-semibold text-gray-700 mb-1">{tF(`${activeModule.type}.${field.key}.label`)}</label>
+              {field.hint && <p className="text-xs text-gray-400 mb-3 leading-relaxed">{tF(`${activeModule.type}.${field.key}.hint`)}</p>}
 
               {/* ── Types spéciaux ── */}
               {field.type === "activities" && (
@@ -568,7 +581,7 @@ export function EditorForm() {
                   }}
                   className={`${input} cursor-pointer`}
                 >
-                  <option value="">— Choisir un port —</option>
+                  <option value="">{t("choosePort")}</option>
                   {PORTS.map(p => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
@@ -581,20 +594,20 @@ export function EditorForm() {
                   onChange={e => set("wifi_security", e.target.value)}
                   className={`${input} cursor-pointer`}
                 >
-                  <option value="WPA">WPA / WPA2 / WPA3 (recommandé)</option>
-                  <option value="WEP">WEP (anciens routeurs)</option>
-                  <option value="">Aucune (réseau ouvert)</option>
+                  <option value="WPA">{t("wifiWpa")}</option>
+                  <option value="WEP">{t("wifiWep")}</option>
+                  <option value="">{t("wifiNone")}</option>
                 </select>
               )}
 
               {field.type === "text" && !(activeModule.type === "tides" && field.key === "port_id") && !(activeModule.type === "accommodation" && field.key === "wifi_security") && (
                 <input type="text" value={get(field.key)} onChange={e => set(field.key, e.target.value)}
-                  placeholder={field.placeholder} className={input} />
+                  placeholder={fPlaceholder} className={input} />
               )}
 
               {field.type === "phone" && (
                 <input type="tel" value={get(field.key)} onChange={e => set(field.key, e.target.value)}
-                  placeholder={field.placeholder} className={input} />
+                  placeholder={fPlaceholder} className={input} />
               )}
 
               {field.type === "photo" && (
@@ -611,7 +624,7 @@ export function EditorForm() {
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-gray-400 truncate">{get(field.key)}</p>
                       <button onClick={() => set(field.key, "")} className="text-xs text-red-400 hover:text-red-600 mt-1 flex items-center gap-1">
-                        <X className="w-3 h-3" /> Supprimer
+                        <X className="w-3 h-3" /> {t("deletePhoto")}
                       </button>
                     </div>
                   )}
@@ -619,17 +632,17 @@ export function EditorForm() {
               )}
 
               {field.type === "url" && (
-                <UrlField value={get(field.key)} onChange={v => set(field.key, v)} placeholder={field.placeholder} />
+                <UrlField value={get(field.key)} onChange={v => set(field.key, v)} placeholder={fPlaceholder} />
               )}
 
               {field.type === "number" && (
                 <input type="number" value={get(field.key)} onChange={e => set(field.key, e.target.value)}
-                  placeholder={field.placeholder} className={`${input} w-32`} />
+                  placeholder={fPlaceholder} className={`${input} w-32`} />
               )}
 
               {field.type === "textarea" && (
                 <textarea value={get(field.key)} onChange={e => set(field.key, e.target.value)}
-                  placeholder={field.placeholder}
+                  placeholder={fPlaceholder}
                   rows={["process", "message", "about", "description", "checkin_process"].some(k => field.key.includes(k)) ? 5 : 3}
                   className={`${input} resize-none leading-relaxed`} />
               )}
@@ -637,7 +650,7 @@ export function EditorForm() {
               {field.type === "places" && (
                 <div className="space-y-2">
                   <textarea value={get(field.key)} onChange={e => set(field.key, e.target.value)}
-                    placeholder={field.placeholder} rows={4}
+                    placeholder={fPlaceholder} rows={4}
                     className={`${input} resize-none font-mono text-xs leading-relaxed`} />
                   {get(field.key) && (
                     <div className="space-y-1.5">
@@ -665,7 +678,8 @@ export function EditorForm() {
                 </div>
               )}
             </div>
-          ))}
+            );
+          })}
         </div>
 
       </div>

@@ -2,9 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { RefreshCw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useEditorStore } from "@/store/editorStore";
 
 export function EditorPreview() {
+  const t = useTranslations("editor");
   const { booklet } = useEditorStore();
   const [key, setKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -51,7 +53,7 @@ export function EditorPreview() {
     return (
       <aside className="w-full lg:w-80 bg-gray-100 border-l border-gray-200 flex flex-col items-center justify-center shrink-0">
         <p className="text-xs text-gray-400 text-center px-6">
-          Définissez un slug dans les réglages pour activer l'aperçu.
+          {t("noSlug")}
         </p>
       </aside>
     );
@@ -64,13 +66,13 @@ export function EditorPreview() {
 
       {/* Header */}
       <div className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shrink-0">
-        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Aperçu</span>
+        <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{t("previewTitle")}</span>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-gray-300 whitespace-nowrap">Pensez à rafraîchir →</span>
+          <span className="text-xs text-gray-300 whitespace-nowrap">{t("refreshHint")}</span>
           <button onClick={() => setKey((k) => k + 1)}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg hover:bg-orange-50 text-gray-400 hover:text-orange-500 transition-colors text-xs font-medium whitespace-nowrap">
             <RefreshCw className="w-3 h-3 shrink-0" />
-            <span>Rafraîchir</span>
+            <span>{t("refresh")}</span>
           </button>
         </div>
       </div>
@@ -103,7 +105,7 @@ export function EditorPreview() {
               src={url}
               className="w-full h-full border-0 bg-white"
               style={{ display: "block" }}
-              title="Aperçu du livret"
+              title={t("previewTitle")}
             />
           </div>
         </div>

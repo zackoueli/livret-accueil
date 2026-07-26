@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import { GripVertical, Eye, EyeOff, Check, X, Loader2, Link, ImagePlus, Trash2, Lock } from "lucide-react";
 import { ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { storage } from "@/lib/firebase";
@@ -31,6 +32,8 @@ import { UpgradeModal } from "@/components/ui/UpgradeModal";
 const TIDES_WEATHER_TYPES: ModuleType[] = ["tides", "weather"];
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
+  const t = useTranslations("editor");
+  const tMeta = useTranslations("moduleMeta");
   const { booklet, activeModuleId, setActiveModule, toggleModule, reorderModules, addModule } = useEditorStore();
   const [tab, setTab] = useState<"modules" | "appearance">("appearance");
   const { isPaid, can } = usePlan();
@@ -69,18 +72,18 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
       <div className="flex border-b border-gray-100 p-2 gap-1">
         <button onClick={() => setTab("appearance")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "appearance" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
-          Apparence
+          {t("appearance")}
         </button>
         <button onClick={() => setTab("modules")}
           className={`flex-1 text-xs font-semibold py-2 rounded-lg transition-colors ${tab === "modules" ? "bg-orange-50 text-orange-600" : "text-gray-400 hover:text-gray-600"}`}>
-          Modules
+          {t("tabModules")}
         </button>
       </div>
 
       {tab === "modules" && (
         <div className="flex-1 overflow-y-auto p-3">
           <p className="text-xs text-gray-400 px-2 mb-3">
-            Glissez pour réordonner · cliquez pour éditer
+            {t("dragHint")}
           </p>
 
           {/* Modules actifs */}
@@ -102,7 +105,7 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
           {OPTIONAL_MODULES.some(t => !existingTypes.has(t)) && (
             <div className="mt-4">
               <div className="flex items-center gap-2 px-2 mb-2">
-                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">À ajouter</p>
+                <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider">{t("toAdd")}</p>
                 {!isPaid && (
                   <span className="flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
                     <Lock className="w-2.5 h-2.5" /> Starter
@@ -116,19 +119,17 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
                 return (
                   <div key={type} className={`flex items-center gap-2 px-3 py-2 rounded-xl mb-1 transition-colors ${unlocked ? "hover:bg-gray-50" : "opacity-60"}`}>
                     <span className="text-base leading-none">{meta.emoji}</span>
-                    <span className="flex-1 text-sm text-gray-500 truncate">{meta.label}</span>
+                    <span className="flex-1 text-sm text-gray-500 truncate">{tMeta(`${type}.label`)}</span>
                     {unlocked ? (
                       <button
                         onClick={() => addModule(type)}
                         className="flex items-center gap-1 text-xs font-bold text-orange-500 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg transition-colors shrink-0">
-                        + Ajouter
+                        {t("add")}
                       </button>
                     ) : (
                       <button
                         onClick={() => {
-                          setUpgradeReason(isTidesWeather
-                            ? "Le module Marée & Météo est réservé aux plans Pro et Agence"
-                            : "Les modules optionnels sont réservés aux plans Starter, Pro et Agence");
+                          setUpgradeReason(isTidesWeather ? t("tidesReason") : t("optionalReason"));
                           setShowUpgrade(true);
                         }}
                         className="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-orange-500 bg-gray-100 hover:bg-orange-50 px-2.5 py-1 rounded-lg transition-colors shrink-0">
@@ -164,6 +165,7 @@ function SortableModuleItem({
   onToggle: () => void;
 }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: module.id });
+  const tMeta = useTranslations("moduleMeta");
   const meta = MODULE_META[module.type];
 
   const style = {
@@ -196,7 +198,7 @@ function SortableModuleItem({
       <span className="text-base leading-none shrink-0">{meta.emoji}</span>
 
       <span className={`flex-1 text-sm font-medium truncate ${isActive ? "text-orange-700" : module.enabled ? "text-gray-700" : "text-gray-400"}`}>
-        {meta.label}
+        {tMeta(`${module.type}.label`)}
       </span>
 
       {/* Toggle visibility — toujours visible */}
@@ -216,6 +218,7 @@ function SortableModuleItem({
 }
 
 function AddressForm({ address, onChange, ibase }: { address: string; onChange: (full: string) => void; ibase: string }) {
+  const t = useTranslations("editor");
   // Parse l'adresse existante en champs séparés (format : "rue, CP ville, pays")
   const parse = (addr: string) => {
     const parts = addr.split(",").map(s => s.trim());
@@ -244,17 +247,17 @@ function AddressForm({ address, onChange, ibase }: { address: string; onChange: 
 
   return (
     <div>
-      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Adresse</label>
+      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("addressTitle")}</label>
       <div className="space-y-2">
-        <input type="text" value={street} placeholder="Rue, numéro" className={ibase}
+        <input type="text" value={street} placeholder={t("street")} className={ibase}
           onChange={e => { setStreet(e.target.value); rebuild(e.target.value, zip, city, country); }} />
         <div className="grid grid-cols-2 gap-2">
-          <input type="text" value={zip} placeholder="Code postal" className={ibase}
+          <input type="text" value={zip} placeholder={t("zip")} className={ibase}
             onChange={e => { setZip(e.target.value); rebuild(street, e.target.value, city, country); }} />
-          <input type="text" value={city} placeholder="Ville" className={ibase}
+          <input type="text" value={city} placeholder={t("city")} className={ibase}
             onChange={e => { setCity(e.target.value); rebuild(street, zip, e.target.value, country); }} />
         </div>
-        <input type="text" value={country} placeholder="Pays" className={ibase}
+        <input type="text" value={country} placeholder={t("country")} className={ibase}
           onChange={e => { setCountry(e.target.value); rebuild(street, zip, city, e.target.value); }} />
         {address && (
           <p className="text-xs text-gray-400 flex items-center gap-1">
@@ -267,6 +270,7 @@ function AddressForm({ address, onChange, ibase }: { address: string; onChange: 
 }
 
 function SidebarAppearance() {
+  const t = useTranslations("editor");
   const { booklet, updateBookletField } = useEditorStore();
   const { can } = usePlan();
   const canCustomSlug = can("custom_slug");
@@ -340,7 +344,7 @@ function SidebarAppearance() {
     <div className="flex-1 overflow-y-auto">
       {/* ── Photo de couverture ── */}
       <div className="p-4 border-b border-gray-100">
-        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Photo de couverture</p>
+        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">{t("coverPhoto")}</p>
 
         {booklet.coverImage ? (
           <div className="relative rounded-2xl overflow-hidden" style={{ aspectRatio: "16/9" }}>
@@ -350,7 +354,7 @@ function SidebarAppearance() {
               <button
                 onClick={() => fileRef.current?.click()}
                 className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/90 text-gray-700 text-xs font-semibold hover:bg-white transition-colors">
-                <ImagePlus className="w-3.5 h-3.5" /> Changer
+                <ImagePlus className="w-3.5 h-3.5" /> {t("change")}
               </button>
               <button
                 onClick={removeCover}
@@ -365,8 +369,8 @@ function SidebarAppearance() {
             disabled={uploading}
             className="w-full flex flex-col items-center justify-center gap-2 py-8 rounded-2xl border-2 border-dashed border-gray-200 text-gray-400 hover:border-orange-300 hover:text-orange-400 hover:bg-orange-50 transition-all disabled:opacity-50">
             {uploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <ImagePlus className="w-6 h-6" />}
-            <span className="text-sm font-medium">{uploading ? "Envoi en cours..." : "Ajouter une photo"}</span>
-            <span className="text-xs text-gray-300">JPG, PNG, WebP · max 5MB</span>
+            <span className="text-sm font-medium">{uploading ? t("uploading") : t("addPhoto")}</span>
+            <span className="text-xs text-gray-300">{t("photoFormats")}</span>
           </button>
         )}
 
@@ -382,9 +386,9 @@ function SidebarAppearance() {
       <div className="p-4 space-y-4">
         {/* Nom */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Nom du logement</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("propertyName")}</label>
           <input type="text" value={booklet.propertyName} onChange={(e) => updateBookletField("propertyName", e.target.value)}
-            placeholder="Villa Les Pins" className={ibase} />
+            placeholder={t("propertyPlaceholder")} className={ibase} />
         </div>
 
         {/* Adresse structurée */}
@@ -396,14 +400,14 @@ function SidebarAppearance() {
 
         {/* Description */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Description courte</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("shortDesc")}</label>
           <textarea value={booklet.description || ""} onChange={(e) => updateBookletField("description", e.target.value)}
-            rows={2} placeholder="Magnifique villa provençale avec piscine..." className={`${ibase} resize-none`} />
+            rows={2} placeholder={t("descPlaceholder")} className={`${ibase} resize-none`} />
         </div>
 
         {/* Couleur */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Couleur principale</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("mainColor")}</label>
           <div className="grid grid-cols-4 gap-2">
             {COLORS.map((c) => (
               <button key={c.hex} onClick={() => updateBookletField("accentColor", c.hex)}
@@ -423,27 +427,27 @@ function SidebarAppearance() {
             <input type="color" value={booklet.accentColor || "#007AFF"}
               onChange={(e) => updateBookletField("accentColor", e.target.value)}
               className="w-8 h-8 rounded-lg border border-gray-200 cursor-pointer p-0.5" />
-            <span className="text-xs text-gray-400">Couleur personnalisée</span>
+            <span className="text-xs text-gray-400">{t("customColor")}</span>
             <span className="text-xs font-mono text-gray-500 ml-auto">{booklet.accentColor}</span>
           </div>
         </div>
 
         {/* Template */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Design du livret</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("design")}</label>
           <div className="grid grid-cols-3 gap-2">
             {[
-              { id: "simple", label: "Scroll", desc: "Vue défilante classique", emoji: "📜" },
-              { id: "grid",   label: "Grille", desc: "App mobile avec drawers", emoji: "📱" },
-              { id: "pastel", label: "Pastel", desc: "Cartes douces et colorées", emoji: "🌸" },
-            ].map((t) => {
-              const isActive = (booklet.templateId ?? "simple") === t.id;
+              { id: "simple", label: t("designScroll"), desc: t("designScrollDesc"), emoji: "📜" },
+              { id: "grid",   label: t("designGrid"),   desc: t("designGridDesc"),   emoji: "📱" },
+              { id: "pastel", label: t("designPastel"), desc: t("designPastelDesc"), emoji: "🌸" },
+            ].map((d) => {
+              const isActive = (booklet.templateId ?? "simple") === d.id;
               return (
-                <button key={t.id} onClick={() => updateBookletField("templateId", t.id)}
+                <button key={d.id} onClick={() => updateBookletField("templateId", d.id)}
                   className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all text-center ${isActive ? "border-orange-400 bg-orange-50" : "border-gray-200 hover:border-gray-300"}`}>
-                  <span className="text-2xl">{t.emoji}</span>
-                  <span className={`text-xs font-bold ${isActive ? "text-orange-500" : "text-gray-600"}`}>{t.label}</span>
-                  <span className="text-[10px] text-gray-400 leading-tight">{t.desc}</span>
+                  <span className="text-2xl">{d.emoji}</span>
+                  <span className={`text-xs font-bold ${isActive ? "text-orange-500" : "text-gray-600"}`}>{d.label}</span>
+                  <span className="text-[10px] text-gray-400 leading-tight">{d.desc}</span>
                 </button>
               );
             })}
@@ -452,7 +456,7 @@ function SidebarAppearance() {
 
         {/* URL */}
         <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">URL du livret</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("url")}</label>
           <div className="relative">
             <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-300" />
             <input type="text" value={slugInput}
@@ -474,15 +478,15 @@ function SidebarAppearance() {
             </div>
           </div>
           <p className={`text-xs mt-1.5 ${slugStatus === "available" ? "text-green-500" : slugStatus === "taken" || slugStatus === "too_short" ? "text-red-400" : "text-gray-400"}`}>
-            {!canCustomSlug ? "Slug personnalisé réservé aux plans Starter, Pro et Agence" :
-              slugStatus === "available" ? "URL disponible ✓" : slugStatus === "taken" ? "URL déjà utilisée" : slugStatus === "too_short" ? "Minimum 3 caractères" : bookletUrl(slugInput || booklet.slug)}
+            {!canCustomSlug ? t("slugLocked") :
+              slugStatus === "available" ? t("slugAvailable") : slugStatus === "taken" ? t("slugTaken") : slugStatus === "too_short" ? t("slugTooShort") : bookletUrl(slugInput || booklet.slug)}
           </p>
         </div>
       </div>
 
       {showSlugUpgrade && (
         <UpgradeModal
-          reason="Le slug personnalisé est réservé aux plans Starter, Pro et Agence"
+          reason={t("slugReason")}
           onClose={() => setShowSlugUpgrade(false)}
         />
       )}
