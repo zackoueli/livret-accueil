@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Suspense } from "react";
 import {
   Plus, BookOpen, Eye, Pencil, Trash2, Share2, Lock,
@@ -21,58 +21,37 @@ import { CreateBookletModal } from "./CreateBookletModal";
 import { AnalyticsModal } from "./AnalyticsModal";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { ReferralSourceModal } from "./ReferralSourceModal";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { usePlan } from "@/hooks/usePlan";
 
-const SERVICES = [
-  {
-    icon: Monitor,
-    color: "text-blue-500",
-    bg: "bg-blue-50",
-    title: "Site web professionnel",
-    desc: "On crée votre vitrine en ligne, pensée pour convertir les visiteurs en réservations.",
-  },
-  {
-    icon: Smartphone,
-    color: "text-purple-500",
-    bg: "bg-purple-50",
-    title: "Application mobile",
-    desc: "On développe une app à votre image pour vos voyageurs, iOS & Android.",
-  },
-  {
-    icon: Search,
-    color: "text-green-500",
-    bg: "bg-green-50",
-    title: "Référencement Airbnb",
-    desc: "On optimise vos annonces pour apparaître en tête des résultats de recherche.",
-  },
-  {
-    icon: Star,
-    color: "text-orange-500",
-    bg: "bg-orange-50",
-    title: "Avis & e-réputation",
-    desc: "On met en place une stratégie pour booster vos avis et fidéliser vos voyageurs.",
-  },
-];
-
 function PromoSidebar() {
+  const t = useTranslations("dashboard");
+
+  const services = [
+    { icon: Monitor, color: "text-blue-500", bg: "bg-blue-50", title: t("promoS1Title"), desc: t("promoS1Desc") },
+    { icon: Smartphone, color: "text-purple-500", bg: "bg-purple-50", title: t("promoS2Title"), desc: t("promoS2Desc") },
+    { icon: Search, color: "text-green-500", bg: "bg-green-50", title: t("promoS3Title"), desc: t("promoS3Desc") },
+    { icon: Star, color: "text-orange-500", bg: "bg-orange-50", title: t("promoS4Title"), desc: t("promoS4Desc") },
+  ];
+
   return (
     <>
       {/* Card principale */}
       <div className="rounded-2xl overflow-hidden border border-gray-200 bg-white shadow-sm">
         {/* Header sobre */}
         <div className="px-5 py-4 border-b border-gray-100">
-          <p className="text-xs font-semibold text-orange-500 uppercase tracking-wider mb-1">Bunkly — Au-delà du livret</p>
+          <p className="text-xs font-semibold text-orange-500 uppercase tracking-wider mb-1">{t("promoKicker")}</p>
           <h3 className="text-sm font-bold text-gray-900 leading-snug">
-            On s'occupe aussi de votre visibilité en ligne
+            {t("promoTitle")}
           </h3>
           <p className="text-xs text-gray-400 mt-1 leading-relaxed">
-            En plus des livrets, notre équipe vous accompagne pour développer votre location courte durée.
+            {t("promoDesc")}
           </p>
         </div>
 
         {/* Services list */}
         <div className="divide-y divide-gray-50">
-          {SERVICES.map(({ icon: Icon, color, bg, title, desc }) => (
+          {services.map(({ icon: Icon, color, bg, title, desc }) => (
             <div key={title} className="flex gap-3 px-4 py-3 hover:bg-gray-50 transition-colors cursor-default">
               <div className={`w-7 h-7 rounded-lg ${bg} flex items-center justify-center shrink-0 mt-0.5`}>
                 <Icon className={`w-3.5 h-3.5 ${color}`} />
@@ -90,10 +69,10 @@ function PromoSidebar() {
           <a
             href="mailto:hello@bunkly.co?subject=Demande de service"
             className="flex items-center justify-center gap-2 w-full bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold py-2.5 rounded-xl transition-colors">
-            Nous contacter
+            {t("promoContact")}
             <ArrowRight className="w-3 h-3" />
           </a>
-          <p className="text-center text-xs text-gray-400 mt-2">hello@bunkly.co · Devis gratuit</p>
+          <p className="text-center text-xs text-gray-400 mt-2">{t("promoContactSub")}</p>
 
           {/* Réseaux sociaux */}
           <div className="flex items-center justify-center gap-3 mt-3 pt-3 border-t border-gray-100">
@@ -110,7 +89,7 @@ function PromoSidebar() {
               </svg>
             </a>
             <a href="https://www.youtube.com/@Bunkly_co" target="_blank" rel="noopener noreferrer"
-              className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-red-50 flex items-center justify-center transition-colors" title="YouTube — Tutoriels">
+              className="w-7 h-7 rounded-lg bg-gray-100 hover:bg-red-50 flex items-center justify-center transition-colors" title={t("youtubeTitle")}>
               <svg className="w-3.5 h-3.5 text-gray-500 hover:text-red-500" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
               </svg>
@@ -126,6 +105,7 @@ function PromoSidebar() {
 function DashboardPageInner() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("dashboard");
   const searchParams = useSearchParams();
   const { user, profile, loading } = useAuthStore();
   const [booklets, setBooklets] = useState<Booklet[]>([]);
@@ -176,10 +156,10 @@ function DashboardPageInner() {
   useEffect(() => {
     const checkout = searchParams.get("checkout");
     if (checkout === "success") {
-      toast.success("Abonnement activé ! Bienvenue dans le plan Actif 🎉");
+      toast.success(t("checkoutSuccess"));
       router.replace(`/${locale}/dashboard`);
     } else if (checkout === "cancel") {
-      toast("Paiement annulé.", { icon: "ℹ️" });
+      toast(t("checkoutCancel"), { icon: "ℹ️" });
       router.replace(`/${locale}/dashboard`);
     }
   }, [searchParams, locale, router]);
@@ -191,32 +171,32 @@ function DashboardPageInner() {
       const id = await createBooklet(user.uid, title, contentTemplateId, layoutId, plan);
       router.push(`/${locale}/editor/${id}`);
     } catch {
-      toast.error("Erreur lors de la création");
+      toast.error(t("createError"));
       setCreating(false);
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer ce livret ?")) return;
+    if (!confirm(t("deleteConfirm"))) return;
     await deleteBooklet(id);
     setBooklets((prev) => prev.filter((b) => b.id !== id));
-    toast.success("Livret supprimé");
+    toast.success(t("deleted"));
   };
 
   const handleDuplicate = async (booklet: Booklet) => {
     if (duplicatingRef.current) return;
     duplicatingRef.current = true;
     try {
-      const title = prompt("Nom du nouveau livret :", `${booklet.title} (copie)`);
+      const title = prompt(t("duplicatePrompt"), `${booklet.title} ${t("copySuffix")}`);
       if (!title) return;
       setDuplicatingId(booklet.id);
       const newId = await duplicateBooklet(booklet, title);
       const updated = await getUserBooklets(user!.uid);
       setBooklets(updated);
-      toast.success("Livret dupliqué !");
+      toast.success(t("duplicated"));
       router.push(`/${locale}/editor/${newId}`);
     } catch {
-      toast.error("Erreur lors de la duplication");
+      toast.error(t("duplicateError"));
     } finally {
       setDuplicatingId(null);
       duplicatingRef.current = false;
@@ -228,29 +208,29 @@ function DashboardPageInner() {
     const folder = await createFolder(user.uid, name, color);
     setFolders(prev => [...prev, folder]);
     setActiveFolder(folder.id);
-    toast.success(`Dossier "${name}" créé`);
+    toast.success(t("folderCreated", { name }));
   };
 
   const handleUpdateFolder = async (folder: FolderType, name: string, color: string) => {
     await updateFolder(folder.id, { name, color });
     setFolders(prev => prev.map(f => f.id === folder.id ? { ...f, name, color } : f));
-    toast.success("Dossier mis à jour");
+    toast.success(t("folderUpdated"));
   };
 
   const handleDeleteFolder = async (folder: FolderType) => {
-    if (!confirm(`Supprimer le dossier "${folder.name}" ? Les livrets ne seront pas supprimés.`)) return;
+    if (!confirm(t("folderDeleteConfirm", { name: folder.name }))) return;
     await deleteFolder(folder.id);
     setFolders(prev => prev.filter(f => f.id !== folder.id));
     setBooklets(prev => prev.map(b => b.folderId === folder.id ? { ...b, folderId: undefined } : b));
     if (activeFolder === folder.id) setActiveFolder(null);
-    toast.success("Dossier supprimé");
+    toast.success(t("folderDeleted"));
   };
 
   const handleMoveToFolder = async (booklet: Booklet, folderId: string | null) => {
     await moveBookletToFolder(booklet.id, folderId);
     setBooklets(prev => prev.map(b => b.id === booklet.id ? { ...b, folderId: folderId ?? undefined } : b));
     const folderName = folderId ? folders.find(f => f.id === folderId)?.name : null;
-    toast.success(folderName ? `Déplacé dans "${folderName}"` : "Retiré du dossier");
+    toast.success(folderName ? t("movedTo", { name: folderName }) : t("removedFromFolder"));
   };
 
   const handleSignOut = async () => {
@@ -277,7 +257,7 @@ function DashboardPageInner() {
                 onClick={() => router.push(`/${locale}/dashboard/settings`)}
                 className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors border border-orange-100">
                 <Crown className="w-3.5 h-3.5" />
-                Passer au plan supérieur
+                {t("upgradeHeaderCta")}
               </button>
             )}
 
@@ -296,17 +276,19 @@ function DashboardPageInner() {
             <button
               onClick={() => router.push(`/${locale}/dashboard/affiliation`)}
               className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors border border-green-100"
-              title="Programme d'affiliation">
+              title={t("affiliationTitle")}>
               <Gift className="w-3.5 h-3.5" />
-              Affiliation
+              {t("affiliation")}
             </button>
+
+            <LanguageSwitcher variant="light" />
 
             <a
               href="https://www.youtube.com/@Bunkly_co"
               target="_blank"
               rel="noopener noreferrer"
               className="p-2.5 rounded-xl hover:bg-red-50 transition-colors text-gray-400 hover:text-red-500"
-              title="Tutoriels YouTube">
+              title={t("youtubeTitle")}>
               <HelpCircle className="w-4 h-4" />
             </a>
             <button onClick={handleSignOut}
@@ -327,13 +309,13 @@ function DashboardPageInner() {
                 <Clock className="w-4 h-4 text-amber-600" />
               </div>
               <div>
-                <p className="font-semibold text-amber-900 text-sm">Votre abonnement expire dans {daysUntilExpiry} jour{daysUntilExpiry! > 1 ? "s" : ""}</p>
-                <p className="text-xs text-amber-700 mt-0.5">Renouvelez maintenant pour ne pas interrompre l'accès à vos livrets.</p>
+                <p className="font-semibold text-amber-900 text-sm">{t("expiringSoon", { days: daysUntilExpiry! })}</p>
+                <p className="text-xs text-amber-700 mt-0.5">{t("expiringSoonDesc")}</p>
               </div>
             </div>
             <button onClick={() => router.push(`/${locale}/dashboard/settings`)}
               className="shrink-0 bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
-              Renouveler
+              {t("renew")}
             </button>
           </div>
         )}
@@ -346,13 +328,13 @@ function DashboardPageInner() {
                 <Lock className="w-4 h-4 text-red-500" />
               </div>
               <div>
-                <p className="font-semibold text-red-900 text-sm">Votre abonnement a expiré</p>
-                <p className="text-xs text-red-700 mt-0.5">Vos livrets sont en pause. Réactivez votre abonnement pour les remettre en ligne — vos données sont intactes.</p>
+                <p className="font-semibold text-red-900 text-sm">{t("expired")}</p>
+                <p className="text-xs text-red-700 mt-0.5">{t("expiredDesc")}</p>
               </div>
             </div>
             <button onClick={() => setShowUpgrade(true)}
               className="shrink-0 bg-red-500 hover:bg-red-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
-              Réactiver
+              {t("reactivate")}
             </button>
           </div>
         )}
@@ -360,19 +342,19 @@ function DashboardPageInner() {
         {/* Page title */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Mes livrets</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
             {isFree && (
               <p className="text-sm text-gray-400 mt-0.5 flex items-center gap-1.5">
                 <Lock className="w-3.5 h-3.5" />
-                {booklets.length}/3 livrets utilisés · Plan gratuit
+                {t("freeUsage", { count: booklets.length })}
               </p>
             )}
           </div>
           <button
-            onClick={() => canCreate ? setShowNewModal(true) : requirePlan(`Limite de ${bookletLimit} livret${bookletLimit > 1 ? "s" : ""} atteinte`)}
+            onClick={() => canCreate ? setShowNewModal(true) : requirePlan(t("limitReached", { limit: bookletLimit }))}
             className="flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-5 py-3 rounded-2xl transition-colors shadow-sm shadow-orange-200">
             <Plus className="w-4 h-4" />
-            Nouveau livret
+            {t("newBooklet")}
           </button>
         </div>
 
@@ -385,7 +367,7 @@ function DashboardPageInner() {
                 ? "bg-gray-900 text-white"
                 : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
             }`}>
-            Tous les livrets
+            {t("allBooklets")}
             <span className={`text-xs px-1.5 py-0.5 rounded-full ${activeFolder === null ? "bg-white/20 text-white" : "bg-gray-100 text-gray-500"}`}>
               {booklets.length}
             </span>
@@ -419,10 +401,10 @@ function DashboardPageInner() {
           })}
 
           <button
-            onClick={() => can("folders") ? (setEditingFolder(null), setShowFolderModal(true)) : requirePlan("Les dossiers sont réservés au plan Pro")}
+            onClick={() => can("folders") ? (setEditingFolder(null), setShowFolderModal(true)) : requirePlan(t("foldersPro"))}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-400 hover:text-gray-600 hover:bg-white border border-dashed border-gray-200 hover:border-gray-300 transition-colors shrink-0">
             <FolderPlus className="w-3.5 h-3.5" />
-            Nouveau dossier
+            {t("newFolder")}
             {!can("folders") && <Lock className="w-3 h-3 text-gray-300" />}
           </button>
         </div>
@@ -445,14 +427,14 @@ function DashboardPageInner() {
                     <Crown className="w-5 h-5 text-orange-500" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-800 text-sm">Débloquez toutes les fonctionnalités</p>
-                    <p className="text-xs text-gray-500 mt-0.5">Dossiers, tous les templates, modules optionnels… à partir de 9€/mois.</p>
+                    <p className="font-semibold text-gray-800 text-sm">{t("unlockTitle")}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{t("unlockDesc")}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowUpgrade(true)}
                   className="shrink-0 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-colors">
-                  Voir les plans
+                  {t("seePlans")}
                 </button>
               </div>
             )}
@@ -481,13 +463,13 @@ function DashboardPageInner() {
                       onEdit={() => router.push(`/${locale}/editor/${booklet.id}`)}
                       onPreview={() => {
                         if (!booklet.isPublished) {
-                          toast("Publiez ce livret pour le voir en ligne.", { icon: "🔒" });
+                          toast(t("publishFirst"), { icon: "🔒" });
                           return;
                         }
                         window.open(bookletUrl(booklet.slug), "_blank");
                       }}
                       onShare={() => setShareBooklet(booklet)}
-                      onAnalytics={() => can("analytics") ? setAnalyticsBooklet(booklet) : requirePlan("Les analytics sont réservés aux plans Pro et Agency")}
+                      onAnalytics={() => can("analytics") ? setAnalyticsBooklet(booklet) : requirePlan(t("analyticsPro"))}
                       onDuplicate={() => handleDuplicate(booklet)}
                       onDelete={() => handleDelete(booklet.id)}
                       onMoveToFolder={(folderId) => handleMoveToFolder(booklet, folderId)}
@@ -504,9 +486,9 @@ function DashboardPageInner() {
                       </div>
                       <div className="text-center">
                         <p className="text-sm font-semibold text-gray-600 group-hover:text-orange-500 transition-colors">
-                          Nouveau livret
+                          {t("newBooklet")}
                         </p>
-                        <p className="text-xs text-gray-400 mt-0.5">Créer un livret d'accueil</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{t("newBookletSub")}</p>
                       </div>
                     </button>
                   )}
@@ -517,8 +499,8 @@ function DashboardPageInner() {
                         <span className="text-2xl">✨</span>
                       </div>
                       <div className="text-center">
-                        <p className="text-sm font-semibold text-gray-500">Nouveau template</p>
-                        <p className="text-xs text-gray-400 mt-0.5">Arrive bientôt</p>
+                        <p className="text-sm font-semibold text-gray-500">{t("templateSoon")}</p>
+                        <p className="text-xs text-gray-400 mt-0.5">{t("comingSoon")}</p>
                       </div>
                     </div>
                   )}
@@ -528,8 +510,8 @@ function DashboardPageInner() {
                       <div className="w-14 h-14 rounded-2xl bg-gray-100 flex items-center justify-center mx-auto mb-4">
                         <FolderOpen className="w-7 h-7 text-gray-400" />
                       </div>
-                      <p className="text-sm font-semibold text-gray-500 mb-1">Ce dossier est vide</p>
-                      <p className="text-xs text-gray-400">Déplacez des livrets ici depuis le menu ···</p>
+                      <p className="text-sm font-semibold text-gray-500 mb-1">{t("emptyFolderTitle")}</p>
+                      <p className="text-xs text-gray-400">{t("emptyFolderDesc")}</p>
                     </div>
                   )}
                 </div>
@@ -591,19 +573,20 @@ export function DashboardPage() {
 }
 
 function EmptyState({ onCreate }: { onCreate: () => void }) {
+  const t = useTranslations("dashboard");
   return (
     <div className="text-center py-24">
       <div className="w-20 h-20 rounded-3xl bg-orange-50 border-2 border-orange-100 flex items-center justify-center mx-auto mb-6">
         <BookOpen className="w-9 h-9 text-orange-400" />
       </div>
-      <h3 className="text-xl font-bold text-gray-900 mb-2">Créez votre premier livret</h3>
+      <h3 className="text-xl font-bold text-gray-900 mb-2">{t("emptyTitle")}</h3>
       <p className="text-gray-400 text-sm max-w-sm mx-auto mb-8">
-        Offrez une expérience inoubliable à vos voyageurs avec un livret d'accueil digital personnalisé.
+        {t("emptyDesc")}
       </p>
       <button onClick={onCreate}
         className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-semibold text-sm px-6 py-3.5 rounded-2xl transition-colors shadow-sm shadow-orange-200">
         <Plus className="w-4 h-4" />
-        Créer mon premier livret
+        {t("emptyCta")}
       </button>
     </div>
   );
@@ -621,6 +604,8 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
   onDelete: () => void;
   onMoveToFolder: (folderId: string | null) => void;
 }) {
+  const t = useTranslations("dashboard");
+  const locale = useLocale();
   const [menuOpen, setMenuOpen] = useState(false);
   const [menuPos, setMenuPos] = useState({ top: 0, right: 0 });
   const [showMoveMenu, setShowMoveMenu] = useState(false);
@@ -664,7 +649,7 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
                 ? "bg-green-500/80 text-white"
                 : "bg-black/40 text-white/80"
           }`}>
-            {isFree ? <><Lock className="w-2.5 h-2.5" />Brouillon</> : booklet.isPublished ? "● Publié" : "Brouillon"}
+            {isFree ? <><Lock className="w-2.5 h-2.5" />{t("draft")}</> : booklet.isPublished ? t("published") : t("draft")}
           </span>
         </div>
 
@@ -686,15 +671,15 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
               style={{ top: menuPos.top, right: menuPos.right }}>
               <button onClick={() => { onPreview(); setMenuOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                <Eye className="w-4 h-4 text-gray-400" /> Aperçu
+                <Eye className="w-4 h-4 text-gray-400" /> {t("preview")}
               </button>
               <button onClick={() => { onAnalytics(); setMenuOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                <BarChart2 className="w-4 h-4 text-gray-400" /> Analytics
+                <BarChart2 className="w-4 h-4 text-gray-400" /> {t("analytics")}
               </button>
               <button onClick={() => { onDuplicate(); setMenuOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                <Copy className="w-4 h-4 text-gray-400" /> Dupliquer
+                <Copy className="w-4 h-4 text-gray-400" /> {t("duplicate")}
               </button>
 
               {/* Déplacer vers dossier */}
@@ -702,7 +687,7 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
               <button
                 onClick={() => setShowMoveMenu(v => !v)}
                 className="w-full flex items-center justify-between gap-2.5 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors">
-                <span className="flex items-center gap-2.5"><Folder className="w-4 h-4 text-gray-400" /> Déplacer vers</span>
+                <span className="flex items-center gap-2.5"><Folder className="w-4 h-4 text-gray-400" /> {t("moveTo")}</span>
                 <ChevronRight className={`w-3.5 h-3.5 text-gray-400 transition-transform ${showMoveMenu ? "rotate-90" : ""}`} />
               </button>
               {showMoveMenu && (
@@ -711,7 +696,7 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
                     <button
                       onClick={() => { onMoveToFolder(null); setMenuOpen(false); setShowMoveMenu(false); }}
                       className="w-full flex items-center gap-2.5 px-5 py-2 text-sm text-gray-500 hover:bg-gray-100 transition-colors">
-                      <X className="w-3.5 h-3.5 text-gray-400" /> Retirer du dossier
+                      <X className="w-3.5 h-3.5 text-gray-400" /> {t("removeFromFolderAction")}
                     </button>
                   )}
                   {folders.map(f => (
@@ -726,7 +711,7 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
                     </button>
                   ))}
                   {folders.length === 0 && (
-                    <p className="px-5 py-2 text-xs text-gray-400 italic">Aucun dossier créé</p>
+                    <p className="px-5 py-2 text-xs text-gray-400 italic">{t("noFolders")}</p>
                   )}
                 </div>
               )}
@@ -734,7 +719,7 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
               <div className="my-1 border-t border-gray-100" />
               <button onClick={() => { onDelete(); setMenuOpen(false); }}
                 className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors">
-                <Trash2 className="w-4 h-4" /> Supprimer
+                <Trash2 className="w-4 h-4" /> {t("delete")}
               </button>
             </div>
           </>
@@ -755,16 +740,16 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
         <div className="flex items-center gap-3 text-xs text-gray-400 mb-3.5">
           <span className="flex items-center gap-1">
             <Clock className="w-3 h-3" />
-            {new Date(booklet.updatedAt).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+            {new Date(booklet.updatedAt).toLocaleDateString(locale, { day: "numeric", month: "short" })}
           </span>
           <span className="flex items-center gap-1">
             <Globe className="w-3 h-3" />
-            {booklet.modules.filter((m) => m.enabled).length} modules
+            {t("modulesCount", { count: booklet.modules.filter((m) => m.enabled).length })}
           </span>
           {booklet.viewCount !== undefined && booklet.viewCount > 0 && (
             <span className="flex items-center gap-1">
               <BarChart2 className="w-3 h-3" />
-              {booklet.viewCount} vue{booklet.viewCount > 1 ? "s" : ""}
+              {t("viewsCount", { count: booklet.viewCount })}
             </span>
           )}
         </div>
@@ -774,12 +759,12 @@ function BookletCard({ booklet, folders, isFree, onEdit, onPreview, onShare, onA
           <button onClick={onEdit}
             className="flex-1 flex items-center justify-center gap-1.5 text-xs font-semibold py-2.5 rounded-xl transition-colors text-white"
             style={{ background: accent }}>
-            <Pencil className="w-3.5 h-3.5" /> Modifier
+            <Pencil className="w-3.5 h-3.5" /> {t("edit")}
           </button>
           {!isFree && booklet.isPublished && (
             <button onClick={onShare}
               className="flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold transition-colors">
-              <Share2 className="w-3.5 h-3.5" /> Partager
+              <Share2 className="w-3.5 h-3.5" /> {t("share")}
             </button>
           )}
         </div>
@@ -802,6 +787,7 @@ function FolderModal({ folder, onClose, onCreate, onUpdate, onDelete }: {
   onUpdate: (name: string, color: string) => Promise<void>;
   onDelete: () => void;
 }) {
+  const t = useTranslations("dashboard");
   const [name, setName] = useState(folder?.name ?? "");
   const [color, setColor] = useState(folder?.color ?? FOLDER_COLORS[0]);
   const [saving, setSaving] = useState(false);
@@ -825,7 +811,7 @@ function FolderModal({ folder, onClose, onCreate, onUpdate, onDelete }: {
       <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
         <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-gray-900">
-            {isEdit ? "Modifier le dossier" : "Nouveau dossier"}
+            {isEdit ? t("folderModalEdit") : t("folderModalNew")}
           </h2>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400">
             <X className="w-4 h-4" />
@@ -838,22 +824,22 @@ function FolderModal({ folder, onClose, onCreate, onUpdate, onDelete }: {
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: color }}>
               <Folder className="w-5 h-5 text-white" />
             </div>
-            <span className="font-semibold text-gray-800 text-sm">{name || "Nom du dossier"}</span>
+            <span className="font-semibold text-gray-800 text-sm">{name || t("folderNamePreview")}</span>
           </div>
 
           {/* Nom */}
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Nom</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">{t("folderNameLabel")}</label>
           <input
             autoFocus
             value={name}
             onChange={e => setName(e.target.value)}
-            placeholder="Ex: Paris, Appartements, Été 2025…"
+            placeholder={t("folderNamePlaceholder")}
             className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:border-transparent mb-4"
             style={{ focusRingColor: color } as React.CSSProperties}
           />
 
           {/* Couleur */}
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Couleur</label>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">{t("folderColorLabel")}</label>
           <div className="flex flex-wrap gap-2 mb-6">
             {FOLDER_COLORS.map(c => (
               <button key={c} type="button" onClick={() => setColor(c)}
@@ -868,13 +854,13 @@ function FolderModal({ folder, onClose, onCreate, onUpdate, onDelete }: {
             {isEdit && (
               <button type="button" onClick={() => { onDelete(); onClose(); }}
                 className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-colors border border-red-100">
-                <Trash2 className="w-3.5 h-3.5" /> Supprimer
+                <Trash2 className="w-3.5 h-3.5" /> {t("delete")}
               </button>
             )}
             <button type="submit" disabled={!name.trim() || saving}
               className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-40"
               style={{ background: color }}>
-              {saving ? "..." : isEdit ? "Enregistrer" : "Créer le dossier"}
+              {saving ? "..." : isEdit ? t("folderSave") : t("folderCreate")}
             </button>
           </div>
         </form>
