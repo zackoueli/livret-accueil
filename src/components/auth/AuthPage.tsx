@@ -59,28 +59,28 @@ export function AuthPage() {
       // La redirection se fait via useEffect ci-dessus
     } catch (err: any) {
       const code = err?.code ?? "";
-      const messages: Record<string, string> = {
-        "auth/invalid-credential": "Email ou mot de passe incorrect.",
-        "auth/user-not-found": "Aucun compte trouvé avec cet email.",
-        "auth/wrong-password": "Mot de passe incorrect.",
-        "auth/email-already-in-use": "Un compte existe déjà avec cet email.",
-        "auth/weak-password": "Le mot de passe doit contenir au moins 6 caractères.",
-        "auth/invalid-email": "Adresse email invalide.",
-        "auth/too-many-requests": "Trop de tentatives. Réessayez dans quelques minutes.",
-        "auth/network-request-failed": "Erreur réseau. Vérifiez votre connexion.",
+      const errorKeys: Record<string, string> = {
+        "auth/invalid-credential": "invalidCredential",
+        "auth/user-not-found": "userNotFound",
+        "auth/wrong-password": "wrongPassword",
+        "auth/email-already-in-use": "emailInUse",
+        "auth/weak-password": "weakPassword",
+        "auth/invalid-email": "invalidEmail",
+        "auth/too-many-requests": "tooManyRequests",
+        "auth/network-request-failed": "network",
       };
-      toast.error(messages[code] ?? "Une erreur est survenue. Réessayez.");
+      toast.error(t(`errors.${errorKeys[code] ?? "generic"}`));
       setLoading(false);
     }
   };
 
   const handleResetPassword = async () => {
-    if (!form.email) return toast.error("Entrez votre email d'abord");
+    if (!form.email) return toast.error(t("resetEmailFirst"));
     setLoading(true);
     try {
       await resetPassword(form.email);
       setResetSent(true);
-      toast.success("Email de réinitialisation envoyé !");
+      toast.success(t("resetEmailSent"));
     } catch (err: any) {
       toast.error(err.message);
     } finally {
@@ -120,19 +120,19 @@ export function AuthPage() {
         {/* Pitch central */}
         <div className="relative">
           <p className="text-orange-400 text-xs font-bold uppercase tracking-widest mb-4">
-            Livrets d'accueil digitaux
+            {t("badge")}
           </p>
           <h2 className="text-4xl font-black text-white leading-tight mb-6">
-            L'accueil parfait<br />pour vos voyageurs
+            {t("pitchTitle")}
           </h2>
           <p className="text-white/60 text-base leading-relaxed mb-8 max-w-sm">
-            Créez un livret moderne en 5 minutes. QR code, multilingue, mis à jour en temps réel.
+            {t("pitchSubtitle")}
           </p>
           <ul className="space-y-3">
             {[
-              "WiFi, check-in, règlement, activités...",
-              "Traduit automatiquement en 5 langues",
-              "Partagé via QR code ou lien direct",
+              t("pitchItem1"),
+              t("pitchItem2"),
+              t("pitchItem3"),
             ].map((item) => (
               <li key={item} className="flex items-center gap-3 text-white/70 text-sm">
                 <div className="w-5 h-5 rounded-full bg-orange-500/30 border border-orange-500/50 flex items-center justify-center shrink-0">
@@ -147,7 +147,7 @@ export function AuthPage() {
         {/* Témoignage */}
         <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5">
           <p className="text-white/80 text-sm leading-relaxed italic mb-3">
-            "Mes voyageurs adorent ! Fini le PDF que personne ne lisait."
+            {t("testimonialText")}
           </p>
           <div className="flex items-center gap-2.5">
             <img
@@ -156,8 +156,8 @@ export function AuthPage() {
               className="w-8 h-8 rounded-full object-cover"
             />
             <div>
-              <p className="text-white text-xs font-semibold">Sophie M.</p>
-              <p className="text-white/40 text-xs">Hôte Airbnb · Paris</p>
+              <p className="text-white text-xs font-semibold">{t("testimonialName")}</p>
+              <p className="text-white/40 text-xs">{t("testimonialRole")}</p>
             </div>
           </div>
         </div>
@@ -188,12 +188,10 @@ export function AuthPage() {
             {/* Header */}
             <div className="mb-7">
               <h1 className="text-2xl font-black text-gray-900 lg:text-gray-900 max-lg:text-white">
-                {mode === "register" ? "Créer mon compte" : "Bon retour !"}
+                {mode === "register" ? t("registerTitle") : t("loginTitle")}
               </h1>
               <p className="text-sm text-gray-400 max-lg:text-white/60 mt-1">
-                {mode === "register"
-                  ? "Gratuit · Sans carte bancaire"
-                  : "Connectez-vous à votre espace hôte"}
+                {mode === "register" ? t("registerSubtitle") : t("loginSubtitle")}
               </p>
             </div>
 
@@ -202,12 +200,12 @@ export function AuthPage() {
               <button
                 onClick={() => setMode("register")}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${mode === "register" ? "bg-white shadow-sm text-gray-900" : "text-gray-400 hover:text-gray-600"}`}>
-                Inscription
+                {t("tabRegister")}
               </button>
               <button
                 onClick={() => setMode("login")}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-bold transition-all ${mode === "login" ? "bg-white shadow-sm text-gray-900" : "text-gray-400 hover:text-gray-600"}`}>
-                Connexion
+                {t("tabLogin")}
               </button>
             </div>
 
@@ -222,12 +220,12 @@ export function AuthPage() {
                 <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
                 <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
               </svg>
-              Continuer avec Google
+              {t("google")}
             </button>
 
             <div className="flex items-center gap-3 mb-5">
               <div className="flex-1 h-px bg-gray-200" />
-              <span className="text-xs text-gray-400 font-medium">ou</span>
+              <span className="text-xs text-gray-400 font-medium">{t("or")}</span>
               <div className="flex-1 h-px bg-gray-200" />
             </div>
 
@@ -235,32 +233,32 @@ export function AuthPage() {
             <form onSubmit={handleSubmit} className="space-y-4">
               {mode === "register" && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Prénom et nom</label>
+                  <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">{t("nameLabel")}</label>
                   <input
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder-gray-300"
-                    placeholder="Jean Dupont"
+                    placeholder={t("namePlaceholder")}
                     autoComplete="name"
                   />
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Email</label>
+                <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">{t("emailLabel")}</label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3.5 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder-gray-300"
-                  placeholder="vous@exemple.fr"
+                  placeholder={t("emailPlaceholder")}
                   autoComplete="email"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Mot de passe</label>
+                <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">{t("passwordLabel")}</label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -284,14 +282,14 @@ export function AuthPage() {
                     onClick={handleResetPassword}
                     disabled={loading}
                     className="text-xs text-orange-500 hover:text-orange-600 font-semibold transition-colors">
-                    {resetSent ? "Email envoyé ✓" : "Mot de passe oublié ?"}
+                    {resetSent ? t("resetSent") : t("forgotPassword")}
                   </button>
                 </div>
               )}
 
               {mode === "register" && (
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">Confirmer le mot de passe</label>
+                  <label className="block text-sm font-semibold text-gray-700 max-lg:text-white mb-1.5">{t("confirmPasswordLabel")}</label>
                   <input
                     type={showPassword ? "text" : "password"}
                     value={form.confirmPassword}
@@ -308,10 +306,10 @@ export function AuthPage() {
                 disabled={loading}
                 className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-4 rounded-2xl transition-all disabled:opacity-50 mt-1 text-sm">
                 {loading
-                  ? "Chargement..."
+                  ? t("loading")
                   : mode === "register"
-                    ? "Créer mon compte gratuitement →"
-                    : "Se connecter →"}
+                    ? t("submitRegister")
+                    : t("submitLogin")}
               </button>
             </form>
 

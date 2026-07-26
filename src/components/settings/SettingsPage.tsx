@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import {
   Crown, Check, ArrowLeft, CreditCard,
   LogOut, Calendar, Zap, Lock, ExternalLink, X,
@@ -18,6 +19,7 @@ import { Suspense } from "react";
 function SettingsPageInner() {
   const router = useRouter();
   const locale = useLocale();
+  const tSettings = useTranslations("settings");
   const searchParams = useSearchParams();
   const { user, profile } = useAuthStore();
   const { plan: currentPlan } = usePlan();
@@ -175,6 +177,15 @@ function SettingsPageInner() {
                 Plan {planLabel[currentPlan] || currentPlan}
               </span>
             </div>
+          </div>
+        </section>
+
+        {/* Langue */}
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">{tSettings("languageTitle")}</h2>
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-sm text-gray-600">{tSettings("languageDesc")}</p>
+            <LanguageSwitcher variant="light" />
           </div>
         </section>
 

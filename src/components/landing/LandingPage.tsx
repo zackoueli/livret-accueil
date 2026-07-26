@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -8,9 +8,12 @@ import {
   Check, ArrowRight, Star, Menu, X, BarChart2, Copy,
   ChevronRight, MapPin, Globe, Play, Users, Shield, Clock,
 } from "lucide-react";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 export function LandingPage() {
   const locale = useLocale();
+  const t = useTranslations("landing");
+  const tm = useTranslations("modules");
   const [billing, setBilling] = useState<"monthly" | "yearly">("yearly");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -36,32 +39,36 @@ export function LandingPage() {
           </Link>
 
           <div className="hidden md:flex items-center gap-8 text-sm text-white/60">
-            <a href="#features" className="hover:text-white transition-colors">Fonctionnalités</a>
-            <a href="#demo" className="hover:text-white transition-colors">Démo</a>
-            <a href="#pricing" className="hover:text-white transition-colors">Tarifs</a>
+            <a href="#features" className="hover:text-white transition-colors">{t("nav.features")}</a>
+            <a href="#demo" className="hover:text-white transition-colors">{t("nav.demo")}</a>
+            <a href="#pricing" className="hover:text-white transition-colors">{t("nav.pricing")}</a>
           </div>
 
           <div className="hidden md:flex items-center gap-3">
+            <LanguageSwitcher variant="dark" />
             <Link href={`/${locale}/auth`} className="text-sm font-medium text-white/70 hover:text-white transition-colors px-4 py-2">
-              Connexion
+              {t("nav.login")}
             </Link>
             <Link href={`/${locale}/auth`} className="bg-orange-500 hover:bg-orange-400 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition-all hover:shadow-lg hover:shadow-orange-500/30">
-              Créer mon compte →
+              {t("nav.signup")}
             </Link>
           </div>
 
-          <button className="md:hidden p-2 text-white/70" onClick={() => setMenuOpen(!menuOpen)}>
-            {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          <div className="md:hidden flex items-center gap-1">
+            <LanguageSwitcher variant="dark" />
+            <button className="p-2 text-white/70" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
 
         {menuOpen && (
           <div className="md:hidden bg-black/95 backdrop-blur-xl border-t border-white/10 px-5 py-4 flex flex-col gap-3">
-            <a href="#features" className="text-sm text-white/70 py-2" onClick={() => setMenuOpen(false)}>Fonctionnalités</a>
-            <a href="#demo" className="text-sm text-white/70 py-2" onClick={() => setMenuOpen(false)}>Démo</a>
-            <a href="#pricing" className="text-sm text-white/70 py-2" onClick={() => setMenuOpen(false)}>Tarifs</a>
+            <a href="#features" className="text-sm text-white/70 py-2" onClick={() => setMenuOpen(false)}>{t("nav.features")}</a>
+            <a href="#demo" className="text-sm text-white/70 py-2" onClick={() => setMenuOpen(false)}>{t("nav.demo")}</a>
+            <a href="#pricing" className="text-sm text-white/70 py-2" onClick={() => setMenuOpen(false)}>{t("nav.pricing")}</a>
             <Link href={`/${locale}/auth`} className="bg-orange-500 text-white text-sm font-bold px-5 py-3.5 rounded-xl text-center mt-2">
-              Créer mon compte gratuitement →
+              {t("nav.signupMobile")}
             </Link>
           </div>
         )}
@@ -83,22 +90,23 @@ export function LandingPage() {
         <div className="relative max-w-4xl mx-auto w-full">
           <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white/80 text-xs font-semibold px-4 py-2 rounded-full mb-6">
             <Star className="w-3 h-3 fill-orange-400 text-orange-400" />
-            Livrets d'accueil pour Airbnb, gîtes & campings
+            {t("hero.badge")}
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-bold text-white leading-[1.05] mb-6 tracking-tight">
-            L'accueil que vos<br />
-            voyageurs <span className="text-orange-400">méritent</span>
+          <h1 className="text-5xl md:text-7xl font-bold text-white leading-[1.05] mb-6 tracking-tight max-w-3xl">
+            {t.rich("hero.title", {
+              accent: (chunks) => <span className="text-orange-400">{chunks}</span>,
+            })}
           </h1>
 
           <p className="text-lg md:text-xl text-white/60 max-w-xl mb-10 leading-relaxed">
-            Créez un livret d'accueil digital moderne en 5 minutes. Partagé via QR code, traduit automatiquement, mis à jour en temps réel.
+            {t("hero.subtitle")}
           </p>
 
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <Link href={`/${locale}/auth`}
               className="flex items-center gap-2.5 bg-orange-500 hover:bg-orange-400 text-white font-bold text-base px-8 py-4 rounded-2xl transition-all hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-0.5 w-full sm:w-auto justify-center">
-              Créer mon compte gratuitement
+              {t("hero.cta")}
               <ArrowRight className="w-5 h-5" />
             </Link>
             <a href="#demo"
@@ -106,14 +114,14 @@ export function LandingPage() {
               <div className="w-9 h-9 rounded-full border border-white/30 flex items-center justify-center hover:border-white/60 transition-colors">
                 <Play className="w-3.5 h-3.5 fill-current ml-0.5" />
               </div>
-              Voir la démo
+              {t("hero.watchDemo")}
             </a>
           </div>
 
           <div className="flex items-center gap-6 mt-8 text-xs text-white/40 font-medium">
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> Sans carte bancaire</span>
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> Prêt en 5 minutes</span>
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> Annulable à tout moment</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> {t("hero.noCard")}</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> {t("hero.ready5")}</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> {t("hero.cancelAnytime")}</span>
           </div>
         </div>
       </section>
@@ -121,7 +129,7 @@ export function LandingPage() {
       {/* ── SOCIAL PROOF BAR ── */}
       <section className="bg-white/5 border-y border-white/10 py-6 px-5">
         <div className="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-white/50 font-medium">
-          {["🏡 Gîtes", "🏠 Airbnb", "🏨 Chambres d'hôtes", "⛺ Campings", "🚐 Vans & tiny houses"].map((item) => (
+          {[t("social.gites"), t("social.airbnb"), t("social.guesthouses"), t("social.campings"), t("social.vans")].map((item) => (
             <span key={item} className="text-sm">{item}</span>
           ))}
         </div>
@@ -131,8 +139,8 @@ export function LandingPage() {
       <section className="py-24 px-5">
         <div className="max-w-5xl mx-auto">
           <div className="mb-14">
-            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">Simple comme bonjour</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight">En 3 étapes,<br />votre livret est en ligne</h2>
+            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">{t("how.kicker")}</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight max-w-2xl">{t("how.title")}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
@@ -140,22 +148,22 @@ export function LandingPage() {
               {
                 n: "01",
                 icon: Users,
-                title: "Créez votre compte",
-                desc: "Inscription gratuite en 30 secondes. Aucune carte bancaire requise.",
+                title: t("how.step1Title"),
+                desc: t("how.step1Desc"),
                 img: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&q=80",
               },
               {
                 n: "02",
                 icon: BookOpen,
-                title: "Remplissez vos infos",
-                desc: "WiFi, check-in, règles, activités... chaque module se remplit en quelques clics.",
+                title: t("how.step2Title"),
+                desc: t("how.step2Desc"),
                 img: "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&q=80",
               },
               {
                 n: "03",
                 icon: QrCode,
-                title: "Partagez par QR code",
-                desc: "Imprimez le QR code, envoyez le lien. Vos voyageurs accèdent au livret sur leur téléphone.",
+                title: t("how.step3Title"),
+                desc: t("how.step3Desc"),
                 img: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&q=80",
               },
             ].map((step, i) => (
@@ -186,7 +194,7 @@ export function LandingPage() {
           <div className="mt-10 text-center">
             <Link href={`/${locale}/auth`}
               className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-bold px-8 py-4 rounded-2xl transition-all hover:shadow-xl hover:shadow-orange-500/30">
-              Commencer maintenant — c'est gratuit
+              {t("how.cta")}
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -197,22 +205,22 @@ export function LandingPage() {
       <section id="features" className="py-24 px-5 bg-white/[0.02]">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">Fonctionnalités</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Tout pour accueillir<br />comme un pro</h2>
-            <p className="text-white/50 text-lg max-w-xl mx-auto">Une plateforme pensée pour les hôtes modernes qui veulent impressionner leurs voyageurs.</p>
+            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">{t("features.kicker")}</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t("features.title")}</h2>
+            <p className="text-white/50 text-lg max-w-xl mx-auto">{t("features.subtitle")}</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {[
-              { icon: BookOpen, title: "10 modules personnalisables", desc: "WiFi, check-in, règlement, activités locales, contacts d'urgence et bien plus.", color: "orange" },
-              { icon: Languages, title: "5 langues disponibles", desc: "Français, anglais, espagnol, allemand, italien. Traduction automatique en un clic.", color: "blue" },
-              { icon: QrCode, title: "QR code téléchargeable", desc: "Généré automatiquement. Imprimez-le, placez-le dans le logement ou envoyez-le.", color: "purple" },
-              { icon: Zap, title: "Mises à jour instantanées", desc: "Modifiez le livret, les voyageurs voient les changements en temps réel. Fini l'impression.", color: "yellow" },
-              { icon: BarChart2, title: "Analytics de vues", desc: "Suivez combien de fois votre livret est consulté. Comprenez vos voyageurs.", color: "green" },
-              { icon: Copy, title: "Duplication de livret", desc: "Plusieurs logements ? Dupliquez un livret existant et adaptez-le en quelques minutes.", color: "pink" },
-              { icon: Palette, title: "Personnalisation complète", desc: "Couleurs, photos de couverture, URL personnalisée — votre image, votre marque.", color: "orange" },
-              { icon: MapPin, title: "Points d'intérêt géolocalisés", desc: "Ajoutez des adresses avec liens Google Maps. Restaurants, activités, commerces.", color: "blue" },
-              { icon: Smartphone, title: "App mobile native", desc: "Interface pensée pour le téléphone. Vos voyageurs naviguent comme dans une vraie app.", color: "purple" },
+              { icon: BookOpen, title: t("features.f1Title"), desc: t("features.f1Desc"), color: "orange" },
+              { icon: Languages, title: t("features.f2Title"), desc: t("features.f2Desc"), color: "blue" },
+              { icon: QrCode, title: t("features.f3Title"), desc: t("features.f3Desc"), color: "purple" },
+              { icon: Zap, title: t("features.f4Title"), desc: t("features.f4Desc"), color: "yellow" },
+              { icon: BarChart2, title: t("features.f5Title"), desc: t("features.f5Desc"), color: "green" },
+              { icon: Copy, title: t("features.f6Title"), desc: t("features.f6Desc"), color: "pink" },
+              { icon: Palette, title: t("features.f7Title"), desc: t("features.f7Desc"), color: "orange" },
+              { icon: MapPin, title: t("features.f8Title"), desc: t("features.f8Desc"), color: "blue" },
+              { icon: Smartphone, title: t("features.f9Title"), desc: t("features.f9Desc"), color: "purple" },
             ].map(({ icon: Icon, title, desc, color }) => {
               const colors: Record<string, string> = {
                 orange: "bg-orange-500/15 text-orange-400 border-orange-500/20",
@@ -240,20 +248,15 @@ export function LandingPage() {
       <section className="py-24 px-5">
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
           <div>
-            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-4">Expérience voyageur</p>
+            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-4">{t("phone.kicker")}</p>
             <h2 className="text-4xl md:text-5xl font-bold text-white leading-tight mb-6">
-              Un livret qui ressemble<br />à une vraie app
+              {t("phone.title")}
             </h2>
             <p className="text-white/50 text-lg leading-relaxed mb-8">
-              Vos voyageurs ouvrent le lien ou scannent le QR code. Ils arrivent sur une interface mobile moderne — photo de couverture, navigation intuitive, toutes les infos à portée de main.
+              {t("phone.desc")}
             </p>
             <ul className="space-y-3 mb-10">
-              {[
-                "Splash screen avec photo et message personnalisé",
-                "Grille de modules style application mobile",
-                "Sélecteur de langue intégré",
-                "Fonctionne sur tous les téléphones, sans installation",
-              ].map((item) => (
+              {[t("phone.li1"), t("phone.li2"), t("phone.li3"), t("phone.li4")].map((item) => (
                 <li key={item} className="flex items-start gap-3 text-sm text-white/60">
                   <div className="w-5 h-5 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center shrink-0 mt-0.5">
                     <Check className="w-3 h-3 text-orange-400" />
@@ -264,7 +267,7 @@ export function LandingPage() {
             </ul>
             <Link href={`/${locale}/auth`}
               className="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-400 text-white font-bold px-7 py-3.5 rounded-2xl transition-all hover:shadow-xl hover:shadow-orange-500/30">
-              Créer mon livret <ArrowRight className="w-4 h-4" />
+              {t("phone.cta")} <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -291,7 +294,7 @@ export function LandingPage() {
                       <MapPin className="w-2.5 h-2.5" /> Maussane-les-Alpilles
                     </p>
                     <div className="bg-white rounded-xl py-2.5 text-center">
-                      <span className="text-[11px] font-bold" style={{ color: "#f97316" }}>Ouvrir le livret →</span>
+                      <span className="text-[11px] font-bold" style={{ color: "#f97316" }}>{t("phone.mockupOpen")}</span>
                     </div>
                   </div>
                 </div>
@@ -304,17 +307,17 @@ export function LandingPage() {
                   {/* Header */}
                   <div className="px-4 pt-7 pb-4" style={{ backgroundColor: "#f97316" }}>
                     <p className="text-white font-bold text-sm">Villa Les Lavandes</p>
-                    <p className="text-white/60 text-[9px] mt-0.5">6 sections disponibles</p>
+                    <p className="text-white/60 text-[9px] mt-0.5">{t("phone.mockupSections")}</p>
                   </div>
                   {/* Grid */}
                   <div className="p-3 grid grid-cols-2 gap-2">
                     {[
-                      { e: "👋", l: "Bienvenue" },
-                      { e: "📋", l: "Infos" },
-                      { e: "🗝️", l: "Check-in" },
-                      { e: "📜", l: "Règlement" },
-                      { e: "🏠", l: "Guide" },
-                      { e: "📞", l: "Contacts" },
+                      { e: "👋", l: tm("welcome") },
+                      { e: "📋", l: tm("practical") },
+                      { e: "🗝️", l: tm("checkin") },
+                      { e: "📜", l: tm("rules") },
+                      { e: "🏠", l: tm("guide") },
+                      { e: "📞", l: tm("contacts") },
                     ].map((m) => (
                       <div key={m.l} className="bg-white/10 rounded-xl p-3">
                         <div className="w-7 h-7 rounded-lg flex items-center justify-center text-sm mb-2"
@@ -336,9 +339,9 @@ export function LandingPage() {
       <section id="demo" className="py-24 px-5 bg-white/[0.02]">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">Démo</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Voyez Bunkly en action</h2>
-            <p className="text-white/50 text-lg">Créez un livret complet en moins de 5 minutes</p>
+            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">{t("demo.kicker")}</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t("demo.title")}</h2>
+            <p className="text-white/50 text-lg">{t("demo.subtitle")}</p>
           </div>
 
           <div ref={videoRef} className="relative rounded-3xl overflow-hidden border border-white/10 shadow-2xl" style={{ aspectRatio: "16/9" }}>
@@ -356,46 +359,46 @@ export function LandingPage() {
       <section className="py-24 px-5">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-14">
-            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">Témoignages</p>
-            <h2 className="text-4xl font-bold text-white">Ce que disent nos hôtes</h2>
+            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">{t("testimonials.kicker")}</p>
+            <h2 className="text-4xl font-bold text-white">{t("testimonials.title")}</h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             {[
               {
-                name: "Sophie M.",
-                role: "Hôte Airbnb · Paris",
-                text: "Mes voyageurs adorent ! Avant j'envoyais un PDF de 10 pages que personne ne lisait. Maintenant ils ont tout sur leur téléphone et me posent deux fois moins de questions.",
+                name: t("testimonials.t1Name"),
+                role: t("testimonials.t1Role"),
+                text: t("testimonials.t1Text"),
                 stars: 5,
                 img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80",
               },
               {
-                name: "Thomas R.",
-                role: "Propriétaire de gîte · Dordogne",
-                text: "J'ai 3 gîtes différents. La fonction duplication m'a sauvé la vie — j'ai créé le premier livret, dupliqué deux fois et adapté en 10 minutes. Génial.",
+                name: t("testimonials.t2Name"),
+                role: t("testimonials.t2Role"),
+                text: t("testimonials.t2Text"),
                 stars: 5,
                 img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80",
               },
               {
-                name: "Marie L.",
-                role: "Camping familial · Bretagne",
-                text: "La traduction automatique est bluffante. On accueille des Allemands et des Anglais toute l'été — plus besoin de traduire manuellement. Un vrai gain de temps.",
+                name: t("testimonials.t3Name"),
+                role: t("testimonials.t3Role"),
+                text: t("testimonials.t3Text"),
                 stars: 5,
                 img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&q=80",
               },
-            ].map((t) => (
-              <div key={t.name} className="bg-white/5 border border-white/10 rounded-3xl p-7">
+            ].map((tst) => (
+              <div key={tst.name} className="bg-white/5 border border-white/10 rounded-3xl p-7">
                 <div className="flex gap-1 mb-4">
-                  {Array.from({ length: t.stars }).map((_, i) => (
+                  {Array.from({ length: tst.stars }).map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-orange-400 text-orange-400" />
                   ))}
                 </div>
-                <p className="text-white/70 text-sm leading-relaxed mb-6">"{t.text}"</p>
+                <p className="text-white/70 text-sm leading-relaxed mb-6">"{tst.text}"</p>
                 <div className="flex items-center gap-3">
-                  <img src={t.img} alt={t.name} className="w-10 h-10 rounded-full object-cover" />
+                  <img src={tst.img} alt={tst.name} className="w-10 h-10 rounded-full object-cover" />
                   <div>
-                    <p className="text-white font-semibold text-sm">{t.name}</p>
-                    <p className="text-white/40 text-xs">{t.role}</p>
+                    <p className="text-white font-semibold text-sm">{tst.name}</p>
+                    <p className="text-white/40 text-xs">{tst.role}</p>
                   </div>
                 </div>
               </div>
@@ -408,9 +411,9 @@ export function LandingPage() {
       <section id="pricing" className="py-24 px-5 bg-white/[0.02]">
         <div className="max-w-3xl mx-auto">
           <div className="text-center mb-12">
-            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">Tarifs</p>
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">Simple et transparent</h2>
-            <p className="text-white/50 mb-8">Commencez gratuitement, passez au plan Actif quand vous êtes prêt</p>
+            <p className="text-orange-400 text-sm font-bold uppercase tracking-widest mb-3">{t("pricing.kicker")}</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t("pricing.title")}</h2>
+            <p className="text-white/50 mb-8">{t("pricing.subtitle")}</p>
 
             <div className="inline-flex items-center bg-white/10 rounded-2xl p-1.5 gap-1">
               {(["monthly", "yearly"] as const).map((b) => (
@@ -420,7 +423,7 @@ export function LandingPage() {
                       ? "bg-white text-gray-900 shadow-sm"
                       : "text-white/50 hover:text-white"
                   }`}>
-                  {b === "monthly" ? "Mensuel" : "Annuel"}
+                  {b === "monthly" ? t("pricing.monthly") : t("pricing.yearly")}
                   {b === "yearly" && (
                     <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">−36%</span>
                   )}
@@ -432,17 +435,17 @@ export function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {/* Free */}
             <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
-              <p className="text-sm font-bold text-white/40 uppercase tracking-wider mb-3">Gratuit</p>
+              <p className="text-sm font-bold text-white/40 uppercase tracking-wider mb-3">{t("pricing.freeName")}</p>
               <div className="flex items-end gap-1 mb-2">
                 <span className="text-5xl font-black text-white">0€</span>
-                <span className="text-white/40 mb-2 text-sm">/toujours</span>
+                <span className="text-white/40 mb-2 text-sm">{t("pricing.freeForever")}</span>
               </div>
-              <p className="text-sm text-white/40 mb-7">Pour découvrir la plateforme</p>
+              <p className="text-sm text-white/40 mb-7">{t("pricing.freeDesc")}</p>
               <ul className="space-y-3.5 mb-8">
                 {[
-                  "Jusqu'à 3 livrets en brouillon",
-                  "Accès à tous les modules",
-                  "Aperçu de votre livret",
+                  t("pricing.freePerk1"),
+                  t("pricing.freePerk2"),
+                  t("pricing.freePerk3"),
                 ].map((perk) => (
                   <li key={perk} className="flex items-center gap-3 text-sm text-white/60">
                     <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center shrink-0">
@@ -454,7 +457,7 @@ export function LandingPage() {
               </ul>
               <Link href={`/${locale}/auth`}
                 className="block text-center border border-white/20 hover:border-white/40 text-white/70 hover:text-white font-semibold py-3.5 rounded-2xl transition-colors">
-                Commencer gratuitement
+                {t("pricing.freeCta")}
               </Link>
             </div>
 
@@ -463,30 +466,30 @@ export function LandingPage() {
               <div className="absolute top-0 right-0 w-48 h-48 rounded-full bg-white/10 -translate-y-1/3 translate-x-1/3" />
               <div className="relative">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-bold text-white/80 uppercase tracking-wider">Actif</p>
-                  <span className="text-xs bg-white/20 text-white font-bold px-3 py-1 rounded-full">⭐ Populaire</span>
+                  <p className="text-sm font-bold text-white/80 uppercase tracking-wider">{t("pricing.actifName")}</p>
+                  <span className="text-xs bg-white/20 text-white font-bold px-3 py-1 rounded-full">{t("pricing.popular")}</span>
                 </div>
                 <div className="flex items-end gap-1 mb-1">
                   <span className="text-5xl font-black text-white">
                     {billing === "monthly" ? "9€" : "69€"}
                   </span>
                   <span className="text-white/60 mb-2 text-sm">
-                    {billing === "monthly" ? "/mois" : "/an"}
+                    {billing === "monthly" ? t("pricing.perMonth") : t("pricing.perYear")}
                   </span>
                 </div>
                 {billing === "yearly" && (
-                  <p className="text-xs text-white/60 mb-2">soit 5,75€/mois · 2 mois offerts</p>
+                  <p className="text-xs text-white/60 mb-2">{t("pricing.yearlyNote")}</p>
                 )}
-                <p className="text-sm text-white/70 mb-7">Pour les hôtes qui accueillent des voyageurs</p>
+                <p className="text-sm text-white/70 mb-7">{t("pricing.actifDesc")}</p>
                 <ul className="space-y-3.5 mb-8">
                   {[
-                    "Livrets illimités",
-                    "Publication & partage par lien",
-                    "QR code téléchargeable",
-                    "Traduction automatique (5 langues)",
-                    "Analytics de vues",
-                    "URL personnalisée",
-                    "Duplication de livret",
+                    t("pricing.actifPerk1"),
+                    t("pricing.actifPerk2"),
+                    t("pricing.actifPerk3"),
+                    t("pricing.actifPerk4"),
+                    t("pricing.actifPerk5"),
+                    t("pricing.actifPerk6"),
+                    t("pricing.actifPerk7"),
                   ].map((perk) => (
                     <li key={perk} className="flex items-center gap-3 text-sm text-white">
                       <div className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center shrink-0">
@@ -498,7 +501,7 @@ export function LandingPage() {
                 </ul>
                 <Link href={`/${locale}/auth`}
                   className="block text-center bg-white hover:bg-orange-50 text-orange-600 font-black py-4 rounded-2xl transition-colors shadow-lg">
-                  Commencer maintenant →
+                  {t("pricing.actifCta")}
                 </Link>
               </div>
             </div>
@@ -506,7 +509,7 @@ export function LandingPage() {
 
           <p className="text-center text-white/30 text-sm mt-6 flex items-center justify-center gap-2">
             <Shield className="w-4 h-4" />
-            Paiement sécurisé par Stripe · Annulable à tout moment
+            {t("pricing.secured")}
           </p>
         </div>
       </section>
@@ -523,20 +526,20 @@ export function LandingPage() {
         </div>
         <div className="relative max-w-2xl mx-auto text-center">
           <h2 className="text-4xl md:text-6xl font-black text-white mb-4 leading-tight">
-            Prêt à enchanter<br />vos voyageurs ?
+            {t("cta.title")}
           </h2>
           <p className="text-white/60 text-xl mb-10">
-            Créez votre premier livret en 5 minutes, gratuitement.
+            {t("cta.subtitle")}
           </p>
           <Link href={`/${locale}/auth`}
             className="inline-flex items-center gap-3 bg-orange-500 hover:bg-orange-400 text-white font-black text-lg px-10 py-5 rounded-2xl transition-all hover:shadow-2xl hover:shadow-orange-500/40 hover:-translate-y-1">
-            Créer mon compte gratuitement
+            {t("cta.button")}
             <ArrowRight className="w-5 h-5" />
           </Link>
           <p className="text-white/30 text-sm mt-5 flex items-center justify-center gap-4">
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> Sans CB</span>
-            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> 5 minutes</span>
-            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-orange-400" /> Annulable</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> {t("cta.noCard")}</span>
+            <span className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5 text-orange-400" /> {t("cta.fiveMin")}</span>
+            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-orange-400" /> {t("cta.cancel")}</span>
           </p>
         </div>
       </section>
@@ -550,11 +553,11 @@ export function LandingPage() {
             </div>
             Bunkly
           </div>
-          <p>© {new Date().getFullYear()} Bunkly — Tous droits réservés</p>
+          <p>© {new Date().getFullYear()} Bunkly — {t("footer.rights")}</p>
           <div className="flex gap-5">
-            <a href="#" className="hover:text-white/70 transition-colors">Confidentialité</a>
-            <a href="#" className="hover:text-white/70 transition-colors">CGU</a>
-            <a href="#" className="hover:text-white/70 transition-colors">Contact</a>
+            <a href="#" className="hover:text-white/70 transition-colors">{t("footer.privacy")}</a>
+            <a href="#" className="hover:text-white/70 transition-colors">{t("footer.terms")}</a>
+            <a href="#" className="hover:text-white/70 transition-colors">{t("footer.contact")}</a>
           </div>
         </div>
       </footer>
