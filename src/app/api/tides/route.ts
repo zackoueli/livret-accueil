@@ -210,6 +210,106 @@ function parseTidesFromHtml(html: string): TideEntry[] {
   return result.sort((a, b) => a.time.localeCompare(b.time));
 }
 
+async function fetchFromMareeInfo(portId: string): Promise<TideEntry[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  const res = await fetch(`https://maree.info/${portId}`, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      "Accept-Language": "fr-FR,fr;q=0.9",
+    },
+    signal: controller.signal,
+  }).finally(() => clearTimeout(timeout));
+  if (!res.ok) throw new Error(`maree.info returned ${res.status}`);
+  const html = await res.text();
+  const tides = parseTidesFromHtml(html);
+  if (tides.length === 0) throw new Error("maree.info: no tide data parsed");
+  return tides;
+}
+
+// ── Fallback Open-Meteo (maree.info bloque certaines IP d'hébergeurs) ─────────
+// On géocode le port, puis on déduit PM/BM des hauteurs horaires du niveau de
+// la mer. Pas de coefficient disponible via cette source.
+
+const geoCache = new Map<string, { lat: number; lon: number }>();
+
+async function geocodePort(name: string): Promise<{ lat: number; lon: number } | null> {
+  const cached = geoCache.get(name);
+  if (cached) return cached;
+  const paren = name.match(/\((.*?)\)/);
+  const candidates = [
+    name.replace(/\s*\(.*?\)\s*/g, " ").replace(/\s+/g, " ").trim(),
+    ...(paren ? [paren[1]] : []),
+    name.split("/")[0].trim(),
+  ];
+  for (const q of candidates) {
+    if (!q) continue;
+    try {
+      const res = await fetch(
+        `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(q)}&count=5&language=fr`,
+        { next: { revalidate: 86400 } }
+      );
+      if (!res.ok) continue;
+      const data = await res.json();
+      const results: { latitude: number; longitude: number; country_code?: string }[] = data.results ?? [];
+      const hit = results.find(r => r.country_code === "FR") ?? results[0];
+      if (hit) {
+        const coords = { lat: hit.latitude, lon: hit.longitude };
+        geoCache.set(name, coords);
+        return coords;
+      }
+    } catch { /* candidat suivant */ }
+  }
+  return null;
+}
+
+async function fetchFromOpenMeteo(portName: string): Promise<TideEntry[]> {
+  const coords = await geocodePort(portName);
+  if (!coords) throw new Error(`open-meteo: geocoding failed for "${portName}"`);
+
+  const res = await fetch(
+    `https://marine-api.open-meteo.com/v1/marine?latitude=${coords.lat}&longitude=${coords.lon}&hourly=sea_level_height_msl&timezone=Europe%2FParis&forecast_days=2`,
+    { next: { revalidate: 1800 } }
+  );
+  if (!res.ok) throw new Error(`open-meteo returned ${res.status}`);
+  const data = await res.json();
+  const times: string[] = data.hourly?.time ?? [];
+  const heights: (number | null)[] = data.hourly?.sea_level_height_msl ?? [];
+  if (times.length < 3) throw new Error("open-meteo: no sea level data");
+
+  // Hauteurs affichées par rapport au plus bas niveau de la fenêtre (valeurs positives,
+  // proches de l'esprit des hauteurs au-dessus du zéro hydrographique)
+  const valid = heights.filter((h): h is number => h !== null);
+  const floor = Math.min(...valid);
+  const today = times[0].slice(0, 10);
+
+  const result: TideEntry[] = [];
+  for (let i = 1; i < heights.length - 1; i++) {
+    const prev = heights[i - 1], cur = heights[i], next = heights[i + 1];
+    if (prev === null || cur === null || next === null) continue;
+    const isMax = cur >= prev && cur > next;
+    const isMin = cur <= prev && cur < next;
+    if (!isMax && !isMin) continue;
+    // Interpolation quadratique pour affiner l'heure et la hauteur de l'extremum
+    const denom = prev - 2 * cur + next;
+    const offset = denom !== 0 ? 0.5 * (prev - next) / denom : 0; // en heures
+    const h = cur - 0.25 * (prev - next) * offset;
+    const date = new Date(times[i]);
+    date.setMinutes(date.getMinutes() + Math.round(offset * 60));
+    // On ne garde que les extrema du jour courant (heure locale Europe/Paris renvoyée par l'API)
+    const y = date.getFullYear(), mo = String(date.getMonth() + 1).padStart(2, "0"), d = String(date.getDate()).padStart(2, "0");
+    if (`${y}-${mo}-${d}` !== today) continue;
+    result.push({
+      type: isMax ? "PM" : "BM",
+      time: `${String(date.getHours()).padStart(2, "0")}h${String(date.getMinutes()).padStart(2, "0")}`,
+      height: `${(h - floor).toFixed(2).replace(".", ",")}m`,
+    });
+  }
+  if (result.length === 0) throw new Error("open-meteo: no tide extrema found for today");
+  return result.sort((a, b) => a.time.localeCompare(b.time));
+}
+
 export async function GET(req: NextRequest) {
   const portId = req.nextUrl.searchParams.get("portId");
 
@@ -225,39 +325,30 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Port inconnu" }, { status: 400 });
   }
 
+  const port = PORTS.find(p => p.id === portId)!;
+  let tides: TideEntry[];
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    const res = await fetch(`https://maree.info/${portId}`, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "fr-FR,fr;q=0.9",
-      },
-      signal: controller.signal,
-      next: { revalidate: 1800 },
-    }).finally(() => clearTimeout(timeout));
-    if (!res.ok) throw new Error(`maree.info returned ${res.status}`);
-    const html = await res.text();
-
-    const port = PORTS.find(p => p.id === portId)!;
-    const tides = parseTidesFromHtml(html);
-
-    // Extraire la date depuis le HTML (présente dans le title ou dans un th)
-    const today = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
-
-    const data: TidesData = {
-      portId,
-      portName: port.name,
-      date: today,
-      tides,
-    };
-
-    return NextResponse.json(data, {
-      headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" },
-    });
+    tides = await fetchFromMareeInfo(portId);
   } catch (err) {
-    console.error("tides scrape error:", err);
-    return NextResponse.json({ error: "Impossible de récupérer les marées" }, { status: 502 });
+    console.error("tides scrape error, falling back to open-meteo:", err);
+    try {
+      tides = await fetchFromOpenMeteo(port.name);
+    } catch (err2) {
+      console.error("tides open-meteo fallback error:", err2);
+      return NextResponse.json({ error: "Impossible de récupérer les marées" }, { status: 502 });
+    }
   }
+
+  const today = new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Paris" });
+
+  const data: TidesData = {
+    portId,
+    portName: port.name,
+    date: today,
+    tides,
+  };
+
+  return NextResponse.json(data, {
+    headers: { "Cache-Control": "public, s-maxage=1800, stale-while-revalidate=3600" },
+  });
 }
