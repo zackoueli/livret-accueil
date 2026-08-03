@@ -854,7 +854,7 @@ function AddonsGridSection({ booklet, accent }: { booklet: Booklet; accent: stri
   const setQty = (id: string, q: number) => setQuantities(p => ({ ...p, [id]: Math.max(1, q) }));
 
   return (
-    <div>
+    <div style={{ margin: "0 16px 16px" }}>
       <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("addons_title")}</p>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {services.map(s => (
