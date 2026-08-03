@@ -275,6 +275,8 @@
     "upgradeHeaderCta": "Passer au plan supérieur",
     "affiliation": "Affiliation",
     "affiliationTitle": "Programme d'affiliation",
+    "orders": "Ventes",
+    "ordersTitle": "Suivi des ventes de services payants",
     "youtubeTitle": "Tutoriels YouTube",
     "allBooklets": "Tous les livrets",
     "newFolder": "Nouveau dossier",
@@ -448,6 +450,28 @@
     "serviceName": "Nom (ex: Piscine)",
     "serviceDetail": "Détail (ex: 8h – 22h)",
     "addService": "Ajouter un service",
+    "addonsCommissionRate": "Commission plateforme : {rate}%",
+    "addonsCommissionHint": "Passez à un plan supérieur pour réduire votre commission sur chaque vente.",
+    "addonsConnectRequired": "Activez les paiements pour rendre ces services achetables par vos voyageurs.",
+    "addonsConnectCta": "Activer les paiements",
+    "addonsEmpty": "Aucun service payant pour le moment",
+    "addonName": "Nom (ex: Départ tardif)",
+    "addonDescription": "Description",
+    "addonEnabled": "Activé",
+    "addonPriceOneTime": "Prix fixe",
+    "addonPricePerDay": "Prix par jour",
+    "addAddon": "Ajouter un service payant",
+    "ordersEmpty": "Aucune vente pour le moment",
+    "ordersDate": "Date",
+    "ordersService": "Service",
+    "ordersAmount": "Montant",
+    "ordersCommission": "Commission",
+    "ordersPayout": "Net reversé",
+    "ordersStatus": "Statut",
+    "ordersStatusPaid": "Payée",
+    "ordersStatusPending": "En attente",
+    "ordersStatusFailed": "Échouée",
+    "ordersStatusRefunded": "Remboursée",
     "invalidUrl": "URL invalide — doit commencer par https://",
     "checkLink": "Vérifier le lien",
     "choosePort": "— Choisir un port —",
@@ -524,7 +548,8 @@
     "eco": { "label": "Éco-responsable", "description": "Tri, économies d'énergie, gestes verts" },
     "practical": { "label": "Infos pratiques", "description": "Pharmacie, médecin, mairie, services" },
     "tides": { "label": "Marées", "description": "Horaires de marées du port le plus proche" },
-    "weather": { "label": "Météo", "description": "Météo en temps réel pour le logement" }
+    "weather": { "label": "Météo", "description": "Météo en temps réel pour le logement" },
+    "addons": { "label": "Services payants", "description": "Options payantes proposées aux voyageurs (late checkout, petit-déjeuner...)" }
   },
   "moduleFields": {
     "arrival": {
@@ -662,6 +687,9 @@
     "weather": {
       "city_override": { "label": "Ville (optionnel)", "placeholder": "Laissez vide pour utiliser l'adresse du logement", "hint": "Par défaut, la météo est basée sur l'adresse du logement. Renseignez une ville uniquement si vous souhaitez afficher la météo d'un autre endroit." },
       "note": { "label": "Note météo", "placeholder": "Le logement est situé à 300m de l'océan, pensez à prendre un coupe-vent." }
+    },
+    "addons": {
+      "addon_services_list": { "label": "Services proposés", "placeholder": "" }
     }
   },
   "modules": {

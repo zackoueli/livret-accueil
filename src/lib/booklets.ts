@@ -35,6 +35,7 @@ function sanitizeForFirestore(
 }
 import { nanoid } from "nanoid";
 import { getTemplate } from "./templates";
+import { seedDefaultServices } from "./services";
 
 export async function createBooklet(userId: string, title: string, contentTemplateId = "blank", layoutId = "simple", ownerPlan: Plan = "free", defaultLang: SupportedLang = "fr"): Promise<string> {
   const slug = await generateUniqueSlug();
@@ -59,6 +60,7 @@ export async function createBooklet(userId: string, title: string, contentTempla
   // sur cette meme reference ecrase le meme document au lieu d'en creer un second.
   const ref = doc(collection(db, "booklets"));
   await setDoc(ref, booklet);
+  await seedDefaultServices(ref.id, userId);
   return ref.id;
 }
 

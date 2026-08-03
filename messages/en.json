@@ -275,6 +275,8 @@
     "upgradeHeaderCta": "Upgrade my plan",
     "affiliation": "Affiliate",
     "affiliationTitle": "Affiliate program",
+    "orders": "Sales",
+    "ordersTitle": "Track your paid service sales",
     "youtubeTitle": "YouTube tutorials",
     "allBooklets": "All books",
     "newFolder": "New folder",
@@ -448,6 +450,28 @@
     "serviceName": "Name (e.g.: Pool)",
     "serviceDetail": "Detail (e.g.: 8am – 10pm)",
     "addService": "Add a service",
+    "addonsCommissionRate": "Platform commission: {rate}%",
+    "addonsCommissionHint": "Upgrade to a higher plan to reduce your commission on every sale.",
+    "addonsConnectRequired": "Activate payments to let guests purchase these services.",
+    "addonsConnectCta": "Activate payments",
+    "addonsEmpty": "No paid services yet",
+    "addonName": "Name (e.g. Late checkout)",
+    "addonDescription": "Description",
+    "addonEnabled": "Enabled",
+    "addonPriceOneTime": "Fixed price",
+    "addonPricePerDay": "Price per day",
+    "addAddon": "Add a paid service",
+    "ordersEmpty": "No sales yet",
+    "ordersDate": "Date",
+    "ordersService": "Service",
+    "ordersAmount": "Amount",
+    "ordersCommission": "Commission",
+    "ordersPayout": "Net payout",
+    "ordersStatus": "Status",
+    "ordersStatusPaid": "Paid",
+    "ordersStatusPending": "Pending",
+    "ordersStatusFailed": "Failed",
+    "ordersStatusRefunded": "Refunded",
     "invalidUrl": "Invalid URL — must start with https://",
     "checkLink": "Check the link",
     "choosePort": "— Choose a port —",
@@ -524,7 +548,8 @@
     "eco": { "label": "Eco-friendly", "description": "Sorting, energy savings, green habits" },
     "practical": { "label": "Practical info", "description": "Pharmacy, doctor, town hall, services" },
     "tides": { "label": "Tides", "description": "Tide times from the nearest port" },
-    "weather": { "label": "Weather", "description": "Real-time weather for the property" }
+    "weather": { "label": "Weather", "description": "Real-time weather for the property" },
+    "addons": { "label": "Paid services", "description": "Paid options offered to guests (late checkout, breakfast...)" }
   },
   "moduleFields": {
     "arrival": {
@@ -662,6 +687,9 @@
     "weather": {
       "city_override": { "label": "City (optional)", "placeholder": "Leave empty to use the property address", "hint": "By default, the weather is based on the property address. Only enter a city if you want to show the weather for another location." },
       "note": { "label": "Weather note", "placeholder": "The property is 300m from the ocean, remember to bring a windbreaker." }
+    },
+    "addons": {
+      "addon_services_list": { "label": "Services offered", "placeholder": "" }
     }
   },
   "modules": {

@@ -3,7 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
-import { sendPurchaseConfirmation, sendSubscriptionExpired, sendAffiliateCommissionEmail } from "@/lib/emails";
+import { sendPurchaseConfirmation, sendSubscriptionExpired, sendAffiliateCommissionEmail, sendServicePurchaseNotification } from "@/lib/emails";
 
 export const runtime = "nodejs";
 
@@ -51,11 +51,71 @@ export async function POST(request: NextRequest) {
   const getEndDate = (sub: Stripe.Subscription): number =>
     (sub as unknown as Record<string, number>).billing_cycle_anchor ?? 0;
 
+  // Vente d'un service payant : encaissement en split direct (application_fee_amount +
+  // transfer_data.destination), on écrit l'ordre et prévient l'hôte. Idempotent via
+  // stripeCheckoutSessionId pour tolérer les retries webhook de Stripe.
+  const handleServicePurchase = async (session: Stripe.Checkout.Session) => {
+    const existing = await adminDb
+      .collection("service_purchases")
+      .where("stripeCheckoutSessionId", "==", session.id)
+      .limit(1)
+      .get();
+    if (!existing.empty) return;
+
+    const meta = session.metadata!;
+    const amountTotal = session.amount_total ?? 0;
+    const commissionRate = Number(meta.commissionRate ?? "0");
+    const commissionAmount = Math.round((amountTotal * commissionRate) / 100);
+
+    const ref = adminDb.collection("service_purchases").doc();
+    await ref.set({
+      id: ref.id,
+      bookletId: meta.bookletId,
+      serviceId: meta.serviceId,
+      hostUid: meta.hostUid,
+      serviceName: meta.serviceName,
+      quantity: Number(meta.quantity ?? "1"),
+      amountTotal,
+      commissionAmount,
+      commissionRate,
+      hostPayoutAmount: amountTotal - commissionAmount,
+      currency: "eur",
+      guestEmail: session.customer_details?.email ?? undefined,
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
+      status: "paid",
+      createdAt: Date.now(),
+      paidAt: Date.now(),
+    });
+
+    try {
+      const hostDoc = await adminDb.collection("users").doc(meta.hostUid).get();
+      const hostData = hostDoc.data();
+      if (hostData?.email) {
+        await sendServicePurchaseNotification({
+          to: hostData.email,
+          hostName: hostData.displayName ?? "",
+          serviceName: meta.serviceName,
+          amount: amountTotal,
+          hostPayoutAmount: amountTotal - commissionAmount,
+        });
+      }
+    } catch (e) {
+      console.error("[webhook] Failed to send service purchase email:", e);
+    }
+  };
+
   console.log(`[webhook] event: ${event.type}`);
 
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object as Stripe.Checkout.Session;
+
+      if (session.mode === "payment" && session.metadata?.type === "service_purchase") {
+        await handleServicePurchase(session);
+        break;
+      }
+
       const uid = getUid(session);
       console.log(`[webhook] checkout.session.completed — uid: ${uid}, session.id: ${session.id}, metadata:`, session.metadata);
       if (!uid) {
@@ -233,6 +293,31 @@ export async function POST(request: NextRequest) {
           chargesEnabled: account.charges_enabled,
           payoutsEnabled: account.payouts_enabled,
         });
+      }
+
+      const hostSnap = await adminDb
+        .collection("host_connect_accounts")
+        .where("stripeAccountId", "==", account.id)
+        .limit(1)
+        .get();
+      if (!hostSnap.empty) {
+        const hostDoc = hostSnap.docs[0];
+        await hostDoc.ref.update({
+          onboardingComplete: account.details_submitted,
+          chargesEnabled: account.charges_enabled,
+          payoutsEnabled: account.payouts_enabled,
+        });
+
+        // Dénormalise l'éligibilité aux achats de services sur tous les livrets de l'hôte
+        const hostUid = hostDoc.data().userId as string;
+        const bookletsSnap = await adminDb.collection("booklets").where("userId", "==", hostUid).get();
+        if (!bookletsSnap.empty) {
+          const batch = adminDb.batch();
+          for (const doc of bookletsSnap.docs) {
+            batch.update(doc.ref, { addonsPurchasable: account.charges_enabled });
+          }
+          await batch.commit();
+        }
       }
       break;
     }

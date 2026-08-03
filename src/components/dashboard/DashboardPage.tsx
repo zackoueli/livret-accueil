@@ -7,7 +7,7 @@ import { Suspense } from "react";
 import {
   Plus, BookOpen, Eye, Pencil, Trash2, Share2, Lock,
   LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, HelpCircle,
-  Monitor, Smartphone, Search, ArrowRight, Star, Folder, FolderOpen, FolderPlus, X, Check, ChevronRight, AlertTriangle, Gift,
+  Monitor, Smartphone, Search, ArrowRight, Star, Folder, FolderOpen, FolderPlus, X, Check, ChevronRight, AlertTriangle, Gift, Wallet,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useAuthStore } from "@/store/authStore";
@@ -279,6 +279,14 @@ function DashboardPageInner() {
               title={t("affiliationTitle")}>
               <Gift className="w-3.5 h-3.5" />
               {t("affiliation")}
+            </button>
+
+            <button
+              onClick={() => router.push(`/${locale}/dashboard/orders`)}
+              className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3.5 py-2 rounded-xl bg-orange-50 text-orange-600 hover:bg-orange-100 transition-colors border border-orange-100"
+              title={t("ordersTitle")}>
+              <Wallet className="w-3.5 h-3.5" />
+              {t("orders")}
             </button>
 
             <LanguageSwitcher variant="light" />

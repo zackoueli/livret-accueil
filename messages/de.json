@@ -275,6 +275,8 @@
     "upgradeHeaderCta": "Plan upgraden",
     "affiliation": "Partnerprogramm",
     "affiliationTitle": "Partnerprogramm",
+    "orders": "Verkäufe",
+    "ordersTitle": "Verfolgen Sie Ihre Verkäufe kostenpflichtiger Leistungen",
     "youtubeTitle": "YouTube-Tutorials",
     "allBooklets": "Alle Mappen",
     "newFolder": "Neuer Ordner",
@@ -448,6 +450,28 @@
     "serviceName": "Name (z. B.: Pool)",
     "serviceDetail": "Detail (z. B.: 8 – 22 Uhr)",
     "addService": "Service hinzufügen",
+    "addonsCommissionRate": "Plattformprovision: {rate}%",
+    "addonsCommissionHint": "Upgraden Sie auf einen höheren Plan, um Ihre Provision pro Verkauf zu senken.",
+    "addonsConnectRequired": "Aktivieren Sie Zahlungen, damit Gäste diese Leistungen kaufen können.",
+    "addonsConnectCta": "Zahlungen aktivieren",
+    "addonsEmpty": "Noch keine kostenpflichtigen Leistungen",
+    "addonName": "Name (z.B. Später Checkout)",
+    "addonDescription": "Beschreibung",
+    "addonEnabled": "Aktiviert",
+    "addonPriceOneTime": "Festpreis",
+    "addonPricePerDay": "Preis pro Tag",
+    "addAddon": "Kostenpflichtige Leistung hinzufügen",
+    "ordersEmpty": "Noch keine Verkäufe",
+    "ordersDate": "Datum",
+    "ordersService": "Leistung",
+    "ordersAmount": "Betrag",
+    "ordersCommission": "Provision",
+    "ordersPayout": "Netto ausgezahlt",
+    "ordersStatus": "Status",
+    "ordersStatusPaid": "Bezahlt",
+    "ordersStatusPending": "Ausstehend",
+    "ordersStatusFailed": "Fehlgeschlagen",
+    "ordersStatusRefunded": "Erstattet",
     "invalidUrl": "Ungültige URL — muss mit https:// beginnen",
     "checkLink": "Link prüfen",
     "choosePort": "— Hafen wählen —",
@@ -524,7 +548,8 @@
     "eco": { "label": "Umweltfreundlich", "description": "Mülltrennung, Energiesparen, grüne Gewohnheiten" },
     "practical": { "label": "Praktische Infos", "description": "Apotheke, Arzt, Rathaus, Services" },
     "tides": { "label": "Gezeiten", "description": "Gezeitenzeiten des nächstgelegenen Hafens" },
-    "weather": { "label": "Wetter", "description": "Echtzeit-Wetter für die Unterkunft" }
+    "weather": { "label": "Wetter", "description": "Echtzeit-Wetter für die Unterkunft" },
+    "addons": { "label": "Kostenpflichtige Leistungen", "description": "Kostenpflichtige Optionen für Gäste (später Checkout, Frühstück...)" }
   },
   "moduleFields": {
     "arrival": {
@@ -662,6 +687,9 @@
     "weather": {
       "city_override": { "label": "Stadt (optional)", "placeholder": "Leer lassen, um die Adresse der Unterkunft zu verwenden", "hint": "Standardmäßig basiert das Wetter auf der Adresse der Unterkunft. Geben Sie nur eine Stadt an, wenn Sie das Wetter eines anderen Ortes anzeigen möchten." },
       "note": { "label": "Wetterhinweis", "placeholder": "Die Unterkunft liegt 300m vom Meer entfernt, denken Sie an eine Windjacke." }
+    },
+    "addons": {
+      "addon_services_list": { "label": "Angebotene Leistungen", "placeholder": "" }
     }
   },
   "modules": {

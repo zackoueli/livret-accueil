@@ -14,10 +14,11 @@ import { SortableContext, useSortable, verticalListSortingStrategy, arrayMove } 
 import { CSS } from "@dnd-kit/utilities";
 import { usePlan } from "@/hooks/usePlan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
+import { AddonServiceEditor } from "./AddonServiceEditor";
 
 // ── Composant upload photo générique ─────────────────────────────────────────
 
-function PhotoUploader({ bookletId, storagePath, value, onChange, aspectRatio = "16/9", circular = false }: {
+export function PhotoUploader({ bookletId, storagePath, value, onChange, aspectRatio = "16/9", circular = false }: {
   bookletId: string;
   storagePath: string;   // sous-dossier dans users/{uid}/booklets/{id}/
   value: string;
@@ -560,6 +561,10 @@ export function EditorForm() {
 
               {field.type === "services" && (
                 <ServiceEditor value={get(field.key)} onChange={v => set(field.key, v)} />
+              )}
+
+              {field.type === "addon_services" && (
+                <AddonServiceEditor bookletId={booklet.id} />
               )}
 
               {/* ── Types standard ── */}

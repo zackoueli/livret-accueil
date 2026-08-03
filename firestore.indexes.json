@@ -39,6 +39,32 @@
         { "fieldPath": "referrerId", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "booklet_services",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bookletId", "order": "ASCENDING" },
+        { "fieldPath": "hostUid", "order": "ASCENDING" },
+        { "fieldPath": "order", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "booklet_services",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "bookletId", "order": "ASCENDING" },
+        { "fieldPath": "enabled", "order": "ASCENDING" },
+        { "fieldPath": "order", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "service_purchases",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "hostUid", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

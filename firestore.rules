@@ -82,5 +82,33 @@ service cloud.firestore {
     match /affiliate_accounts/{userId} {
       allow read: if request.auth != null && request.auth.uid == userId;
     }
+
+    // ── Services payants (add-ons) ───────────────────────────────────────────
+
+    // Compte Stripe Connect de l'hôte : lecture seule, écrit uniquement par le
+    // webhook (Admin SDK) — même logique que affiliate_accounts.
+    match /host_connect_accounts/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Services proposés par un livret : lecture publique si activé (page publique
+    // + validation checkout), lecture/écriture complètes pour l'hôte propriétaire.
+    match /booklet_services/{serviceId} {
+      allow read: if resource.data.enabled == true
+                  || (request.auth != null && request.auth.uid == resource.data.hostUid);
+      allow write: if request.auth != null && request.auth.uid == resource.data.hostUid;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.hostUid;
+    }
+
+    // Achats de services : lecture par l'hôte concerné, écrit uniquement par le
+    // webhook (Admin SDK) pour garantir l'intégrité des montants/commissions.
+    match /service_purchases/{purchaseId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.hostUid;
+    }
+
+    // Catalogue de services par défaut : lecture publique, écrit uniquement côté serveur.
+    match /default_services/{serviceId} {
+      allow read: if true;
+    }
   }
 }

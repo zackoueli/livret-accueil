@@ -225,3 +225,35 @@ export async function sendAffiliateCommissionEmail({
     html: layout(content),
   });
 }
+
+// ── 6. Vente d'un service payant ───────────────────────────────────────────────
+
+export async function sendServicePurchaseNotification({
+  to, hostName, serviceName, amount, hostPayoutAmount,
+}: { to: string; hostName: string; serviceName: string; amount: number; hostPayoutAmount: number }) {
+  const euroAmount = (amount / 100).toFixed(2).replace(".", ",");
+  const euroPayout = (hostPayoutAmount / 100).toFixed(2).replace(".", ",");
+
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#111827;">Nouvelle vente ! 🎉</h1>
+    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+      Bonjour ${hostName || ""},<br><br>
+      Un voyageur vient d'acheter <strong>${serviceName}</strong> depuis votre livret d'accueil.
+    </p>
+    <div style="background:#fff7ed;border-radius:16px;padding:20px;margin-bottom:24px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:0.5px;">Montant payé</p>
+      <p style="margin:0 0 12px;font-size:32px;font-weight:900;color:#111827;">${euroAmount} €</p>
+      <p style="margin:0;font-size:13px;color:#9ca3af;">Dont ${euroPayout} € reversés directement sur votre compte</p>
+    </div>
+    <div style="text-align:center;">
+      ${btn("Voir mes ventes →", `${APP_URL}/dashboard/orders`)}
+    </div>
+  `;
+
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Nouvelle vente : ${serviceName} (+${euroPayout} €)`,
+    html: layout(content),
+  });
+}

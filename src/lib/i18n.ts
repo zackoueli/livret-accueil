@@ -192,6 +192,17 @@ const dict = {
     early_checkin: "Arrivée anticipée",
     le_logement: "Le logement",
     menage_dechets: "Ménage & Déchets",
+
+    // Services payants
+    addons_title: "Services proposés",
+    addons_buy: "Acheter",
+    addons_buying: "Redirection...",
+    addons_per_day: "/ jour",
+    addons_quantity: "Nombre de jours",
+    addons_success_title: "Merci pour votre achat !",
+    addons_success_body: "Un reçu vous a été envoyé par email. Votre hôte a été prévenu.",
+    addons_cancel_title: "Achat annulé",
+    addons_processing: "Confirmation en cours...",
   },
 
   en: {
@@ -363,6 +374,17 @@ const dict = {
     early_checkin: "Early check-in",
     le_logement: "The accommodation",
     menage_dechets: "Cleaning & Waste",
+
+    // Paid services
+    addons_title: "Services offered",
+    addons_buy: "Buy",
+    addons_buying: "Redirecting...",
+    addons_per_day: "/ day",
+    addons_quantity: "Number of days",
+    addons_success_title: "Thank you for your purchase!",
+    addons_success_body: "A receipt has been sent by email. Your host has been notified.",
+    addons_cancel_title: "Purchase cancelled",
+    addons_processing: "Confirming...",
   },
 
   es: {
@@ -534,6 +556,17 @@ const dict = {
     early_checkin: "Llegada anticipada",
     le_logement: "El alojamiento",
     menage_dechets: "Limpieza & Residuos",
+
+    // Servicios de pago
+    addons_title: "Servicios ofrecidos",
+    addons_buy: "Comprar",
+    addons_buying: "Redirigiendo...",
+    addons_per_day: "/ día",
+    addons_quantity: "Número de días",
+    addons_success_title: "¡Gracias por tu compra!",
+    addons_success_body: "Se ha enviado un recibo por email. Tu anfitrión ha sido notificado.",
+    addons_cancel_title: "Compra cancelada",
+    addons_processing: "Confirmando...",
   },
 
   de: {
@@ -705,6 +738,17 @@ const dict = {
     early_checkin: "Frühe Anreise",
     le_logement: "Die Unterkunft",
     menage_dechets: "Reinigung & Abfall",
+
+    // Kostenpflichtige Leistungen
+    addons_title: "Angebotene Leistungen",
+    addons_buy: "Kaufen",
+    addons_buying: "Weiterleitung...",
+    addons_per_day: "/ Tag",
+    addons_quantity: "Anzahl der Tage",
+    addons_success_title: "Danke für Ihren Kauf!",
+    addons_success_body: "Eine Quittung wurde per E-Mail versendet. Ihr Gastgeber wurde benachrichtigt.",
+    addons_cancel_title: "Kauf abgebrochen",
+    addons_processing: "Bestätigung läuft...",
   },
 
   it: {
@@ -876,6 +920,17 @@ const dict = {
     early_checkin: "Arrivo anticipato",
     le_logement: "L'alloggio",
     menage_dechets: "Pulizie & Rifiuti",
+
+    // Servizi a pagamento
+    addons_title: "Servizi offerti",
+    addons_buy: "Acquista",
+    addons_buying: "Reindirizzamento...",
+    addons_per_day: "/ giorno",
+    addons_quantity: "Numero di giorni",
+    addons_success_title: "Grazie per il tuo acquisto!",
+    addons_success_body: "Una ricevuta è stata inviata via email. Il tuo host è stato avvisato.",
+    addons_cancel_title: "Acquisto annullato",
+    addons_processing: "Conferma in corso...",
   },
 
   ar: {
@@ -1047,6 +1102,17 @@ const dict = {
     early_checkin: "وصول مبكر",
     le_logement: "السكن",
     menage_dechets: "التنظيف والنفايات",
+
+    // خدمات مدفوعة
+    addons_title: "الخدمات المقترحة",
+    addons_buy: "شراء",
+    addons_buying: "جارٍ التحويل...",
+    addons_per_day: "/ يوم",
+    addons_quantity: "عدد الأيام",
+    addons_success_title: "شكراً على شرائك!",
+    addons_success_body: "تم إرسال إيصال عبر البريد الإلكتروني. تم إخطار المضيف.",
+    addons_cancel_title: "تم إلغاء الشراء",
+    addons_processing: "جارٍ التأكيد...",
   },
 } as const;
 

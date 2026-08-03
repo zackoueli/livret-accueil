@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useMemo, createContext, useContext } from "react";
+import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
+import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Copy, Check, MapPin, Clock, Key, Car, Thermometer, Wind, Tv, Mailbox,
   Info, Users, Cigarette, Dog, Volume2, PartyPopper, UtensilsCrossed, Trash2,
@@ -11,7 +12,7 @@ import {
   Flame, Zap, Droplets, Hospital, Shield, Home, Briefcase, Accessibility,
   Leaf, Pill, Stethoscope, Store, Building2, Bike, Plane, Bus, Navigation,
   Star, ChevronRight, ChevronDown, ExternalLink, Baby, Waves, Monitor, Dumbbell,
-  Globe, QrCode,
+  Globe, QrCode, Minus, Plus,
 } from "lucide-react";
 
 type Tab = "home" | "stay" | "area" | "safety" | "checkout";
@@ -386,6 +387,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const arrival       = useMod(booklet, "arrival");
   const accommodation = useMod(booklet, "accommodation");
   const contact       = useMod(booklet, "contact");
+  const addonsModule  = useMod(booklet, "addons");
 
   const checkinTime  = g(arrival, "checkin_time");
   const checkoutTime = g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
@@ -405,6 +407,10 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
     <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
       <BookletHero booklet={booklet} accent={accent} />
       <div style={{ padding: "24px 16px 48px" }}>
+
+        <AddonsSimpleBanner booklet={booklet} accent={accent} />
+
+        {addonsModule && <AddonsSimpleSection booklet={booklet} accent={accent} />}
 
         {/* Hôte + message */}
         {(welcomeMsg || hostName) && (
@@ -1264,6 +1270,96 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
   );
 }
 
+// ─── Services payants (add-ons) ───────────────────────────────────────────────
+
+function AddonsSimpleSection({ booklet, accent }: { booklet: Booklet; accent: string }) {
+  const tr = useT();
+  const { services, purchasable } = useAddonServices(booklet);
+  const { buy, purchasing } = useAddonPurchase(booklet.id);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  if (!purchasable || services.length === 0) return null;
+
+  const getQty = (id: string) => quantities[id] ?? 1;
+  const setQty = (id: string, q: number) => setQuantities(p => ({ ...p, [id]: Math.max(1, q) }));
+
+  return (
+    <div style={{ marginBottom: 28 }}>
+      <SectionTitle>{tr("addons_title")}</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {services.map(s => (
+          <Card key={s.id}>
+            {s.image && (
+              <img src={s.image} alt="" style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }} />
+            )}
+            <div style={{ padding: "14px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                {!s.image && <IconBox color={accent}><span style={{ fontSize: 18 }}>{s.emoji || "✨"}</span></IconBox>}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: C.label }}>{s.name}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 600, color: accent }}>
+                    {fmtAddonPrice(s.amount)}{s.priceType === "per_day" ? ` ${tr("addons_per_day")}` : ""}
+                  </p>
+                </div>
+              </div>
+              {s.description && <p style={{ margin: "10px 0 0", fontSize: 13, color: C.sub, lineHeight: 1.55 }}>{s.description}</p>}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 14 }}>
+                {s.priceType === "per_day" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{tr("addons_quantity")}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: C.bg, borderRadius: 12, padding: "4px 6px" }}>
+                      <button onClick={() => setQty(s.id, getQty(s.id) - 1)} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: C.card, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                        <Minus size={12} color={C.label} />
+                      </button>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: C.label, minWidth: 16, textAlign: "center" }}>{getQty(s.id)}</span>
+                      <button onClick={() => setQty(s.id, getQty(s.id) + 1)} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: C.card, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                        <Plus size={12} color={C.label} />
+                      </button>
+                    </div>
+                  </div>
+                ) : <div />}
+                <button
+                  onClick={() => buy(s.id, s.priceType === "per_day" ? getQty(s.id) : 1)}
+                  disabled={!!purchasing}
+                  style={{ padding: "9px 18px", borderRadius: 20, border: "none", cursor: purchasing ? "default" : "pointer", fontSize: 13, fontWeight: 700, background: accent, color: "#fff", opacity: purchasing && purchasing !== s.id ? 0.5 : 1 }}>
+                  {purchasing === s.id ? tr("addons_buying") : tr("addons_buy")}
+                </button>
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AddonsSimpleBanner({ booklet, accent }: { booklet: Booklet; accent: string }) {
+  const tr = useT();
+  const { purchase, status } = useAddonPurchaseConfirmation();
+  if (!purchase) return null;
+
+  const isSuccess = purchase === "success";
+  const processing = isSuccess && status?.status === "processing";
+
+  return (
+    <div style={{ marginBottom: 20 }}>
+      <Card style={isSuccess ? { border: `1.5px solid ${accent}30`, background: `${accent}08` } : { border: "1.5px solid #E5E7EB" }}>
+        <div style={{ padding: "14px 16px" }}>
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: isSuccess ? accent : C.label }}>
+            {isSuccess ? (processing ? tr("addons_processing") : tr("addons_success_title")) : tr("addons_cancel_title")}
+          </p>
+          {isSuccess && !processing && (
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: C.sub, lineHeight: 1.5 }}>
+              {tr("addons_success_body")}
+              {status?.serviceName ? ` (${status.serviceName}${status.amountTotal ? ` · ${fmtAddonPrice(status.amountTotal)}` : ""})` : ""}
+            </p>
+          )}
+        </div>
+      </Card>
+    </div>
+  );
+}
+
 // ─── TAB DÉPART ───────────────────────────────────────────────────────────────
 
 function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) {
@@ -1641,13 +1737,13 @@ function DesktopViewer({ booklet }: { booklet: Booklet }) {
 
 export function ViewerSimple({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   return (
-    <>
+    <Suspense>
       <div className="md:hidden" style={{ height: "100vh", maxHeight: "100dvh" }}>
         <ViewerContent booklet={booklet} onTabChange={onTabChange} />
       </div>
       <div className="hidden md:block">
         <DesktopViewer booklet={booklet} />
       </div>
-    </>
+    </Suspense>
   );
 }

@@ -1,16 +1,17 @@
 "use client";
 
-import { useState, useEffect, useMemo, createContext, useContext } from "react";
+import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, Activity } from "@/lib/modules";
+import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, ScrollText,
   Shield, Phone, Star, MapPin, Clock, Navigation,
   Check, Copy, Globe, X, ChevronRight,
   Baby, Dog, Waves, Briefcase, Info, Bus,
   Users, Volume2, Cigarette, PartyPopper,
-  Home, LogOut, QrCode, Sun, Heart,
+  Home, LogOut, QrCode, Sun, Heart, ShoppingBag, Minus, Plus,
 } from "lucide-react";
 
 // ─── i18n Context ─────────────────────────────────────────────────────────────
@@ -334,6 +335,7 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
   const transport     = useMod(booklet, "transport");
   const tidesModule   = useMod(booklet, "tides");
   const weatherModule = useMod(booklet, "weather");
+  const addonsModule  = useMod(booklet, "addons");
 
   const wifiName = g(accommodation, "wifi_name");
   const wifiPass = g(accommodation, "wifi_password");
@@ -403,6 +405,11 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
             </a>
           </div>
         )}
+      </div>
+
+      <div style={{ padding: "0 16px" }}>
+        <AddonsPastelBanner booklet={booklet} />
+        {addonsModule && <AddonsPastelSection booklet={booklet} />}
       </div>
 
       {/* Liste de cartes */}
@@ -704,6 +711,96 @@ function ActivitySheetContent({ act, tr }: { act: Activity; tr: (k: I18nKey) => 
         {act.website && <a href={act.website} target="_blank" rel="noopener noreferrer" style={{ flex: 1, padding: "11px 0", borderRadius: 14, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", textAlign: "center", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Globe size={14} /> {tr("website")}</a>}
       </div>
     </>
+  );
+}
+
+// ─── Services payants (add-ons) ───────────────────────────────────────────────
+
+function AddonsPastelSection({ booklet }: { booklet: Booklet }) {
+  const tr = useT();
+  const { services, purchasable } = useAddonServices(booklet);
+  const { buy, purchasing } = useAddonPurchase(booklet.id);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+
+  if (!purchasable || services.length === 0) return null;
+
+  const getQty = (id: string) => quantities[id] ?? 1;
+  const setQty = (id: string, q: number) => setQuantities(p => ({ ...p, [id]: Math.max(1, q) }));
+
+  return (
+    <div style={{ marginBottom: 16 }}>
+      <p style={{ margin: "0 0 10px", fontSize: 12.5, fontWeight: 700, color: C.sub, textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("addons_title")}</p>
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {services.map(s => (
+          <div key={s.id} style={{ background: C.card, border: `1px solid ${C.sep}`, borderRadius: 18, overflow: "hidden" }}>
+            {s.image ? (
+              <img src={s.image} alt="" style={{ width: "100%", height: 140, objectFit: "cover", display: "block" }} />
+            ) : null}
+            <div style={{ padding: "14px 16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                {!s.image && (
+                  <div style={{ width: 38, height: 38, borderRadius: 12, background: C.peach, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontSize: 18 }}>
+                    {s.emoji || "✨"}
+                  </div>
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.ink }}>{s.name}</p>
+                  <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 700, color: C.sub }}>
+                    {fmtAddonPrice(s.amount)}{s.priceType === "per_day" ? ` ${tr("addons_per_day")}` : ""}
+                  </p>
+                </div>
+              </div>
+              {s.description && <p style={{ margin: "8px 0 0", fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>{s.description}</p>}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 12 }}>
+                {s.priceType === "per_day" ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                    <span style={{ fontSize: 11, color: C.muted, fontWeight: 700 }}>{tr("addons_quantity")}</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: C.bg, borderRadius: 12, padding: "4px 6px" }}>
+                      <button onClick={() => setQty(s.id, getQty(s.id) - 1)} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: C.card, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                        <Minus size={12} color={C.ink} />
+                      </button>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: C.ink, minWidth: 16, textAlign: "center" }}>{getQty(s.id)}</span>
+                      <button onClick={() => setQty(s.id, getQty(s.id) + 1)} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: C.card, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                        <Plus size={12} color={C.ink} />
+                      </button>
+                    </div>
+                  </div>
+                ) : <div />}
+                <button
+                  onClick={() => buy(s.id, s.priceType === "per_day" ? getQty(s.id) : 1)}
+                  disabled={!!purchasing}
+                  style={{ padding: "9px 18px", borderRadius: 20, border: "none", cursor: purchasing ? "default" : "pointer", fontSize: 13, fontWeight: 700, background: C.green, color: C.ink, opacity: purchasing && purchasing !== s.id ? 0.5 : 1 }}>
+                  {purchasing === s.id ? tr("addons_buying") : tr("addons_buy")}
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AddonsPastelBanner({ booklet }: { booklet: Booklet }) {
+  const tr = useT();
+  const { purchase, status } = useAddonPurchaseConfirmation();
+  if (!purchase) return null;
+
+  const isSuccess = purchase === "success";
+  const processing = isSuccess && status?.status === "processing";
+
+  return (
+    <div style={{ margin: "0 16px 14px", borderRadius: 18, padding: "14px 16px", background: isSuccess ? C.green : C.sep, border: `1px solid ${isSuccess ? C.green : C.sep}` }}>
+      <p style={{ margin: 0, fontSize: 14, fontWeight: 800, color: C.ink }}>
+        {isSuccess ? (processing ? tr("addons_processing") : tr("addons_success_title")) : tr("addons_cancel_title")}
+      </p>
+      {isSuccess && !processing && (
+        <p style={{ margin: "4px 0 0", fontSize: 12.5, color: C.ink, opacity: 0.75, lineHeight: 1.5 }}>
+          {tr("addons_success_body")}
+          {status?.serviceName ? ` (${status.serviceName}${status.amountTotal ? ` · ${fmtAddonPrice(status.amountTotal)}` : ""})` : ""}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -1104,13 +1201,13 @@ function PastelDesktop({ booklet }: { booklet: Booklet }) {
 
 export function ViewerPastel({ booklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   return (
-    <>
+    <Suspense>
       <div className="md:hidden" style={{ height: "100vh", maxHeight: "100dvh" }}>
         <PastelContent booklet={booklet} onTabChange={onTabChange} />
       </div>
       <div className="hidden md:block">
         <PastelDesktop booklet={booklet} />
       </div>
-    </>
+    </Suspense>
   );
 }

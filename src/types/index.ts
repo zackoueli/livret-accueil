@@ -50,7 +50,8 @@ export type ModuleType =
   | "eco"           // 🌿 Éco-responsable
   | "practical"     // ℹ️ Infos pratiques
   | "tides"         // 🌊 Marées
-  | "weather";      // ⛅ Météo
+  | "weather"       // ⛅ Météo
+  | "addons";       // 💳 Services payants
 
 export interface BookletDocument {
   url: string;
@@ -176,6 +177,60 @@ export interface Booklet {
   isPublished: boolean;
   viewCount?: number;
   translations?: Partial<BookletTranslations>;
+  /** Dénormalisé depuis host_connect_accounts : services payants achetables sur ce livret */
+  addonsPurchasable?: boolean;
   createdAt: number;
   updatedAt: number;
+}
+
+// ── Services payants (add-ons) ──────────────────────────────────────────────────
+
+export type ServicePriceType = "one_time" | "per_day";
+
+export interface BookletService {
+  id: string;
+  bookletId: string;
+  hostUid: string;
+  sourceServiceId?: string;
+  isDefault: boolean;
+  name: string;
+  description?: string;
+  emoji?: string;
+  image?: string;
+  priceType: ServicePriceType;
+  amount: number; // centimes, EUR
+  currency: "eur";
+  enabled: boolean;
+  order: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface ServicePurchase {
+  id: string;
+  bookletId: string;
+  serviceId: string;
+  hostUid: string;
+  serviceName: string;
+  quantity: number;
+  amountTotal: number; // centimes
+  commissionAmount: number; // centimes
+  commissionRate: number; // %
+  hostPayoutAmount: number; // centimes
+  currency: "eur";
+  guestEmail?: string;
+  stripeCheckoutSessionId: string;
+  stripePaymentIntentId?: string;
+  status: "pending" | "paid" | "failed" | "refunded";
+  createdAt: number;
+  paidAt?: number;
+}
+
+export interface HostConnectAccount {
+  userId: string;
+  stripeAccountId: string;
+  onboardingComplete: boolean;
+  chargesEnabled: boolean;
+  payoutsEnabled: boolean;
+  createdAt: number;
 }

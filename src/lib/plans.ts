@@ -81,6 +81,14 @@ export const PLAN_ACTIVITY_LIMIT: Record<Plan, number | null> = {
   agency: null,
 };
 
+// Commission plateforme (%) sur chaque vente de service payant, selon le plan de l'hôte
+export const PLAN_COMMISSION: Record<Plan, number> = {
+  free: 20,
+  starter: 10,
+  pro: 5,
+  agency: 2.5,
+};
+
 export const PLANS_CONFIG = [
   {
     id: "free" as Plan,

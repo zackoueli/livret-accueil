@@ -7,6 +7,7 @@ import {
   PLAN_TEMPLATE_COUNT,
   PLAN_TRANSLATION_LANGS,
   PLAN_ACTIVITY_LIMIT,
+  PLAN_COMMISSION,
   PlanFeature,
 } from "@/lib/plans";
 import { Plan } from "@/types";
@@ -24,6 +25,7 @@ export function usePlan() {
     templateCount: PLAN_TEMPLATE_COUNT[plan],
     translationLangLimit: PLAN_TRANSLATION_LANGS[plan],
     activityLimit: PLAN_ACTIVITY_LIMIT[plan],
+    commissionRate: PLAN_COMMISSION[plan],
     isFree: plan === "free",
     isStarter: plan === "starter",
     isPro: plan === "pro",

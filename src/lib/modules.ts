@@ -1,6 +1,6 @@
 import { ModuleType } from "@/types";
 
-export type FieldType = "text" | "textarea" | "time" | "phone" | "url" | "photo" | "number" | "places" | "activities" | "services";
+export type FieldType = "text" | "textarea" | "time" | "phone" | "url" | "photo" | "number" | "places" | "activities" | "services" | "addon_services";
 
 export interface ModuleField {
   key: string;
@@ -41,6 +41,7 @@ export const MODULE_META: Record<ModuleType, ModuleMeta> = {
   practical:     { label: "Infos pratiques",        emoji: "ℹ️", description: "Pharmacie, médecin, mairie, services", optional: true },
   tides:         { label: "Marées",                 emoji: "🌊", description: "Horaires de marées du port le plus proche", optional: true },
   weather:       { label: "Météo",                  emoji: "⛅", description: "Météo en temps réel pour le logement", optional: true },
+  addons:        { label: "Services payants",       emoji: "💳", description: "Options payantes proposées aux voyageurs (late checkout, petit-déjeuner...)", optional: true },
 };
 
 // ── Champs par module ──────────────────────────────────────────────────────────
@@ -211,6 +212,10 @@ export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
       hint: "Par défaut, la météo est basée sur l'adresse du logement. Renseignez une ville uniquement si vous souhaitez afficher la météo d'un autre endroit." },
     { key: "note", label: "Note météo", placeholder: "Le logement est situé à 300m de l'océan, pensez à prendre un coupe-vent.", type: "textarea" },
   ],
+
+  addons: [
+    { key: "addon_services_list", label: "Services proposés", placeholder: "", type: "addon_services" },
+  ],
 };
 
 // ── Modules principaux (toujours présents par défaut) ─────────────────────────
@@ -240,6 +245,7 @@ export const OPTIONAL_MODULES: ModuleType[] = [
   "practical",
   "tides",
   "weather",
+  "addons",
 ];
 
 // ── Formatage de l'heure HH:MM → HHhMM ───────────────────────────────────────
