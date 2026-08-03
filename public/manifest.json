@@ -1,6 +1,6 @@
 {
-  "name": "Livret.",
-  "short_name": "Livret",
+  "name": "Bunkly",
+  "short_name": "Bunkly",
   "description": "Votre livret d'accueil digital",
   "start_url": "/",
   "display": "standalone",
