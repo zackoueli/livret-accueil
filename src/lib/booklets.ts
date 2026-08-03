@@ -87,7 +87,14 @@ export async function updateBooklet(id: string, data: Partial<Booklet>) {
   // Le champ `id` ne doit jamais etre persiste : c'est le nom du document, pas une donnee.
   // S'il se glissait dans `clean`, une lecture ulterieure ({ id: snap.id, ...snap.data() })
   // se ferait ecraser par cette valeur perimee et pointerait vers le mauvais document.
-  const { id: _omit, ...rest } = data as Record<string, unknown> & { id?: string };
+  //
+  // `addonsPurchasable`/`ownerPlan` sont denormalises par le serveur (webhook Stripe,
+  // /api/host/connect/status) et peuvent changer pendant qu'un onglet editeur reste
+  // ouvert avec un state perime : les exclure ici evite qu'une sauvegarde ulterieure
+  // n'ecrase la valeur a jour avec l'ancienne valeur chargee en memoire.
+  const { id: _omit, addonsPurchasable: _addons, ownerPlan: _plan, ...rest } = data as Record<string, unknown> & {
+    id?: string; addonsPurchasable?: boolean; ownerPlan?: string;
+  };
   const clean = sanitizeForFirestore({ ...rest, updatedAt: Date.now() });
   await updateDoc(doc(db, "booklets", id), clean);
 }
