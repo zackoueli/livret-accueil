@@ -4,7 +4,6 @@ import "../globals.css";
 export const metadata: Metadata = {
   title: "Bunkly",
   robots: { index: false, follow: false },
-  manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
@@ -27,7 +26,6 @@ export default function BookletLayout({ children }: { children: React.ReactNode 
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="apple-mobile-web-app-title" content="Bunkly" />
-        <link rel="manifest" href="/manifest.json" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
       </head>
       <body style={{ margin: 0, background: "#000" }}>
