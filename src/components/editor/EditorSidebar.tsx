@@ -30,6 +30,10 @@ import { usePlan } from "@/hooks/usePlan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 
 const TIDES_WEATHER_TYPES: ModuleType[] = ["tides", "weather"];
+// Disponible sur tous les plans, y compris gratuit : la commission plateforme
+// (plus élevée sur le plan gratuit) incite déjà à upgrader, pas besoin de
+// verrouiller la fonctionnalité elle-même.
+const FREE_MODULE_TYPES: ModuleType[] = ["addons"];
 
 export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void } = {}) {
   const t = useTranslations("editor");
@@ -41,6 +45,7 @@ export function EditorSidebar({ onModuleSelect }: { onModuleSelect?: () => void 
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>(undefined);
 
   const canAddModule = (type: ModuleType) => {
+    if (FREE_MODULE_TYPES.includes(type)) return true;
     if (TIDES_WEATHER_TYPES.includes(type)) return can("tides_weather");
     return can("all_modules");
   };
