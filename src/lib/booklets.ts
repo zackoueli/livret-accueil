@@ -4,6 +4,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   getDocs,
   query,
   where,
@@ -40,6 +41,13 @@ import { seedDefaultServices } from "./services";
 export async function createBooklet(userId: string, title: string, contentTemplateId = "blank", layoutId = "simple", ownerPlan: Plan = "free", defaultLang: SupportedLang = "fr"): Promise<string> {
   const slug = await generateUniqueSlug();
   const tpl = getTemplate(contentTemplateId);
+
+  // Reprend le statut Connect déjà acquis par l'hôte, sinon un nouveau livret créé
+  // après l'onboarding resterait à addonsPurchasable=false jusqu'au prochain
+  // événement account.updated (qui peut ne jamais se reproduire).
+  const connectDoc = await getDoc(doc(db, "host_connect_accounts", userId));
+  const addonsPurchasable = connectDoc.exists() ? Boolean(connectDoc.data().chargesEnabled) : false;
+
   const booklet: Omit<Booklet, "id"> = {
     userId,
     ownerPlan,
@@ -53,6 +61,7 @@ export async function createBooklet(userId: string, title: string, contentTempla
     coverImage: tpl.coverImage ?? "",
     modules: tpl.modules(),
     isPublished: true,
+    addonsPurchasable,
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
