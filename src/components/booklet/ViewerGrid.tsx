@@ -13,7 +13,7 @@ import {
   Flame, Zap, Droplets, Hospital, ConciergeBell, Wrench,
   Pill, Stethoscope, Store, Building2, WashingMachine, Users,
   Mailbox, Volume2, Cigarette, PartyPopper, ShoppingBag,
-  Home, LogOut, QrCode, Sun, Droplet, Minus, Plus,
+  Home, LogOut, QrCode, Sun, Droplet, Minus, Plus, CreditCard,
 } from "lucide-react";
 
 // ─── i18n Context ─────────────────────────────────────────────────────────────
@@ -391,7 +391,6 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const transport     = useMod(booklet, "transport");
   const tidesModule   = useMod(booklet, "tides");
   const weatherModule = useMod(booklet, "weather");
-  const addonsModule  = useMod(booklet, "addons");
 
   const wifiName = g(accommodation, "wifi_name");
   const wifiPass = g(accommodation, "wifi_password");
@@ -467,7 +466,6 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
         )}
 
         <AddonsGridBanner booklet={booklet} accent={accent} />
-        {addonsModule && <AddonsGridSection booklet={booklet} accent={accent} />}
 
         {/* Grille de boutons */}
         <div style={{ padding: "0 16px 32px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -854,8 +852,7 @@ function AddonsGridSection({ booklet, accent }: { booklet: Booklet; accent: stri
   const setQty = (id: string, q: number) => setQuantities(p => ({ ...p, [id]: Math.max(1, q) }));
 
   return (
-    <div style={{ margin: "0 16px 16px" }}>
-      <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("addons_title")}</p>
+    <div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {services.map(s => (
           <div key={s.id} style={{ ...GLASS_CARD, overflow: "hidden" }}>
@@ -931,6 +928,36 @@ function AddonsGridBanner({ booklet, accent }: { booklet: Booklet; accent: strin
 }
 
 // ─── PAGE DÉPART ──────────────────────────────────────────────────────────────
+
+function PageServices({ booklet, accent }: { booklet: Booklet; accent: string }) {
+  const tr = useT();
+
+  return (
+    <div style={{ position: "relative", flex: 1, height: "100%", overflow: "hidden" }}>
+      {/* Fond photo plein écran */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        {booklet.coverImage
+          ? <img src={booklet.coverImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          : <div style={{ width: "100%", height: "100%", background: "#1a1a2e" }} />
+        }
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)" }} />
+      </div>
+
+      {/* Contenu scrollable */}
+      <div style={{ position: "relative", zIndex: 1, height: "100%", overflowY: "auto", touchAction: "pan-y", paddingBottom: TAB_BAR_H }}>
+
+        {/* Header */}
+        <div style={{ padding: "48px 20px 16px" }}>
+          <h2 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#fff", letterSpacing: -0.4, textShadow: "0 1px 8px rgba(0,0,0,0.4)" }}>{tr("nav_services")}</h2>
+        </div>
+
+        <div style={{ padding: "0 16px 32px" }}>
+          <AddonsGridSection booklet={booklet} accent={accent} />
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const tr = useT();
@@ -1050,15 +1077,16 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 
 // ─── Tab Bar ──────────────────────────────────────────────────────────────────
 
-type GridTab = "home" | "area" | "checkout";
+type GridTab = "home" | "area" | "services" | "checkout";
 
-function GridTabBar({ active, onSelect, accent }: { active: GridTab; onSelect: (t: GridTab) => void; accent: string }) {
+function GridTabBar({ active, onSelect, accent, showServices }: { active: GridTab; onSelect: (t: GridTab) => void; accent: string; showServices: boolean }) {
   const tr = useT();
   const inactive = "rgba(255,255,255,0.5)";
 
   const tabs = [
     { id: "home" as GridTab,     label: tr("nav_home"),     icon: (a: boolean) => <Home size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
     { id: "area" as GridTab,     label: tr("nav_area"),     icon: (a: boolean) => <MapPin size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
+    ...(showServices ? [{ id: "services" as GridTab, label: tr("nav_services"), icon: (a: boolean) => <CreditCard size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> }] : []),
     { id: "checkout" as GridTab, label: tr("nav_checkout"), icon: (a: boolean) => <LogOut size={22} color={a ? "#fff" : inactive} strokeWidth={a ? 2.5 : 1.8} /> },
   ];
 
@@ -1176,6 +1204,7 @@ function GridContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; o
   const [lang, setLang] = useState<SupportedLang>(rawBooklet.defaultLang ?? "fr");
   const booklet = useTranslatedBooklet(rawBooklet, lang);
   const accent = booklet.accentColor || C.blue;
+  const showServices = !!useMod(booklet, "addons") && !!booklet.addonsPurchasable;
 
   const handleTabChange = (t: GridTab) => {
     setTab(t);
@@ -1202,12 +1231,13 @@ function GridContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; o
       <div style={{ position: "absolute", inset: 0, zIndex: 2, display: "flex", flexDirection: "column" }}>
         {tab === "home"     && <PageHome     booklet={booklet} accent={accent} setDrawer={setDrawer} />}
         {tab === "area"     && <PageArea     booklet={booklet} accent={accent} />}
+        {tab === "services" && <PageServices booklet={booklet} accent={accent} />}
         {tab === "checkout" && <PageCheckout booklet={booklet} accent={accent} />}
       </div>
 
       {/* Tab bar */}
       <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 50 }}>
-        <GridTabBar active={tab} onSelect={handleTabChange} accent={accent} />
+        <GridTabBar active={tab} onSelect={handleTabChange} accent={accent} showServices={showServices} />
       </div>
 
       {/* Drawers — au-dessus de tout, même de la tab bar */}

@@ -410,8 +410,6 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
         <AddonsSimpleBanner booklet={booklet} accent={accent} />
 
-        {addonsModule && <AddonsSimpleSection booklet={booklet} accent={accent} />}
-
         {/* Hôte + message */}
         {(welcomeMsg || hostName) && (
           <div style={{ marginBottom: 28 }}>
@@ -544,6 +542,8 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
             </Card>
           </div>
         )}
+
+        {addonsModule && <AddonsSimpleSection booklet={booklet} accent={accent} />}
 
         {/* Services */}
         {services.length > 0 && (

@@ -8,6 +8,7 @@ const dict = {
     nav_area: "Activités",
     nav_safety: "Urgences",
     nav_checkout: "Départ",
+    nav_services: "Services",
 
     // Sections principales
     schedule: "Horaires",
@@ -211,6 +212,7 @@ const dict = {
     nav_area: "Around",
     nav_safety: "Safety",
     nav_checkout: "Check-out",
+    nav_services: "Services",
 
     schedule: "Schedule",
     checkin: "Check-in",
@@ -393,6 +395,7 @@ const dict = {
     nav_area: "Alrededores",
     nav_safety: "Urgencias",
     nav_checkout: "Salida",
+    nav_services: "Servicios",
 
     schedule: "Horarios",
     checkin: "Llegada",
@@ -575,6 +578,7 @@ const dict = {
     nav_area: "Umgebung",
     nav_safety: "Notfall",
     nav_checkout: "Abreise",
+    nav_services: "Leistungen",
 
     schedule: "Zeiten",
     checkin: "Anreise",
@@ -757,6 +761,7 @@ const dict = {
     nav_area: "Dintorni",
     nav_safety: "Emergenze",
     nav_checkout: "Partenza",
+    nav_services: "Servizi",
 
     schedule: "Orari",
     checkin: "Arrivo",
@@ -939,6 +944,7 @@ const dict = {
     nav_area: "المحيط",
     nav_safety: "الطوارئ",
     nav_checkout: "المغادرة",
+    nav_services: "الخدمات",
 
     schedule: "المواعيد",
     checkin: "الوصول",

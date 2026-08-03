@@ -409,7 +409,6 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
 
       <div style={{ padding: "0 16px" }}>
         <AddonsPastelBanner booklet={booklet} />
-        {addonsModule && <AddonsPastelSection booklet={booklet} />}
       </div>
 
       {/* Liste de cartes */}
@@ -418,6 +417,13 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
           <PastelCard key={c.id} tint={c.tint} icon={c.icon} title={c.label} onClick={() => setSheet(c.id)} />
         ))}
       </div>
+
+      {addonsModule && (
+        <div style={{ padding: "0 16px 32px" }}>
+          <AddonsPastelSection booklet={booklet} />
+        </div>
+      )}
+
       <BunklyCredit ownerPlan={booklet.ownerPlan} />
     </div>
   );
