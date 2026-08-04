@@ -469,6 +469,8 @@
     "addonOptionMax": "Max",
     "addonChoiceItemLabel": "Libellé (ex: E-bike)",
     "addonAddChoiceItem": "Ajouter un choix",
+    "addonChoiceItemPrice": "Prix",
+    "addonChoiceMaxQuantity": "Quantité max",
     "ordersEmpty": "Aucune vente pour le moment",
     "ordersDate": "Date",
     "ordersService": "Service",

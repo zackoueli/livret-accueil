@@ -1291,22 +1291,31 @@ function AddonQuantityPicker({ label, min, max, value, onChange }: {
   );
 }
 
-function AddonChoicePicker({ choices, value, onChange, accent }: {
-  choices: ServiceChoiceItem[]; value: string | undefined; onChange: (id: string) => void; accent: string;
+function AddonChoicesPicker({ choices, quantities, onChange }: {
+  choices: ServiceChoiceItem[]; quantities: Record<string, number>; onChange: (choiceId: string, q: number) => void;
 }) {
   return (
-    <div style={{ marginTop: 10 }}>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {choices.map(c => {
-          const selected = value === c.id;
-          return (
-            <button key={c.id} onClick={() => onChange(c.id)}
-              style={{ padding: "6px 12px", borderRadius: 16, border: selected ? "none" : `1px solid ${C.sep}`, background: selected ? accent : C.card, color: selected ? "#fff" : C.label, fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-              {c.label} · {fmtAddonPrice(c.amount)}
-            </button>
-          );
-        })}
-      </div>
+    <div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+      {choices.map(c => {
+        const qty = quantities[c.id] ?? 0;
+        return (
+          <div key={c.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+            <div style={{ minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: C.label }}>{c.label}</p>
+              <p style={{ margin: 0, fontSize: 11, color: C.muted }}>{fmtAddonPrice(c.amount)}</p>
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, background: C.bg, borderRadius: 12, padding: "4px 6px", flexShrink: 0 }}>
+              <button onClick={() => onChange(c.id, Math.max(0, qty - 1))} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: C.card, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <Minus size={12} color={C.label} />
+              </button>
+              <span style={{ fontSize: 13, fontWeight: 700, color: C.label, minWidth: 16, textAlign: "center" }}>{qty}</span>
+              <button onClick={() => onChange(c.id, Math.min(c.maxQuantity, qty + 1))} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: C.card, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <Plus size={12} color={C.label} />
+              </button>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -1316,22 +1325,24 @@ function AddonsSimpleSection({ booklet, accent }: { booklet: Booklet; accent: st
   const { services, purchasable } = useAddonServices(booklet);
   const { buy, purchasing } = useAddonPurchase(booklet.id);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [choiceIds, setChoiceIds] = useState<Record<string, string>>({});
+  const [choiceQuantities, setChoiceQuantities] = useState<Record<string, Record<string, number>>>({});
 
   if (!purchasable || services.length === 0) return null;
 
   const getQty = (s: BookletService) => quantities[s.id] ?? (s.priceType === "per_unit" ? (s.unitMin ?? 1) : 1);
   const setQty = (s: BookletService, q: number) => setQuantities(p => ({ ...p, [s.id]: q }));
-  const getChoiceId = (s: BookletService) => choiceIds[s.id] ?? s.choices?.[0]?.id;
-  const setChoiceId = (s: BookletService, id: string) => setChoiceIds(p => ({ ...p, [s.id]: id }));
+  const getChoiceQuantities = (s: BookletService) => choiceQuantities[s.id] ?? {};
+  const setChoiceQuantity = (s: BookletService, choiceId: string, q: number) =>
+    setChoiceQuantities(p => ({ ...p, [s.id]: { ...getChoiceQuantities(s), [choiceId]: q } }));
 
   return (
     <div style={{ marginBottom: 28 }}>
       <SectionTitle>{tr("addons_title")}</SectionTitle>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {services.map(s => {
-          const selection = { quantity: getQty(s), choiceId: getChoiceId(s) };
+          const selection = { quantity: getQty(s), choiceQuantities: getChoiceQuantities(s) };
           const { totalAmount } = computeServiceTotal(s, selection);
+          const canBuy = s.priceType !== "choice" || totalAmount > 0;
 
           return (
           <Card key={s.id}>
@@ -1359,7 +1370,7 @@ function AddonsSimpleSection({ booklet, accent }: { booklet: Booklet; accent: st
                 <AddonQuantityPicker label={s.unitLabel || tr("addons_quantity")} min={s.unitMin ?? 1} max={s.unitMax ?? 9999} value={getQty(s)} onChange={(v) => setQty(s, v)} />
               )}
               {s.priceType === "choice" && s.choices && (
-                <AddonChoicePicker choices={s.choices} value={getChoiceId(s)} onChange={(id) => setChoiceId(s, id)} accent={accent} />
+                <AddonChoicesPicker choices={s.choices} quantities={getChoiceQuantities(s)} onChange={(id, q) => setChoiceQuantity(s, id, q)} />
               )}
 
               <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
@@ -1368,8 +1379,8 @@ function AddonsSimpleSection({ booklet, accent }: { booklet: Booklet; accent: st
                 )}
                 <button
                   onClick={() => buy(s.id, selection)}
-                  disabled={!!purchasing}
-                  style={{ padding: "9px 18px", borderRadius: 20, border: "none", cursor: purchasing ? "default" : "pointer", fontSize: 13, fontWeight: 700, background: accent, color: "#fff", opacity: purchasing && purchasing !== s.id ? 0.5 : 1 }}>
+                  disabled={!!purchasing || !canBuy}
+                  style={{ padding: "9px 18px", borderRadius: 20, border: "none", cursor: purchasing || !canBuy ? "default" : "pointer", fontSize: 13, fontWeight: 700, background: accent, color: "#fff", opacity: (purchasing && purchasing !== s.id) || !canBuy ? 0.5 : 1 }}>
                   {purchasing === s.id ? tr("addons_buying") : tr("addons_buy")}
                 </button>
               </div>

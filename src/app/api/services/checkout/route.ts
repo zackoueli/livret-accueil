@@ -31,10 +31,14 @@ export async function POST(request: NextRequest) {
     }
 
     // Recalcul entièrement côté serveur — jamais de montant/quantité fourni par le client.
-    const { totalAmount, quantity, choice } = computeServiceTotal(
+    const { totalAmount, quantity, choiceSelections } = computeServiceTotal(
       service,
       (selection ?? {}) as ServiceSelection
     );
+
+    if (totalAmount <= 0) {
+      return Response.json({ error: "Nothing selected" }, { status: 400 });
+    }
 
     const commissionRate = PLAN_COMMISSION[(booklet.ownerPlan as Plan) ?? "free"];
     const applicationFeeAmount = Math.round((totalAmount * commissionRate) / 100);
@@ -65,7 +69,10 @@ export async function POST(request: NextRequest) {
         serviceName: service.name,
         quantity: String(quantity),
         unitLabel: service.priceType === "per_unit" ? (service.unitLabel ?? "") : "",
-        choiceLabel: choice?.label ?? "",
+        // Encodage minimal (id + quantité uniquement) — le webhook relit la définition
+        // des choix du service pour résoudre les libellés humains, même logique que
+        // serviceName déjà snapshotté plutôt que fourni par le client.
+        choiceSelections: JSON.stringify(choiceSelections.map((c) => ({ i: c.choice.id, q: c.quantity }))),
         commissionRate: String(commissionRate),
       },
       success_url: `${appUrl}/b/${booklet.slug}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,

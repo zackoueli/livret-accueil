@@ -189,13 +189,15 @@ export interface Booklet {
 // - one_time  : prix fixe (amount)
 // - per_day   : prix × nombre de jours (amount, quantité saisie à l'achat)
 // - per_unit  : prix × quantité sur une unité libre (amount = prix/unité, unitLabel/min/max)
-// - choice    : le voyageur choisit une valeur dans une liste, chacune avec son propre prix (choices)
+// - choice    : le voyageur choisit une quantité pour chacun des choix proposés (choices),
+//               le total est la somme de (quantité × prix) sur les choix sélectionnés
 export type ServicePriceType = "one_time" | "per_day" | "per_unit" | "choice";
 
 export interface ServiceChoiceItem {
   id: string;
   label: string;
-  amount: number; // centimes
+  amount: number; // centimes, prix par unité de ce choix
+  maxQuantity: number; // quantité maximale sélectionnable pour ce choix
 }
 
 export interface BookletService {
@@ -223,6 +225,11 @@ export interface BookletService {
   updatedAt: number;
 }
 
+export interface ServicePurchaseChoiceSelection {
+  label: string;
+  quantity: number;
+}
+
 export interface ServicePurchase {
   id: string;
   bookletId: string;
@@ -231,7 +238,7 @@ export interface ServicePurchase {
   serviceName: string;
   quantity: number; // pour per_day/per_unit — unitLabel snapshotté séparément
   unitLabel?: string;
-  choiceLabel?: string; // si priceType === "choice" au moment de l'achat
+  choiceSelections?: ServicePurchaseChoiceSelection[]; // si priceType === "choice" au moment de l'achat
   amountTotal: number; // centimes
   commissionAmount: number; // centimes
   commissionRate: number; // %

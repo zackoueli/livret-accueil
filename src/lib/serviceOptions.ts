@@ -1,29 +1,30 @@
 import { BookletService, ServiceChoiceItem } from "@/types";
 
 // Garde-fou technique uniquement (débordement numérique/Stripe), pas une limite produit —
-// le max réel est celui configuré par l'hôte (unitMax).
+// le max réel est celui configuré par l'hôte (unitMax / choice.maxQuantity).
 const HARD_MAX_QUANTITY = 9999;
 
 export interface ServiceSelection {
   quantity?: number; // per_day / per_unit
-  choiceId?: string; // choice
+  choiceQuantities?: Record<string, number>; // choice — choiceId -> quantité
+}
+
+export interface ResolvedChoiceSelection {
+  choice: ServiceChoiceItem;
+  quantity: number;
+  amount: number; // centimes
 }
 
 export interface PriceComputationResult {
   totalAmount: number;
   quantity: number; // 1 pour one_time/choice
-  choice?: ServiceChoiceItem;
+  choiceSelections: ResolvedChoiceSelection[];
 }
 
 export function clampQuantity(min: number, max: number, raw: unknown, fallback: number): number {
   const parsed = Math.round(Number(raw));
   const value = Number.isFinite(parsed) ? parsed : fallback;
   return Math.min(Math.max(value, min), Math.min(max, HARD_MAX_QUANTITY));
-}
-
-export function resolveChoice(service: Pick<BookletService, "choices">, choiceId: unknown): ServiceChoiceItem | undefined {
-  const choices = service.choices ?? [];
-  return choices.find((c) => c.id === choiceId) ?? choices[0];
 }
 
 export function computeServiceTotal(
@@ -34,13 +35,21 @@ export function computeServiceTotal(
     const min = service.priceType === "per_unit" ? (service.unitMin ?? 1) : 1;
     const max = service.priceType === "per_unit" ? (service.unitMax ?? HARD_MAX_QUANTITY) : HARD_MAX_QUANTITY;
     const quantity = clampQuantity(min, max, selection.quantity, min);
-    return { totalAmount: service.amount * quantity, quantity };
+    return { totalAmount: service.amount * quantity, quantity, choiceSelections: [] };
   }
 
   if (service.priceType === "choice") {
-    const choice = resolveChoice(service, selection.choiceId);
-    return { totalAmount: choice?.amount ?? 0, quantity: 1, choice };
+    const choices = service.choices ?? [];
+    const raw = selection.choiceQuantities ?? {};
+    const choiceSelections: ResolvedChoiceSelection[] = choices
+      .map((choice) => {
+        const quantity = clampQuantity(0, choice.maxQuantity, raw[choice.id], 0);
+        return { choice, quantity, amount: choice.amount * quantity };
+      })
+      .filter((c) => c.quantity > 0);
+    const totalAmount = choiceSelections.reduce((sum, c) => sum + c.amount, 0);
+    return { totalAmount, quantity: 1, choiceSelections };
   }
 
-  return { totalAmount: service.amount, quantity: 1 };
+  return { totalAmount: service.amount, quantity: 1, choiceSelections: [] };
 }

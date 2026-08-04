@@ -89,7 +89,9 @@ export function OrdersPage() {
                       <p className="text-xs text-gray-400 mt-0.5">
                         {new Date(order.createdAt).toLocaleDateString(locale)}
                         {order.quantity > 1 ? ` · ×${order.quantity}${order.unitLabel ? ` ${order.unitLabel}` : ""}` : ""}
-                        {order.choiceLabel ? ` · ${order.choiceLabel}` : ""}
+                        {order.choiceSelections && order.choiceSelections.length > 0
+                          ? ` · ${order.choiceSelections.map((c) => `${c.label} ×${c.quantity}`).join(", ")}`
+                          : ""}
                       </p>
                     </div>
 

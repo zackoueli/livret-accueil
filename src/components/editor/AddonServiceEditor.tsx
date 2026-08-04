@@ -35,27 +35,40 @@ function ChoicesEditor({ service, patch }: {
     patch({ choices: choices.map((c) => (c.id === id ? { ...c, ...data } : c)) });
   };
   const addChoice = () => {
-    patch({ choices: [...choices, { id: nanoid(), label: "", amount: 0 }] });
+    patch({ choices: [...choices, { id: nanoid(), label: "", amount: 0, maxQuantity: 5 }] });
   };
   const removeChoice = (id: string) => {
     patch({ choices: choices.filter((c) => c.id !== id) });
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       {choices.map((choice) => (
-        <div key={choice.id} className="flex items-center gap-2">
-          <input type="text" value={choice.label} onChange={(e) => updateChoice(choice.id, { label: e.target.value })}
-            placeholder={t("addonChoiceItemLabel")} className={`${input} flex-1 text-sm`} />
-          <div className="relative w-24 shrink-0">
-            <input type="number" min={0} step={0.5} value={fmtAmount(choice.amount)}
-              onChange={(e) => updateChoice(choice.id, { amount: Math.round(parseFloat(e.target.value || "0") * 100) })}
-              className={`${input} pr-6 text-sm text-gray-900`} />
-            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">€</span>
+        <div key={choice.id} className="bg-white rounded-xl border border-gray-100 p-2.5 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <input type="text" value={choice.label} onChange={(e) => updateChoice(choice.id, { label: e.target.value })}
+              placeholder={t("addonChoiceItemLabel")} className={`${input} flex-1 text-sm`} />
+            <button onClick={() => removeChoice(choice.id)} className="p-1 text-gray-300 hover:text-red-400 transition-colors shrink-0">
+              <Trash2 className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <button onClick={() => removeChoice(choice.id)} className="p-1 text-gray-300 hover:text-red-400 transition-colors shrink-0">
-            <Trash2 className="w-3.5 h-3.5" />
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">{t("addonChoiceItemPrice")}</label>
+              <div className="relative">
+                <input type="number" min={0} step={0.5} value={fmtAmount(choice.amount)}
+                  onChange={(e) => updateChoice(choice.id, { amount: Math.round(parseFloat(e.target.value || "0") * 100) })}
+                  className={`${input} pr-7 text-sm text-gray-900`} />
+                <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">€</span>
+              </div>
+            </div>
+            <div>
+              <label className="text-xs text-gray-400 block mb-1">{t("addonChoiceMaxQuantity")}</label>
+              <input type="number" min={1} value={choice.maxQuantity ?? 5}
+                onChange={(e) => updateChoice(choice.id, { maxQuantity: Math.max(1, Math.round(Number(e.target.value) || 1)) })}
+                className={`${input} text-sm text-gray-900`} />
+            </div>
+          </div>
         </div>
       ))}
       <button onClick={addChoice}
@@ -127,7 +140,7 @@ export function AddonServiceEditor({ bookletId }: { bookletId: string }) {
   const changePriceType = (service: BookletService, priceType: ServicePriceType) => {
     const data: Partial<BookletService> = { priceType };
     if (priceType === "choice" && !service.choices?.length) {
-      data.choices = [{ id: nanoid(), label: "", amount: 0 }];
+      data.choices = [{ id: nanoid(), label: "", amount: 0, maxQuantity: 5 }];
     }
     if (priceType === "per_unit") {
       data.unitMin = service.unitMin ?? 1;

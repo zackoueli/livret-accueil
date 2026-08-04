@@ -67,6 +67,24 @@ export async function POST(request: NextRequest) {
     const commissionRate = Number(meta.commissionRate ?? "0");
     const commissionAmount = Math.round((amountTotal * commissionRate) / 100);
 
+    // Résout les choix sélectionnés (ids + quantités uniquement dans les métadonnées)
+    // vers des libellés humains en relisant la définition actuelle du service — ne doit
+    // jamais faire échouer le webhook si un choix a été modifié/supprimé depuis l'achat.
+    let choiceSelections: { label: string; quantity: number }[] = [];
+    try {
+      const raw = JSON.parse(meta.choiceSelections ?? "[]") as Array<{ i: string; q: number }>;
+      if (raw.length > 0) {
+        const serviceSnap = await adminDb.collection("booklet_services").doc(meta.serviceId).get();
+        const choices = (serviceSnap.data()?.choices ?? []) as Array<{ id: string; label: string }>;
+        choiceSelections = raw.map((sel) => {
+          const choice = choices.find((c) => c.id === sel.i);
+          return { label: choice?.label ?? "(choix supprimé)", quantity: sel.q };
+        });
+      }
+    } catch (e) {
+      console.error("[webhook] Failed to resolve choice selections:", e);
+    }
+
     const ref = adminDb.collection("service_purchases").doc();
     await ref.set({
       id: ref.id,
@@ -76,7 +94,7 @@ export async function POST(request: NextRequest) {
       serviceName: meta.serviceName,
       quantity: Number(meta.quantity ?? "1"),
       unitLabel: meta.unitLabel || undefined,
-      choiceLabel: meta.choiceLabel || undefined,
+      choiceSelections,
       amountTotal,
       commissionAmount,
       commissionRate,
