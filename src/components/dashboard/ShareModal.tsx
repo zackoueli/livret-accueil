@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Copy, Check, ExternalLink, Download } from "lucide-react";
+import { X, Copy, Check, ExternalLink } from "lucide-react";
 import QRCodeStyling, { DotType, CornerSquareType, CornerDotType } from "qr-code-styling";
 import { Booklet } from "@/types";
 import toast from "react-hot-toast";
 import { bookletUrl } from "@/lib/url";
 import { usePlan } from "@/hooks/usePlan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
-import { Lock } from "lucide-react";
+import { Lock, FileDown } from "lucide-react";
+import { downloadQrPdf, PdfPageFormat } from "@/lib/qrPdf";
 
 const PRESET_COLORS = [
   { dark: "#1a1a1a", light: "#ffffff" },
@@ -35,6 +36,21 @@ const QR_STYLES: QRStyle[] = [
   { id: "hybrid",  label: "Hybride", dots: "classy-rounded",corners: "extra-rounded", cornerDots: "dot" },
 ];
 
+const PDF_FORMATS: { id: PdfPageFormat; label: string }[] = [
+  { id: "a4", label: "A4" },
+  { id: "a5", label: "A5" },
+  { id: "a6", label: "A6" },
+];
+
+function blobToDataUrl(blob: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
 export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: () => void }) {
   const { can } = usePlan();
   const canCustomizeQr = can("qr_custom");
@@ -46,21 +62,27 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
   const [customDark, setCustomDark] = useState(booklet.accentColor);
   const [customLight, setCustomLight] = useState("#ffffff");
   const [activeStyle, setActiveStyle] = useState<QRStyle>(QR_STYLES[1]); // Arrondi par défaut
+  const [pdfFormat, setPdfFormat] = useState<PdfPageFormat>("a5");
+  const [generatingPdf, setGeneratingPdf] = useState(false);
   const url = bookletUrl(booklet.slug);
+
+  const buildQrOptions = () => ({
+    width: 200,
+    height: 200,
+    data: url,
+    margin: 8,
+    image: "/Logo.png",
+    imageOptions: { crossOrigin: "anonymous" as const, margin: 6, imageSize: 0.35, hideBackgroundDots: true },
+    qrOptions: { errorCorrectionLevel: "H" as const },
+    dotsOptions: { type: activeStyle.dots, color: qrColor.dark },
+    backgroundOptions: { color: qrColor.light },
+    cornersSquareOptions: { type: activeStyle.corners, color: qrColor.dark },
+    cornersDotOptions: { type: activeStyle.cornerDots, color: qrColor.dark },
+  });
 
   // Init QRCodeStyling
   useEffect(() => {
-    qrRef.current = new QRCodeStyling({
-      width: 200,
-      height: 200,
-      data: url,
-      margin: 8,
-      qrOptions: { errorCorrectionLevel: "M" },
-      dotsOptions: { type: activeStyle.dots, color: qrColor.dark },
-      backgroundOptions: { color: qrColor.light },
-      cornersSquareOptions: { type: activeStyle.corners, color: qrColor.dark },
-      cornersDotOptions: { type: activeStyle.cornerDots, color: qrColor.dark },
-    });
+    qrRef.current = new QRCodeStyling(buildQrOptions());
     if (containerRef.current) {
       containerRef.current.innerHTML = "";
       qrRef.current.append(containerRef.current);
@@ -69,12 +91,7 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
 
   // Update on change
   useEffect(() => {
-    qrRef.current?.update({
-      dotsOptions: { type: activeStyle.dots, color: qrColor.dark },
-      backgroundOptions: { color: qrColor.light },
-      cornersSquareOptions: { type: activeStyle.corners, color: qrColor.dark },
-      cornersDotOptions: { type: activeStyle.cornerDots, color: qrColor.dark },
-    });
+    qrRef.current?.update(buildQrOptions());
   }, [qrColor, activeStyle]);
 
   const applyColor = (dark: string, light: string) => {
@@ -90,8 +107,26 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleDownload = () => {
-    qrRef.current?.download({ name: `qrcode-${booklet.slug}`, extension: "png" });
+  const handleDownloadPdf = async () => {
+    setGeneratingPdf(true);
+    try {
+      const hiResQr = new QRCodeStyling({ ...buildQrOptions(), width: 1000, height: 1000, margin: 20 });
+      const blob = await hiResQr.getRawData("png");
+      if (!blob) throw new Error("QR generation failed");
+      const dataUrl = await blobToDataUrl(blob as Blob);
+      await downloadQrPdf({
+        qrDataUrl: dataUrl,
+        logoUrl: "/Logo.png",
+        format: pdfFormat,
+        title: booklet.title,
+        fileName: `qrcode-${booklet.slug}-${pdfFormat}`,
+        accentColor: booklet.accentColor,
+      });
+    } catch {
+      toast.error("Erreur lors de la génération du PDF");
+    } finally {
+      setGeneratingPdf(false);
+    }
   };
 
   return (
@@ -182,11 +217,28 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
             </button>
           </div>
 
+          {/* Format papier */}
+          <div>
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Format d&apos;impression</p>
+            <div className="grid grid-cols-3 gap-1.5">
+              {PDF_FORMATS.map((f) => (
+                <button key={f.id} onClick={() => setPdfFormat(f.id)}
+                  className={`py-2 rounded-xl text-xs font-semibold border transition-all ${
+                    pdfFormat === f.id
+                      ? "bg-orange-500 text-white border-orange-500"
+                      : "bg-white text-gray-500 border-gray-200 hover:border-orange-300"
+                  }`}>
+                  {f.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Actions */}
           <div className="flex gap-2">
-            <button onClick={handleDownload}
-              className="flex-1 flex items-center justify-center gap-2 border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 text-gray-600 font-semibold text-sm py-3 rounded-2xl transition-colors">
-              <Download className="w-4 h-4" /> Télécharger
+            <button onClick={handleDownloadPdf} disabled={generatingPdf}
+              className="flex-1 flex items-center justify-center gap-2 border-2 border-gray-100 hover:border-gray-200 hover:bg-gray-50 text-gray-600 font-semibold text-sm py-3 rounded-2xl transition-colors disabled:opacity-50">
+              <FileDown className="w-4 h-4" /> {generatingPdf ? "Génération…" : "PDF à imprimer"}
             </button>
             <a href={url} target="_blank" rel="noopener noreferrer"
               className="flex-1 flex items-center justify-center gap-2 font-semibold text-sm py-3 rounded-2xl text-white transition-colors"
