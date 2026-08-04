@@ -464,6 +464,7 @@
     "addonPriceChoice": "Multiple choice",
     "addAddon": "Add a paid service",
     "addonOptionUnitLabel": "Unit (e.g. person, km)",
+    "addonOptionUnitHint": "Price applied per unit, the guest picks the quantity between min and max",
     "addonOptionMin": "Min",
     "addonOptionMax": "Max",
     "addonChoiceItemLabel": "Label (e.g. E-bike)",

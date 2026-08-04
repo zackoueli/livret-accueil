@@ -236,15 +236,24 @@ export function AddonServiceEditor({ bookletId }: { bookletId: string }) {
             </div>
 
             {service.priceType === "per_unit" && (
-              <div className="grid grid-cols-3 gap-2">
+              <div className="bg-white rounded-xl border border-gray-100 p-3 space-y-2">
+                <p className="text-xs font-semibold text-gray-500">{t("addonOptionUnitHint")}</p>
                 <input type="text" value={service.unitLabel ?? ""} onChange={(e) => patch(service, { unitLabel: e.target.value })}
                   placeholder={t("addonOptionUnitLabel")} className={`${input} text-sm`} />
-                <input type="number" min={1} value={service.unitMin ?? 1}
-                  onChange={(e) => patch(service, { unitMin: Math.max(1, Math.round(Number(e.target.value) || 1)) })}
-                  placeholder={t("addonOptionMin")} className={`${input} text-sm text-gray-900`} />
-                <input type="number" min={service.unitMin ?? 1} value={service.unitMax ?? 10}
-                  onChange={(e) => patch(service, { unitMax: Math.max(service.unitMin ?? 1, Math.round(Number(e.target.value) || 1)) })}
-                  placeholder={t("addonOptionMax")} className={`${input} text-sm text-gray-900`} />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">{t("addonOptionMin")}</label>
+                    <input type="number" min={1} value={service.unitMin ?? 1}
+                      onChange={(e) => patch(service, { unitMin: Math.max(1, Math.round(Number(e.target.value) || 1)) })}
+                      className={`${input} text-sm text-gray-900`} />
+                  </div>
+                  <div>
+                    <label className="text-xs text-gray-400 block mb-1">{t("addonOptionMax")}</label>
+                    <input type="number" min={service.unitMin ?? 1} value={service.unitMax ?? 10}
+                      onChange={(e) => patch(service, { unitMax: Math.max(service.unitMin ?? 1, Math.round(Number(e.target.value) || 1)) })}
+                      className={`${input} text-sm text-gray-900`} />
+                  </div>
+                </div>
               </div>
             )}
 

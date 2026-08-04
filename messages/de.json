@@ -464,6 +464,7 @@
     "addonPriceChoice": "Mehrfachauswahl",
     "addAddon": "Kostenpflichtige Leistung hinzufügen",
     "addonOptionUnitLabel": "Einheit (z.B. Person, km)",
+    "addonOptionUnitHint": "Preis pro Einheit, der Gast wählt die Menge zwischen Min und Max",
     "addonOptionMin": "Min",
     "addonOptionMax": "Max",
     "addonChoiceItemLabel": "Bezeichnung (z.B. E-Bike)",

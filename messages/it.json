@@ -464,6 +464,7 @@
     "addonPriceChoice": "Scelta multipla",
     "addAddon": "Aggiungi un servizio a pagamento",
     "addonOptionUnitLabel": "Unità (es: persona, km)",
+    "addonOptionUnitHint": "Prezzo applicato per unità, l'ospite sceglie la quantità tra min e max",
     "addonOptionMin": "Min",
     "addonOptionMax": "Max",
     "addonChoiceItemLabel": "Etichetta (es: E-bike)",
