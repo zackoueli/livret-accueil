@@ -88,17 +88,9 @@ export function OrdersPage() {
                       <p className="text-sm font-semibold text-gray-800 truncate">{order.serviceName}</p>
                       <p className="text-xs text-gray-400 mt-0.5">
                         {new Date(order.createdAt).toLocaleDateString(locale)}
-                        {order.quantity > 1 ? ` · ×${order.quantity}` : ""}
+                        {order.quantity > 1 ? ` · ×${order.quantity}${order.unitLabel ? ` ${order.unitLabel}` : ""}` : ""}
+                        {order.choiceLabel ? ` · ${order.choiceLabel}` : ""}
                       </p>
-                      {order.selections && order.selections.length > 0 && (
-                        <p className="text-xs text-gray-400 mt-0.5 truncate">
-                          {order.selections
-                            .map((s) => s.type === "multiplier"
-                              ? `${s.label}: ${s.quantity}${s.unitLabel ? ` ${s.unitLabel}` : ""}`
-                              : `${s.label}: ${s.choiceLabel}`)
-                            .join(" · ")}
-                        </p>
-                      )}
                     </div>
 
                     <div className="text-right shrink-0">

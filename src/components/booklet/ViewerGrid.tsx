@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
-import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceOption } from "@/types";
+import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceChoiceItem } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
-import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal, ServiceSelections } from "@/components/booklet/AddonsSection";
+import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
   Sparkles, Shield, Phone, Star, MapPin, Clock, Navigation,
@@ -838,44 +838,37 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
 // ─── Services payants (add-ons) ───────────────────────────────────────────────
 
-function defaultSelections(service: BookletService): ServiceSelections {
-  const sel: ServiceSelections = {};
-  for (const opt of service.options ?? []) {
-    sel[opt.id] = opt.type === "multiplier" ? (opt.defaultQuantity ?? opt.min) : (opt.defaultChoiceId ?? opt.choices[0]?.id ?? "");
-  }
-  return sel;
+function AddonQuantityPicker({ label, min, max, value, onChange }: {
+  label: string; min: number; max: number; value: number; onChange: (v: number) => void;
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
+      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontWeight: 700 }}>{label}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: "4px 6px" }}>
+        <button onClick={() => onChange(Math.max(min, value - 1))} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <Minus size={12} color="#fff" />
+        </button>
+        <span style={{ fontSize: 13, fontWeight: 700, color: "#fff", minWidth: 16, textAlign: "center" }}>{value}</span>
+        <button onClick={() => onChange(Math.min(max, value + 1))} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+          <Plus size={12} color="#fff" />
+        </button>
+      </div>
+    </div>
+  );
 }
 
-function AddonOptionPicker({ opt, value, onChange, accent }: {
-  opt: ServiceOption; value: string | number; onChange: (v: string | number) => void; accent: string;
+function AddonChoicePicker({ choices, value, onChange, accent }: {
+  choices: ServiceChoiceItem[]; value: string | undefined; onChange: (id: string) => void; accent: string;
 }) {
-  if (opt.type === "multiplier") {
-    const qty = Number(value) || opt.min;
-    return (
-      <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10 }}>
-        <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontWeight: 700 }}>{opt.label}{opt.unitLabel ? ` (${opt.unitLabel})` : ""}</span>
-        <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: "4px 6px" }}>
-          <button onClick={() => onChange(Math.max(opt.min, qty - 1))} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-            <Minus size={12} color="#fff" />
-          </button>
-          <span style={{ fontSize: 13, fontWeight: 700, color: "#fff", minWidth: 16, textAlign: "center" }}>{qty}</span>
-          <button onClick={() => onChange(Math.min(opt.max, qty + 1))} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-            <Plus size={12} color="#fff" />
-          </button>
-        </div>
-      </div>
-    );
-  }
   return (
     <div style={{ marginTop: 10 }}>
-      <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontWeight: 700, display: "block", marginBottom: 6 }}>{opt.label}</span>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {opt.choices.map(c => {
+        {choices.map(c => {
           const selected = value === c.id;
           return (
             <button key={c.id} onClick={() => onChange(c.id)}
               style={{ padding: "6px 12px", borderRadius: 16, border: selected ? "none" : "1px solid rgba(255,255,255,0.25)", background: selected ? accent : "rgba(255,255,255,0.1)", color: selected ? "#fff" : "rgba(255,255,255,0.75)", fontSize: 12, fontWeight: 700, cursor: "pointer" }}>
-              {c.label}{c.priceDelta > 0 ? ` +${fmtAddonPrice(c.priceDelta)}` : ""}
+              {c.label} · {fmtAddonPrice(c.amount)}
             </button>
           );
         })}
@@ -889,25 +882,23 @@ function AddonsGridSection({ booklet, accent }: { booklet: Booklet; accent: stri
   const { services, purchasable } = useAddonServices(booklet);
   const { buy, purchasing } = useAddonPurchase(booklet.id);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
-  const [selections, setSelections] = useState<Record<string, ServiceSelections>>({});
+  const [choiceIds, setChoiceIds] = useState<Record<string, string>>({});
 
   const GLASS_CARD = { background: "rgba(255,255,255,0.14)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.2)", borderRadius: 20 };
 
   if (!purchasable || services.length === 0) return null;
 
-  const getQty = (id: string) => quantities[id] ?? 1;
-  const setQty = (id: string, q: number) => setQuantities(p => ({ ...p, [id]: Math.max(1, q) }));
-  const getSelections = (s: BookletService) => selections[s.id] ?? defaultSelections(s);
-  const setSelection = (s: BookletService, optionId: string, value: string | number) =>
-    setSelections(p => ({ ...p, [s.id]: { ...getSelections(s), [optionId]: value } }));
+  const getQty = (s: BookletService) => quantities[s.id] ?? (s.priceType === "per_unit" ? (s.unitMin ?? 1) : 1);
+  const setQty = (s: BookletService, q: number) => setQuantities(p => ({ ...p, [s.id]: q }));
+  const getChoiceId = (s: BookletService) => choiceIds[s.id] ?? s.choices?.[0]?.id;
+  const setChoiceId = (s: BookletService, id: string) => setChoiceIds(p => ({ ...p, [s.id]: id }));
 
   return (
     <div>
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
         {services.map(s => {
-          const hasOptions = (s.options?.length ?? 0) > 0;
-          const sSelections = getSelections(s);
-          const { totalAmount } = computeServiceTotal(s, hasOptions ? sSelections : { _legacy_qty: getQty(s.id) });
+          const selection = { quantity: getQty(s), choiceId: getChoiceId(s) };
+          const { totalAmount } = computeServiceTotal(s, selection);
 
           return (
           <div key={s.id} style={{ ...GLASS_CARD, overflow: "hidden" }}>
@@ -924,39 +915,30 @@ function AddonsGridSection({ booklet, accent }: { booklet: Booklet; accent: stri
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#fff" }}>{s.name}</p>
                   <p style={{ margin: "2px 0 0", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.75)" }}>
-                    {hasOptions
+                    {s.priceType === "choice"
                       ? `${tr("addons_total")}: ${fmtAddonPrice(totalAmount)}`
-                      : `${fmtAddonPrice(s.amount)}${s.priceType === "per_day" ? ` ${tr("addons_per_day")}` : ""}`}
+                      : `${fmtAddonPrice(s.amount)}${s.priceType === "per_day" ? ` ${tr("addons_per_day")}` : s.priceType === "per_unit" ? ` / ${s.unitLabel || tr("addons_quantity")}` : ""}`}
                   </p>
                 </div>
               </div>
               {s.description && <p style={{ margin: "8px 0 0", fontSize: 12.5, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>{s.description}</p>}
 
-              {hasOptions ? (
-                (s.options ?? []).map(opt => (
-                  <AddonOptionPicker key={opt.id} opt={opt} accent={accent}
-                    value={sSelections[opt.id]}
-                    onChange={(v) => setSelection(s, opt.id, v)} />
-                ))
-              ) : null}
+              {s.priceType === "per_day" && (
+                <AddonQuantityPicker label={tr("addons_quantity")} min={1} max={9999} value={getQty(s)} onChange={(v) => setQty(s, v)} />
+              )}
+              {s.priceType === "per_unit" && (
+                <AddonQuantityPicker label={s.unitLabel || tr("addons_quantity")} min={s.unitMin ?? 1} max={s.unitMax ?? 9999} value={getQty(s)} onChange={(v) => setQty(s, v)} />
+              )}
+              {s.priceType === "choice" && s.choices && (
+                <AddonChoicePicker choices={s.choices} value={getChoiceId(s)} onChange={(id) => setChoiceId(s, id)} accent={accent} />
+              )}
 
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginTop: 12 }}>
-                {!hasOptions && s.priceType === "per_day" ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 11, color: "rgba(255,255,255,0.55)", fontWeight: 700 }}>{tr("addons_quantity")}</span>
-                    <div style={{ display: "flex", alignItems: "center", gap: 6, background: "rgba(0,0,0,0.2)", borderRadius: 12, padding: "4px 6px" }}>
-                      <button onClick={() => setQty(s.id, getQty(s.id) - 1)} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                        <Minus size={12} color="#fff" />
-                      </button>
-                      <span style={{ fontSize: 13, fontWeight: 700, color: "#fff", minWidth: 16, textAlign: "center" }}>{getQty(s.id)}</span>
-                      <button onClick={() => setQty(s.id, getQty(s.id) + 1)} style={{ width: 24, height: 24, borderRadius: 8, border: "none", background: "rgba(255,255,255,0.15)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                        <Plus size={12} color="#fff" />
-                      </button>
-                    </div>
-                  </div>
-                ) : <div />}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 10, marginTop: 12 }}>
+                {(s.priceType === "per_day" || s.priceType === "per_unit") && (
+                  <p style={{ margin: 0, fontSize: 12.5, fontWeight: 700, color: "#fff", flex: 1 }}>{tr("addons_total")}: {fmtAddonPrice(totalAmount)}</p>
+                )}
                 <button
-                  onClick={() => buy(s.id, hasOptions ? sSelections : { _legacy_qty: getQty(s.id) })}
+                  onClick={() => buy(s.id, selection)}
                   disabled={!!purchasing}
                   style={{ padding: "9px 18px", borderRadius: 20, border: "none", cursor: purchasing ? "default" : "pointer", fontSize: 13, fontWeight: 700, background: accent, color: "#fff", opacity: purchasing && purchasing !== s.id ? 0.5 : 1 }}>
                   {purchasing === s.id ? tr("addons_buying") : tr("addons_buy")}

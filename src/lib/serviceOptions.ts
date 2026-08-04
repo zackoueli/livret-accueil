@@ -1,88 +1,46 @@
-import {
-  BookletService,
-  ServiceChoiceItem,
-  ServiceChoiceOption,
-  ServiceMultiplierOption,
-  ServiceOption,
-} from "@/types";
+import { BookletService, ServiceChoiceItem } from "@/types";
 
 // Garde-fou technique uniquement (débordement numérique/Stripe), pas une limite produit —
-// le max réel est celui configuré par l'hôte sur chaque option.
+// le max réel est celui configuré par l'hôte (unitMax).
 const HARD_MAX_QUANTITY = 9999;
 
-export type ServiceSelections = Record<string, string | number>;
-
-export interface ResolvedOptionSelection {
-  optionId: string;
-  option: ServiceOption;
-  quantity?: number;
-  choice?: ServiceChoiceItem;
-  amount: number; // centimes
+export interface ServiceSelection {
+  quantity?: number; // per_day / per_unit
+  choiceId?: string; // choice
 }
 
 export interface PriceComputationResult {
-  baseAmount: number;
-  optionsAmount: number;
   totalAmount: number;
-  resolved: ResolvedOptionSelection[];
-  legacyQuantity: number;
+  quantity: number; // 1 pour one_time/choice
+  choice?: ServiceChoiceItem;
 }
 
-export function clampMultiplierQuantity(opt: ServiceMultiplierOption, raw: unknown): number {
+export function clampQuantity(min: number, max: number, raw: unknown, fallback: number): number {
   const parsed = Math.round(Number(raw));
-  const fallback = opt.defaultQuantity ?? opt.min;
   const value = Number.isFinite(parsed) ? parsed : fallback;
-  const max = Math.min(opt.max, HARD_MAX_QUANTITY);
-  return Math.min(Math.max(value, opt.min), max);
+  return Math.min(Math.max(value, min), Math.min(max, HARD_MAX_QUANTITY));
 }
 
-export function resolveChoice(opt: ServiceChoiceOption, choiceId: unknown): ServiceChoiceItem {
-  const found = opt.choices.find((c) => c.id === choiceId);
-  if (found) return found;
-  const byDefault = opt.choices.find((c) => c.id === opt.defaultChoiceId);
-  return byDefault ?? opt.choices[0];
+export function resolveChoice(service: Pick<BookletService, "choices">, choiceId: unknown): ServiceChoiceItem | undefined {
+  const choices = service.choices ?? [];
+  return choices.find((c) => c.id === choiceId) ?? choices[0];
 }
 
 export function computeServiceTotal(
-  service: Pick<BookletService, "priceType" | "amount" | "options">,
-  selections: ServiceSelections
+  service: Pick<BookletService, "priceType" | "amount" | "unitLabel" | "unitMin" | "unitMax" | "choices">,
+  selection: ServiceSelection
 ): PriceComputationResult {
-  const options = service.options ?? [];
-
-  if (options.length === 0) {
-    const legacyQuantity =
-      service.priceType === "per_day"
-        ? Math.min(Math.max(Math.round(Number(selections["_legacy_qty"])) || 1, 1), HARD_MAX_QUANTITY)
-        : 1;
-    const totalAmount = service.amount * legacyQuantity;
-    return {
-      baseAmount: totalAmount,
-      optionsAmount: 0,
-      totalAmount,
-      resolved: [],
-      legacyQuantity,
-    };
+  if (service.priceType === "per_day" || service.priceType === "per_unit") {
+    const min = service.priceType === "per_unit" ? (service.unitMin ?? 1) : 1;
+    const max = service.priceType === "per_unit" ? (service.unitMax ?? HARD_MAX_QUANTITY) : HARD_MAX_QUANTITY;
+    const quantity = clampQuantity(min, max, selection.quantity, min);
+    return { totalAmount: service.amount * quantity, quantity };
   }
 
-  let optionsAmount = 0;
-  const resolved: ResolvedOptionSelection[] = options.map((opt) => {
-    if (opt.type === "multiplier") {
-      const quantity = clampMultiplierQuantity(opt, selections[opt.id]);
-      const amount = opt.pricePerUnit * quantity;
-      optionsAmount += amount;
-      return { optionId: opt.id, option: opt, quantity, amount };
-    }
-    const choice = resolveChoice(opt, selections[opt.id]);
-    optionsAmount += choice.priceDelta;
-    return { optionId: opt.id, option: opt, choice, amount: choice.priceDelta };
-  });
+  if (service.priceType === "choice") {
+    const choice = resolveChoice(service, selection.choiceId);
+    return { totalAmount: choice?.amount ?? 0, quantity: 1, choice };
+  }
 
-  const baseAmount = service.amount;
-  return {
-    baseAmount,
-    optionsAmount,
-    totalAmount: baseAmount + optionsAmount,
-    resolved,
-    legacyQuantity: 1,
-  };
+  return { totalAmount: service.amount, quantity: 1 };
 }

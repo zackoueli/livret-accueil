@@ -2,12 +2,12 @@ import { NextRequest } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase-admin";
 import { PLAN_COMMISSION } from "@/lib/plans";
-import { computeServiceTotal, ServiceSelections } from "@/lib/serviceOptions";
+import { computeServiceTotal, ServiceSelection } from "@/lib/serviceOptions";
 import { BookletService, Plan } from "@/types";
 
 export async function POST(request: NextRequest) {
   try {
-    const { bookletId, serviceId, selections } = await request.json();
+    const { bookletId, serviceId, selection } = await request.json();
     if (!bookletId || !serviceId) {
       return Response.json({ error: "Missing bookletId or serviceId" }, { status: 400 });
     }
@@ -31,24 +31,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Recalcul entièrement côté serveur — jamais de montant/quantité fourni par le client.
-    const { totalAmount, resolved, legacyQuantity } = computeServiceTotal(
+    const { totalAmount, quantity, choice } = computeServiceTotal(
       service,
-      (selections ?? {}) as ServiceSelections
+      (selection ?? {}) as ServiceSelection
     );
 
     const commissionRate = PLAN_COMMISSION[(booklet.ownerPlan as Plan) ?? "free"];
     const applicationFeeAmount = Math.round((totalAmount * commissionRate) / 100);
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.bunkly.co";
-
-    // Encodage minimal (ids + valeurs uniquement, pas de libellés/prix) — le webhook
-    // relit la définition des options du service pour résoudre les libellés humains,
-    // même logique que serviceName déjà snapshotté plutôt que fourni par le client.
-    const optionSelections = resolved.map((r) =>
-      r.option.type === "multiplier"
-        ? { o: r.optionId, q: r.quantity }
-        : { o: r.optionId, c: r.choice!.id }
-    );
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -72,9 +63,10 @@ export async function POST(request: NextRequest) {
         serviceId,
         hostUid: booklet.userId,
         serviceName: service.name,
-        quantity: String(legacyQuantity),
+        quantity: String(quantity),
+        unitLabel: service.priceType === "per_unit" ? (service.unitLabel ?? "") : "",
+        choiceLabel: choice?.label ?? "",
         commissionRate: String(commissionRate),
-        optionSelections: JSON.stringify(optionSelections),
       },
       success_url: `${appUrl}/b/${booklet.slug}?purchase=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/b/${booklet.slug}?purchase=cancel`,

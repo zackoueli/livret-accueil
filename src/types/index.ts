@@ -185,38 +185,18 @@ export interface Booklet {
 
 // ── Services payants (add-ons) ──────────────────────────────────────────────────
 
-export type ServicePriceType = "one_time" | "per_day";
-
-export type ServiceOptionType = "multiplier" | "choice";
-
-export interface ServiceMultiplierOption {
-  id: string;
-  type: "multiplier";
-  label: string;
-  unitLabel?: string;
-  pricePerUnit: number; // centimes
-  min: number;
-  max: number;
-  defaultQuantity?: number;
-  order: number;
-}
+// Un service n'a qu'un seul mécanisme de prix à la fois :
+// - one_time  : prix fixe (amount)
+// - per_day   : prix × nombre de jours (amount, quantité saisie à l'achat)
+// - per_unit  : prix × quantité sur une unité libre (amount = prix/unité, unitLabel/min/max)
+// - choice    : le voyageur choisit une valeur dans une liste, chacune avec son propre prix (choices)
+export type ServicePriceType = "one_time" | "per_day" | "per_unit" | "choice";
 
 export interface ServiceChoiceItem {
   id: string;
   label: string;
-  priceDelta: number; // centimes, >= 0
+  amount: number; // centimes
 }
-
-export interface ServiceChoiceOption {
-  id: string;
-  type: "choice";
-  label: string;
-  choices: ServiceChoiceItem[];
-  defaultChoiceId?: string;
-  order: number;
-}
-
-export type ServiceOption = ServiceMultiplierOption | ServiceChoiceOption;
 
 export interface BookletService {
   id: string;
@@ -229,24 +209,18 @@ export interface BookletService {
   emoji?: string;
   image?: string;
   priceType: ServicePriceType;
-  amount: number; // centimes, EUR
+  amount: number; // centimes, EUR — prix fixe/par jour/par unité (ignoré si priceType === "choice")
   currency: "eur";
   enabled: boolean;
   order: number;
-  options?: ServiceOption[];
+  // priceType === "per_unit"
+  unitLabel?: string;
+  unitMin?: number;
+  unitMax?: number;
+  // priceType === "choice"
+  choices?: ServiceChoiceItem[];
   createdAt: number;
   updatedAt: number;
-}
-
-export interface ServicePurchaseOptionSelection {
-  optionId: string;
-  label: string;
-  type: ServiceOptionType;
-  quantity?: number;
-  unitLabel?: string;
-  choiceId?: string;
-  choiceLabel?: string;
-  amount: number; // centimes contribués par cette option
 }
 
 export interface ServicePurchase {
@@ -255,7 +229,9 @@ export interface ServicePurchase {
   serviceId: string;
   hostUid: string;
   serviceName: string;
-  quantity: number;
+  quantity: number; // pour per_day/per_unit — unitLabel snapshotté séparément
+  unitLabel?: string;
+  choiceLabel?: string; // si priceType === "choice" au moment de l'achat
   amountTotal: number; // centimes
   commissionAmount: number; // centimes
   commissionRate: number; // %
@@ -265,7 +241,6 @@ export interface ServicePurchase {
   stripeCheckoutSessionId: string;
   stripePaymentIntentId?: string;
   status: "pending" | "paid" | "failed" | "refunded";
-  selections?: ServicePurchaseOptionSelection[];
   createdAt: number;
   paidAt?: number;
 }

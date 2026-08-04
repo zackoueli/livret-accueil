@@ -5,10 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Booklet, BookletService } from "@/types";
-import { computeServiceTotal, ServiceSelections } from "@/lib/serviceOptions";
+import { computeServiceTotal, ServiceSelection } from "@/lib/serviceOptions";
 
 export { computeServiceTotal };
-export type { ServiceSelections };
+export type { ServiceSelection };
 
 export function useAddonServices(booklet: Booklet) {
   const [services, setServices] = useState<BookletService[]>([]);
@@ -43,13 +43,13 @@ export function useAddonServices(booklet: Booklet) {
 export function useAddonPurchase(bookletId: string) {
   const [purchasing, setPurchasing] = useState<string | null>(null);
 
-  const buy = async (serviceId: string, selections: ServiceSelections = {}) => {
+  const buy = async (serviceId: string, selection: ServiceSelection = {}) => {
     setPurchasing(serviceId);
     try {
       const res = await fetch("/api/services/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bookletId, serviceId, selections }),
+        body: JSON.stringify({ bookletId, serviceId, selection }),
       });
       const data = await res.json();
       if (data.url) {
