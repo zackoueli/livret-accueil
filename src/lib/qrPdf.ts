@@ -8,60 +8,49 @@ const PAGE_SIZES_MM: Record<PdfPageFormat, { width: number; height: number }> = 
   a6: { width: 105, height: 148 },
 };
 
-const MARGIN_MM = 15;
-
 export async function downloadQrPdf({
   qrDataUrl,
-  logoUrl,
   format,
   title,
+  subtitle,
   fileName,
-  accentColor,
 }: {
   qrDataUrl: string;
-  logoUrl: string;
   format: PdfPageFormat;
   title: string;
+  subtitle?: string;
   fileName: string;
-  accentColor: string;
 }) {
   const { width: pageWidth, height: pageHeight } = PAGE_SIZES_MM[format];
   const doc = new jsPDF({ unit: "mm", format: [pageWidth, pageHeight] });
 
-  const contentWidth = pageWidth - MARGIN_MM * 2;
+  const margin = pageWidth * 0.14;
+  const contentWidth = pageWidth - margin * 2;
 
-  doc.setFontSize(format === "a6" ? 11 : 14);
-  doc.setTextColor(30, 30, 30);
+  // Titre, centré, sobre
+  const titleSize = format === "a6" ? 13 : format === "a5" ? 16 : 20;
   doc.setFont("helvetica", "bold");
-  const titleY = MARGIN_MM + 4;
+  doc.setFontSize(titleSize);
+  doc.setTextColor(20, 20, 20);
+  const titleY = pageHeight * 0.16;
   doc.text(title, pageWidth / 2, titleY, { align: "center", maxWidth: contentWidth });
 
-  const qrSize = Math.min(contentWidth, pageHeight - MARGIN_MM * 2 - 20);
+  // QR centré verticalement dans la page
+  const qrSize = contentWidth;
   const qrX = (pageWidth - qrSize) / 2;
-  const qrY = titleY + 10;
+  const qrY = (pageHeight - qrSize) / 2 - (pageHeight * 0.03);
   doc.addImage(qrDataUrl, "PNG", qrX, qrY, qrSize, qrSize);
 
-  const logoSize = qrSize * 0.22;
-  const logoImg = await loadImage(logoUrl);
-  const logoX = qrX + (qrSize - logoSize) / 2;
-  const logoY = qrY + (qrSize - logoSize) / 2;
-  doc.setFillColor(255, 255, 255);
-  doc.roundedRect(logoX - 1.5, logoY - 1.5, logoSize + 3, logoSize + 3, 1.5, 1.5, "F");
-  doc.addImage(logoImg, "PNG", logoX, logoY, logoSize, logoSize);
-
-  doc.setDrawColor(accentColor);
-  doc.setLineWidth(0.4);
-  doc.roundedRect(MARGIN_MM, MARGIN_MM, contentWidth, pageHeight - MARGIN_MM * 2, 3, 3);
+  // Sous-titre / instruction, sous le QR
+  const subSize = format === "a6" ? 8 : format === "a5" ? 9.5 : 11;
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(subSize);
+  doc.setTextColor(120, 120, 120);
+  const subtitleY = qrY + qrSize + pageHeight * 0.055;
+  doc.text(subtitle ?? "Scannez pour accéder au livret d'accueil", pageWidth / 2, subtitleY, {
+    align: "center",
+    maxWidth: contentWidth,
+  });
 
   doc.save(`${fileName}.pdf`);
-}
-
-function loadImage(src: string): Promise<HTMLImageElement> {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
 }

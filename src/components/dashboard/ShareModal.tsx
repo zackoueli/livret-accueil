@@ -72,7 +72,7 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
     data: url,
     margin: 8,
     image: "/Logo.png",
-    imageOptions: { crossOrigin: "anonymous" as const, margin: 6, imageSize: 0.35, hideBackgroundDots: true },
+    imageOptions: { crossOrigin: "anonymous" as const, margin: 4, imageSize: 0.18, hideBackgroundDots: true },
     qrOptions: { errorCorrectionLevel: "H" as const },
     dotsOptions: { type: activeStyle.dots, color: qrColor.dark },
     backgroundOptions: { color: qrColor.light },
@@ -116,11 +116,9 @@ export function ShareModal({ booklet, onClose }: { booklet: Booklet; onClose: ()
       const dataUrl = await blobToDataUrl(blob as Blob);
       await downloadQrPdf({
         qrDataUrl: dataUrl,
-        logoUrl: "/Logo.png",
         format: pdfFormat,
         title: booklet.title,
         fileName: `qrcode-${booklet.slug}-${pdfFormat}`,
-        accentColor: booklet.accentColor,
       });
     } catch {
       toast.error("Erreur lors de la génération du PDF");
