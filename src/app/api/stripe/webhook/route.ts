@@ -4,6 +4,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
 import { sendPurchaseConfirmation, sendSubscriptionExpired, sendAffiliateCommissionEmail, sendServicePurchaseNotification } from "@/lib/emails";
+import { BookletService, ServiceOption, ServicePurchaseOptionSelection } from "@/types";
 
 export const runtime = "nodejs";
 
@@ -67,6 +68,33 @@ export async function POST(request: NextRequest) {
     const commissionRate = Number(meta.commissionRate ?? "0");
     const commissionAmount = Math.round((amountTotal * commissionRate) / 100);
 
+    // Résout les sélections d'options (ids uniquement dans les métadonnées) vers des
+    // libellés humains en relisant la définition actuelle des options du service —
+    // ne doit jamais faire échouer le webhook si une option a été modifiée/supprimée
+    // depuis l'achat, l'enregistrement de la commande est prioritaire.
+    let selections: ServicePurchaseOptionSelection[] = [];
+    try {
+      const rawSelections = JSON.parse(meta.optionSelections ?? "[]") as Array<{ o: string; q?: number; c?: string }>;
+      if (rawSelections.length > 0) {
+        const serviceSnap = await adminDb.collection("booklet_services").doc(meta.serviceId).get();
+        const serviceOptions = ((serviceSnap.data() as BookletService | undefined)?.options ?? []) as ServiceOption[];
+        selections = rawSelections.map((sel) => {
+          const opt = serviceOptions.find((o) => o.id === sel.o);
+          if (!opt) {
+            return { optionId: sel.o, label: "(option supprimée)", type: sel.c ? "choice" : "multiplier", amount: 0 };
+          }
+          if (opt.type === "multiplier") {
+            const quantity = sel.q ?? opt.min;
+            return { optionId: opt.id, label: opt.label, type: "multiplier", quantity, unitLabel: opt.unitLabel, amount: opt.pricePerUnit * quantity };
+          }
+          const choice = opt.choices.find((c) => c.id === sel.c) ?? opt.choices[0];
+          return { optionId: opt.id, label: opt.label, type: "choice", choiceId: choice.id, choiceLabel: choice.label, amount: choice.priceDelta };
+        });
+      }
+    } catch (e) {
+      console.error("[webhook] Failed to resolve option selections:", e);
+    }
+
     const ref = adminDb.collection("service_purchases").doc();
     await ref.set({
       id: ref.id,
@@ -84,6 +112,7 @@ export async function POST(request: NextRequest) {
       stripeCheckoutSessionId: session.id,
       stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : undefined,
       status: "paid",
+      selections,
       createdAt: Date.now(),
       paidAt: Date.now(),
     });

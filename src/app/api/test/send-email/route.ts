@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { sendPurchaseConfirmation, sendExpirationWarning, sendSubscriptionExpired } from "@/lib/emails";
+import { sendPurchaseConfirmation, sendExpirationWarning, sendSubscriptionExpired, sendServicePurchaseNotification } from "@/lib/emails";
 
 // Route de test — À SUPPRIMER EN PRODUCTION
 export async function GET(request: NextRequest) {
@@ -16,6 +16,14 @@ export async function GET(request: NextRequest) {
     await sendExpirationWarning({ to, name: "Mathieu", daysLeft: 7, renewalDate: "17 juin 2025" });
   } else if (type === "expired") {
     await sendSubscriptionExpired({ to, name: "Mathieu" });
+  } else if (type === "service_purchase") {
+    await sendServicePurchaseNotification({
+      to,
+      hostName: "Mathieu",
+      serviceName: "Petit déjeuner",
+      amount: 1200,
+      hostPayoutAmount: 1140,
+    });
   }
 
   return Response.json({ sent: true, type, to });

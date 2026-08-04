@@ -187,6 +187,37 @@ export interface Booklet {
 
 export type ServicePriceType = "one_time" | "per_day";
 
+export type ServiceOptionType = "multiplier" | "choice";
+
+export interface ServiceMultiplierOption {
+  id: string;
+  type: "multiplier";
+  label: string;
+  unitLabel?: string;
+  pricePerUnit: number; // centimes
+  min: number;
+  max: number;
+  defaultQuantity?: number;
+  order: number;
+}
+
+export interface ServiceChoiceItem {
+  id: string;
+  label: string;
+  priceDelta: number; // centimes, >= 0
+}
+
+export interface ServiceChoiceOption {
+  id: string;
+  type: "choice";
+  label: string;
+  choices: ServiceChoiceItem[];
+  defaultChoiceId?: string;
+  order: number;
+}
+
+export type ServiceOption = ServiceMultiplierOption | ServiceChoiceOption;
+
 export interface BookletService {
   id: string;
   bookletId: string;
@@ -202,8 +233,20 @@ export interface BookletService {
   currency: "eur";
   enabled: boolean;
   order: number;
+  options?: ServiceOption[];
   createdAt: number;
   updatedAt: number;
+}
+
+export interface ServicePurchaseOptionSelection {
+  optionId: string;
+  label: string;
+  type: ServiceOptionType;
+  quantity?: number;
+  unitLabel?: string;
+  choiceId?: string;
+  choiceLabel?: string;
+  amount: number; // centimes contribués par cette option
 }
 
 export interface ServicePurchase {
@@ -222,6 +265,7 @@ export interface ServicePurchase {
   stripeCheckoutSessionId: string;
   stripePaymentIntentId?: string;
   status: "pending" | "paid" | "failed" | "refunded";
+  selections?: ServicePurchaseOptionSelection[];
   createdAt: number;
   paidAt?: number;
 }

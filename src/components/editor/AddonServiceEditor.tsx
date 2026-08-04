@@ -15,6 +15,7 @@ import {
 import { usePlan } from "@/hooks/usePlan";
 import { useAuthStore } from "@/store/authStore";
 import { PhotoUploader } from "./EditorForm";
+import { ServiceOptionsEditor } from "./ServiceOptionsEditor";
 
 const input = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder-gray-300";
 
@@ -174,6 +175,11 @@ export function AddonServiceEditor({ bookletId }: { bookletId: string }) {
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 pointer-events-none">€</span>
               </div>
             </div>
+
+            <ServiceOptionsEditor
+              options={service.options ?? []}
+              onChange={(options) => patch(service, { options })}
+            />
           </div>
         ))}
       </div>
