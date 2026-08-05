@@ -47,9 +47,9 @@ export async function POST(request: NextRequest) {
     return "pro";
   };
 
-  // API 2026-04-22.dahlia: current_period_end → billing_cycle_anchor
+  // API 2026-04-22.dahlia: current_period_end a migré de Subscription vers SubscriptionItem
   const getEndDate = (sub: Stripe.Subscription): number =>
-    (sub as unknown as Record<string, number>).billing_cycle_anchor ?? 0;
+    sub.items.data[0]?.current_period_end ?? 0;
 
   // Vente d'un service payant : encaissement en split direct (application_fee_amount +
   // transfer_data.destination), on écrit l'ordre et prévient l'hôte. Idempotent via
