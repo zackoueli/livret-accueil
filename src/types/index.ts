@@ -17,6 +17,7 @@ export interface UserProfile {
   plan: Plan;
   billingPeriod?: BillingPeriod;
   referralSource?: ReferralSource;
+  referralSourceDetail?: string;
   stripeCustomerId?: string;
   stripeSubscriptionId?: string;
   subscriptionStatus?: "active" | "canceled" | "past_due" | "trialing";
