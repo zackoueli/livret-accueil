@@ -65,6 +65,14 @@
         { "fieldPath": "hostUid", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "affiliate_events",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "codeType", "order": "ASCENDING" },
+        { "fieldPath": "createdAt", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

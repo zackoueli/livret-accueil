@@ -11,6 +11,7 @@ interface PromoCode {
   percentOff: number | null;
   maxRedemptions: number | null;
   timesRedeemed: number;
+  identifiedRedemptions: number;
   expiresAt: number | null;
   createdAt: number;
 }
@@ -151,6 +152,7 @@ export function AdminPromoCodes() {
                   <p className="text-xs text-gray-500 truncate">
                     -{c.percentOff}% · {c.timesRedeemed} utilisé{c.timesRedeemed > 1 ? "s" : ""}
                     {c.maxRedemptions ? ` / ${c.maxRedemptions}` : ""}
+                    {` · ${c.identifiedRedemptions} abonnement${c.identifiedRedemptions > 1 ? "s" : ""} identifié${c.identifiedRedemptions > 1 ? "s" : ""}`}
                     {c.expiresAt ? ` · expire le ${new Date(c.expiresAt).toLocaleDateString("fr-FR")}` : ""}
                   </p>
                 </div>

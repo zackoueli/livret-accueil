@@ -7,11 +7,24 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const [accountsSnap, commissionsSnap, referralsSnap] = await Promise.all([
+    const [accountsSnap, commissionsSnap, referralsSnap, clickEventsSnap, referralCodesSnap] = await Promise.all([
       adminDb.collection("affiliate_accounts").get(),
       adminDb.collection("affiliate_commissions").orderBy("createdAt", "desc").limit(200).get(),
       adminDb.collection("referrals").get(),
+      adminDb.collection("affiliate_events").where("codeType", "==", "referral").orderBy("createdAt", "desc").limit(1000).get(),
+      adminDb.collection("referral_codes").get(),
     ]);
+
+    const codeByUserId: Record<string, string> = {};
+    for (const d of referralCodesSnap.docs) {
+      codeByUserId[d.data().userId as string] = d.data().code as string;
+    }
+
+    const clicksByCode: Record<string, number> = {};
+    for (const d of clickEventsSnap.docs) {
+      const code = d.data().code as string;
+      clicksByCode[code] = (clicksByCode[code] ?? 0) + 1;
+    }
 
     // Enrichir les comptes avec les emails depuis Firestore users
     const accounts = await Promise.all(
@@ -19,12 +32,18 @@ export async function GET(request: NextRequest) {
         const data = d.data();
         const userDoc = await adminDb.collection("users").doc(data.userId).get();
         const userData = userDoc.data();
+        const code = codeByUserId[data.userId] ?? null;
         return {
           ...data,
           email: userData?.email ?? null,
           displayName: userData?.displayName ?? null,
+          code,
+          clickCount: code ? clicksByCode[code] ?? 0 : 0,
           referralCount: referralsSnap.docs.filter(
             (r) => r.data().referrerId === data.userId
+          ).length,
+          conversionCount: referralsSnap.docs.filter(
+            (r) => r.data().referrerId === data.userId && r.data().status === "converted"
           ).length,
         };
       })

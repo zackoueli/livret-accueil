@@ -158,6 +158,23 @@ export interface AffiliateAccount {
   createdAt: number;
 }
 
+// Événement brut de tracking (clic sur lien d'affiliation / usage d'un code promo).
+// Ne duplique pas ce que referrals/affiliate_commissions savent déjà (inscription, conversion payante) :
+// couvre uniquement ce qui manquait à ces modèles.
+export interface TrackingEvent {
+  id: string;
+  codeType: "referral" | "promo";
+  type: "click" | "promo_redeemed";
+  code: string;
+  referrerId?: string; // codeType === "referral"
+  userId?: string; // codeType === "promo" : uid du souscripteur
+  stripePromotionCodeId?: string; // codeType === "promo"
+  stripeCheckoutSessionId?: string; // codeType === "promo", idempotence webhook
+  amountTotal?: number; // centimes, codeType === "promo"
+  userAgent?: string;
+  createdAt: number;
+}
+
 export interface Booklet {
   id: string;
   userId: string;

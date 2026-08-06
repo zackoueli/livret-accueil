@@ -125,6 +125,44 @@ export async function POST(request: NextRequest) {
     }
   };
 
+  // Capte le code promo Stripe réellement utilisé lors d'un checkout réussi
+  // (Stripe Checkout ne permet pas de "tester" un code sans payer, donc un
+  // event ici = un abonnement effectivement souscrit avec ce code). Best-effort :
+  // ne doit jamais faire échouer le webhook.
+  const handlePromoCodeUsage = async (session: Stripe.Checkout.Session, uid: string) => {
+    const full = await stripe.checkout.sessions.retrieve(session.id, {
+      expand: ["discounts.promotion_code"],
+    });
+    const discounts = full.discounts ?? [];
+    if (discounts.length === 0) return;
+
+    for (const discount of discounts) {
+      const promoCode = discount.promotion_code;
+      if (!promoCode || typeof promoCode === "string") continue;
+
+      const existing = await adminDb
+        .collection("affiliate_events")
+        .where("stripeCheckoutSessionId", "==", session.id)
+        .where("codeType", "==", "promo")
+        .limit(1)
+        .get();
+      if (!existing.empty) continue;
+
+      const id = adminDb.collection("affiliate_events").doc().id;
+      await adminDb.collection("affiliate_events").doc(id).set({
+        id,
+        codeType: "promo",
+        type: "promo_redeemed",
+        code: promoCode.code,
+        userId: uid,
+        stripePromotionCodeId: promoCode.id,
+        stripeCheckoutSessionId: session.id,
+        amountTotal: full.amount_total ?? 0,
+        createdAt: Date.now(),
+      });
+    }
+  };
+
   console.log(`[webhook] event: ${event.type}`);
 
   switch (event.type) {
@@ -167,6 +205,12 @@ export async function POST(request: NextRequest) {
       );
       await syncOwnerPlan(uid, newPlan);
       console.log(`[webhook] user ${uid} updated to ${newPlan} ✓`);
+
+      try {
+        await handlePromoCodeUsage(session, uid);
+      } catch (e) {
+        console.error("[webhook] promo code usage tracking error:", e);
+      }
 
       // Email de confirmation — on lit email+nom depuis Firestore (après écriture) et depuis le customer Stripe en fallback
       try {

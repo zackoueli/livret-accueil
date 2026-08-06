@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
-import { requireAdmin } from "@/lib/firebase-admin";
+import { adminDb, requireAdmin } from "@/lib/firebase-admin";
 
 export async function GET(request: NextRequest) {
   if (!(await requireAdmin(request))) {
@@ -8,10 +8,19 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const promotionCodes = await stripe.promotionCodes.list({
-      limit: 100,
-      expand: ["data.promotion.coupon"],
-    });
+    const [promotionCodes, usageEventsSnap] = await Promise.all([
+      stripe.promotionCodes.list({
+        limit: 100,
+        expand: ["data.promotion.coupon"],
+      }),
+      adminDb.collection("affiliate_events").where("codeType", "==", "promo").get(),
+    ]);
+
+    const usageByPromoCodeId: Record<string, number> = {};
+    for (const d of usageEventsSnap.docs) {
+      const id = d.data().stripePromotionCodeId as string;
+      usageByPromoCodeId[id] = (usageByPromoCodeId[id] ?? 0) + 1;
+    }
 
     const codes = promotionCodes.data.map((pc) => {
       const coupon = pc.promotion.coupon;
@@ -22,6 +31,7 @@ export async function GET(request: NextRequest) {
         percentOff: typeof coupon === "object" && coupon ? coupon.percent_off ?? null : null,
         maxRedemptions: pc.max_redemptions ?? null,
         timesRedeemed: pc.times_redeemed,
+        identifiedRedemptions: usageByPromoCodeId[pc.id] ?? 0,
         expiresAt: pc.expires_at ? pc.expires_at * 1000 : null,
         createdAt: pc.created * 1000,
       };

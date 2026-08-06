@@ -8,7 +8,10 @@ import { adminFetch } from "@/lib/adminFetch";
 type EnrichedAccount = AffiliateAccount & {
   email: string | null;
   displayName: string | null;
+  code: string | null;
+  clickCount: number;
   referralCount: number;
+  conversionCount: number;
 };
 
 function fmt(cents: number) {
@@ -121,7 +124,7 @@ export function AdminAffiliates() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-800">
-                {["Utilisateur", "Filleuls", "Total gagné", "Versé", "Connect"].map((h) => (
+                {["Utilisateur", "Clics", "Filleuls", "Conversions", "Taux", "Total gagné", "Versé", "Connect"].map((h) => (
                   <th key={h} className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                     {h}
                   </th>
@@ -131,7 +134,7 @@ export function AdminAffiliates() {
             <tbody className="divide-y divide-gray-800">
               {accounts.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="text-center text-gray-500 text-sm py-8">
+                  <td colSpan={8} className="text-center text-gray-500 text-sm py-8">
                     Aucun affilié pour l'instant
                   </td>
                 </tr>
@@ -142,7 +145,12 @@ export function AdminAffiliates() {
                       <p className="text-sm font-semibold text-white">{acc.displayName ?? "—"}</p>
                       <p className="text-xs text-gray-500">{acc.email ?? acc.userId}</p>
                     </td>
+                    <td className="px-6 py-3 text-sm text-gray-300">{acc.clickCount}</td>
                     <td className="px-6 py-3 text-sm text-gray-300">{acc.referralCount}</td>
+                    <td className="px-6 py-3 text-sm text-gray-300">{acc.conversionCount}</td>
+                    <td className="px-6 py-3 text-sm text-gray-300">
+                      {acc.clickCount > 0 ? Math.round((acc.conversionCount / acc.clickCount) * 100) + "%" : "—"}
+                    </td>
                     <td className="px-6 py-3 text-sm text-gray-300">{fmt(acc.totalEarned ?? 0)}</td>
                     <td className="px-6 py-3 text-sm text-gray-300">{fmt(acc.totalPaid ?? 0)}</td>
                     <td className="px-6 py-3">
@@ -188,8 +196,10 @@ export function AdminAffiliates() {
                     {acc.payoutsEnabled ? "Actif" : acc.onboardingComplete ? "En vérif." : "Non connecté"}
                   </span>
                 </div>
-                <div className="flex items-center gap-4 text-xs text-gray-400">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
+                  <span>{acc.clickCount} clics</span>
                   <span>{acc.referralCount} filleuls</span>
+                  <span>{acc.conversionCount} conversions</span>
                   <span>{fmt(acc.totalEarned ?? 0)} gagné</span>
                   <span>{fmt(acc.totalPaid ?? 0)} versé</span>
                 </div>

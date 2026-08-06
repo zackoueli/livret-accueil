@@ -38,3 +38,9 @@ export function clearRefCookie(): void {
 export function isValidCode(code: string): boolean {
   return CODE_PATTERN.test(code);
 }
+
+// Variante serveur de setRefCookie, pour construire un header Set-Cookie
+// dans un Route Handler (ex. /r/[code]) plutôt que via document.cookie.
+export function buildRefCookieHeader(code: string): string {
+  return `${REF_COOKIE}=${code}; Max-Age=${REF_COOKIE_DAYS * 24 * 60 * 60}; Path=/; SameSite=Lax`;
+}

@@ -83,6 +83,14 @@ service cloud.firestore {
       allow read: if request.auth != null && request.auth.uid == userId;
     }
 
+    // Evenements de tracking (clics /r/[code], usage de codes promo) : ecrit
+    // uniquement par le serveur (route /r/[code] et webhook Stripe, via Admin SDK).
+    // Consulte uniquement via /api/admin/* (protege par requireAdmin), aucune
+    // lecture cliente necessaire, meme pour le proprietaire du compte affilié.
+    match /affiliate_events/{eventId} {
+      allow read, write: if false;
+    }
+
     // ── Services payants (add-ons) ───────────────────────────────────────────
 
     // Compte Stripe Connect de l'hôte : lecture seule, écrit uniquement par le
