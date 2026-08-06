@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { LayoutDashboard, BookOpen, LogOut, Lock, Users2, Tag, Menu, X } from "lucide-react";
+import { LayoutDashboard, BookOpen, LogOut, Lock, Users2, Tag, Link2, Menu, X } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { adminFetch } from "@/lib/adminFetch";
 
@@ -13,6 +13,7 @@ const NAV = [
   { href: "/admin/booklets", label: "Livrets", icon: BookOpen },
   { href: "/admin/affiliates", label: "Affiliés", icon: Users2 },
   { href: "/admin/promo-codes", label: "Codes promo", icon: Tag },
+  { href: "/admin/marketing-links", label: "Liens tracking", icon: Link2 },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {

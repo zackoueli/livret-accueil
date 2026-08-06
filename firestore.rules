@@ -91,6 +91,13 @@ service cloud.firestore {
       allow read, write: if false;
     }
 
+    // Liens de tracking marketing internes (crees dans l'admin, ex. posts Insta/YouTube) :
+    // ecrit uniquement par le serveur (route /r/[code], /api/referral/link,
+    // /api/admin/marketing-links, via Admin SDK). Consulte uniquement via l'admin.
+    match /marketing_links/{linkId} {
+      allow read, write: if false;
+    }
+
     // ── Services payants (add-ons) ───────────────────────────────────────────
 
     // Compte Stripe Connect de l'hôte : lecture seule, écrit uniquement par le

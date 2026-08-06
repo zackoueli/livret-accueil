@@ -175,6 +175,18 @@ export interface TrackingEvent {
   createdAt: number;
 }
 
+// Lien de tracking marketing interne (ex. "Vidéo YouTube titre", "Post insta 10 août"),
+// créé manuellement dans l'admin. Distinct des codes d'affiliation : pas d'utilisateur
+// rattaché, pas de commission, ne doit jamais apparaître dans l'onglet Affiliés.
+export interface MarketingLink {
+  id: string;
+  name: string;
+  code: string;
+  clickCount: number;
+  signupCount: number;
+  createdAt: number;
+}
+
 export interface Booklet {
   id: string;
   userId: string;

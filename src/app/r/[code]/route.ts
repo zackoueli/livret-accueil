@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { isValidCode, buildRefCookieHeader } from "@/lib/referral";
 
 // Lien de partage d'affiliation (ex. bunkly.com/r/ABC-1234) : trace le clic
@@ -39,6 +40,17 @@ export async function GET(
         userAgent: request.headers.get("user-agent") ?? undefined,
         createdAt: Date.now(),
       });
+    } else {
+      // Lien de tracking marketing interne (créé dans l'admin), pas un code
+      // d'affiliation — pas d'event affiliate_events, juste un compteur dénormalisé.
+      const marketingSnap = await adminDb
+        .collection("marketing_links")
+        .where("code", "==", code)
+        .limit(1)
+        .get();
+      if (!marketingSnap.empty) {
+        await marketingSnap.docs[0].ref.update({ clickCount: FieldValue.increment(1) });
+      }
     }
   } catch (e) {
     console.error("[r/[code]] Failed to log click event:", e);

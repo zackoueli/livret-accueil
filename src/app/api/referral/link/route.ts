@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,6 +17,17 @@ export async function POST(request: NextRequest) {
       .get();
 
     if (codeSnap.empty) {
+      // Pas un code d'affiliation — peut-être un lien de tracking marketing
+      // interne (créé dans l'admin), qui n'a pas de notion de parrain/filleul.
+      const marketingSnap = await adminDb
+        .collection("marketing_links")
+        .where("code", "==", code)
+        .limit(1)
+        .get();
+      if (!marketingSnap.empty) {
+        await marketingSnap.docs[0].ref.update({ signupCount: FieldValue.increment(1) });
+        return Response.json({ ok: true });
+      }
       return Response.json({ error: "Invalid code" }, { status: 404 });
     }
 
