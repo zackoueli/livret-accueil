@@ -64,8 +64,15 @@ export async function GET(request: NextRequest) {
       })
     );
 
+    // Exclut les codes générés automatiquement par l'ancien flux (avant le bouton
+    // "Générer mon lien") qui n'ont jamais servi — un affilié réel a au moins un
+    // clic, un filleul, ou un compte Stripe Connect entamé.
+    const activeAccounts = accounts.filter(
+      (a) => a.clickCount > 0 || a.referralCount > 0 || a.stripeAccountId !== null
+    );
+
     return Response.json({
-      accounts,
+      accounts: activeAccounts,
       commissions: commissionsSnap.docs.map((d) => d.data()),
       referrals: referralsSnap.docs.map((d) => d.data()),
     });
