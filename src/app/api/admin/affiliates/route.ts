@@ -26,24 +26,39 @@ export async function GET(request: NextRequest) {
       clicksByCode[code] = (clicksByCode[code] ?? 0) + 1;
     }
 
-    // Enrichir les comptes avec les emails depuis Firestore users
+    const stripeAccountByUserId: Record<string, FirebaseFirestore.DocumentData> = {};
+    for (const d of accountsSnap.docs) {
+      stripeAccountByUserId[d.data().userId as string] = d.data();
+    }
+
+    // Liste basée sur referral_codes (tout utilisateur en a un dès l'inscription),
+    // pas sur affiliate_accounts (créé seulement si l'onboarding Stripe Connect a
+    // été fait) — sinon un affilié qui a partagé son lien sans connecter Stripe
+    // disparaît complètement des stats.
     const accounts = await Promise.all(
-      accountsSnap.docs.map(async (d) => {
-        const data = d.data();
-        const userDoc = await adminDb.collection("users").doc(data.userId).get();
+      referralCodesSnap.docs.map(async (d) => {
+        const userId = d.data().userId as string;
+        const code = d.data().code as string;
+        const stripeAccount = stripeAccountByUserId[userId];
+        const userDoc = await adminDb.collection("users").doc(userId).get();
         const userData = userDoc.data();
-        const code = codeByUserId[data.userId] ?? null;
         return {
-          ...data,
+          userId,
+          stripeAccountId: stripeAccount?.stripeAccountId ?? null,
+          onboardingComplete: stripeAccount?.onboardingComplete ?? false,
+          chargesEnabled: stripeAccount?.chargesEnabled ?? false,
+          payoutsEnabled: stripeAccount?.payoutsEnabled ?? false,
+          totalEarned: stripeAccount?.totalEarned ?? 0,
+          totalPaid: stripeAccount?.totalPaid ?? 0,
           email: userData?.email ?? null,
           displayName: userData?.displayName ?? null,
           code,
-          clickCount: code ? clicksByCode[code] ?? 0 : 0,
+          clickCount: clicksByCode[code] ?? 0,
           referralCount: referralsSnap.docs.filter(
-            (r) => r.data().referrerId === data.userId
+            (r) => r.data().referrerId === userId
           ).length,
           conversionCount: referralsSnap.docs.filter(
-            (r) => r.data().referrerId === data.userId && r.data().status === "converted"
+            (r) => r.data().referrerId === userId && r.data().status === "converted"
           ).length,
         };
       })

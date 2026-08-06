@@ -36,6 +36,7 @@ function AffiliationPageInner() {
   const searchParams = useSearchParams();
 
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [generatingCode, setGeneratingCode] = useState(false);
   const [copied, setCopied] = useState(false);
   const [connectStatus, setConnectStatus] = useState<ConnectStatus>({ connected: false });
   const [referrals, setReferrals] = useState<Referral[]>([]);
@@ -63,15 +64,13 @@ function AffiliationPageInner() {
     if (!user) return;
     setLoading(true);
     try {
-      // Code de parrainage — créer si absent (users inscrits avant le système d'affiliation)
+      // Code de parrainage — généré uniquement à la demande (bouton "Générer mon lien"),
+      // pour ne pas polluer les stats admin avec des utilisateurs n'ayant jamais
+      // eu l'intention de faire de l'affiliation.
       const codeRef = doc(db, "referral_codes", user.uid);
       const codeDoc = await getDoc(codeRef);
       if (codeDoc.exists()) {
         setReferralCode(codeDoc.data().code);
-      } else {
-        const newCode = generateReferralCode();
-        await setDoc(codeRef, { userId: user.uid, code: newCode, createdAt: Date.now() });
-        setReferralCode(newCode);
       }
 
       // Statut Connect
@@ -110,8 +109,26 @@ function AffiliationPageInner() {
   }
 
   const referralLink = referralCode
-    ? `https://app.bunkly.co/auth?ref=${referralCode}`
+    ? `https://app.bunkly.co/r/${referralCode}`
     : "";
+
+  const handleGenerateCode = async () => {
+    if (!user || generatingCode) return;
+    setGeneratingCode(true);
+    try {
+      const newCode = generateReferralCode();
+      await setDoc(doc(db, "referral_codes", user.uid), {
+        userId: user.uid,
+        code: newCode,
+        createdAt: Date.now(),
+      });
+      setReferralCode(newCode);
+    } catch {
+      toast.error("Erreur lors de la génération du lien");
+    } finally {
+      setGeneratingCode(false);
+    }
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(referralLink);
@@ -243,7 +260,12 @@ function AffiliationPageInner() {
               </p>
             </>
           ) : (
-            <p className="text-sm text-gray-400">Chargement de votre code...</p>
+            <button
+              onClick={handleGenerateCode}
+              disabled={generatingCode}
+              className="w-full bg-gray-900 hover:bg-gray-800 text-white font-bold py-3 px-4 rounded-xl text-sm transition-colors disabled:opacity-50">
+              {generatingCode ? "Génération..." : "Générer mon lien d'affiliation"}
+            </button>
           )}
         </div>
 

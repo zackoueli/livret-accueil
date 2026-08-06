@@ -10,7 +10,7 @@ import {
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { UserProfile } from "@/types";
-import { generateReferralCode, getRefCookie } from "./referral";
+import { getRefCookie } from "./referral";
 
 export async function registerWithEmail(
   email: string,
@@ -39,14 +39,6 @@ export async function registerWithEmail(
   } catch {
     // non-bloquant
   }
-
-  // Générer un code de parrainage pour ce nouvel utilisateur
-  const code = generateReferralCode();
-  await setDoc(doc(db, "referral_codes", cred.user.uid), {
-    userId: cred.user.uid,
-    code,
-    createdAt: Date.now(),
-  });
 
   // Lier le parrainage si l'utilisateur vient d'un lien ref
   if (refCode) {
@@ -103,12 +95,6 @@ export async function loginWithGoogle() {
         // non-bloquant
       }
 
-      const code = generateReferralCode();
-      await setDoc(doc(db, "referral_codes", result.user.uid), {
-        userId: result.user.uid,
-        code,
-        createdAt: Date.now(),
-      });
       const refCode = getRefCookie();
       if (refCode) {
         try {
