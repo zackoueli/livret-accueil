@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
     }
 
     const completion = await client.chat.completions.create({
-      model: "llama-3.1-8b-instant",
+      model: "openai/gpt-oss-20b",
       max_tokens: 2048,
       messages: [
         { role: "user", content: `${PROMPT}\n${text.slice(0, 4000)}` },
