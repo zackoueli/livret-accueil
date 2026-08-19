@@ -10,9 +10,11 @@ import {
   where,
   orderBy,
   deleteField,
+  writeBatch,
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { Booklet, BookletModule, BookletTranslations, Folder, ModuleType, Plan, SupportedLang } from "@/types";
+import { getBookletServices } from "./services";
 
 // Firestore rejette les `undefined`.
 // - Au niveau racine : on utilise deleteField() pour supprimer le champ
@@ -162,5 +164,17 @@ export async function duplicateBooklet(booklet: Booklet, title?: string): Promis
   };
   const ref = doc(collection(db, "booklets"));
   await setDoc(ref, copy);
+
+  const services = await getBookletServices(booklet.id, booklet.userId);
+  if (services.length > 0) {
+    const batch = writeBatch(db);
+    for (const service of services) {
+      const { id: _omit, ...serviceData } = service;
+      const serviceRef = doc(collection(db, "booklet_services"));
+      batch.set(serviceRef, { ...serviceData, id: serviceRef.id, bookletId: ref.id });
+    }
+    await batch.commit();
+  }
+
   return ref.id;
 }
