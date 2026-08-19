@@ -234,6 +234,7 @@ export const CORE_MODULES: ModuleType[] = [
 // ── Modules optionnels ────────────────────────────────────────────────────────
 
 export const OPTIONAL_MODULES: ModuleType[] = [
+  "addons",
   "baby",
   "pets",
   "pool",
@@ -245,7 +246,6 @@ export const OPTIONAL_MODULES: ModuleType[] = [
   "practical",
   "tides",
   "weather",
-  "addons",
 ];
 
 // ── Formatage de l'heure HH:MM → HHhMM ───────────────────────────────────────
