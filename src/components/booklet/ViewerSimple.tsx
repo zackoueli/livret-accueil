@@ -1626,10 +1626,19 @@ function useTranslatedBooklet(booklet: Booklet, lang: SupportedLang): Booklet {
       ...booklet,
       title: tr["_meta_"]?.title ?? booklet.title,
       description: tr["_meta_"]?.description ?? booklet.description,
-      modules: booklet.modules.map(mod => ({
-        ...mod,
-        content: tr[mod.id] ? { ...mod.content, ...tr[mod.id] } : mod.content,
-      })),
+      modules: booklet.modules.map(mod => {
+        const modTr = tr[mod.id];
+        if (!modTr) return mod;
+        // On ne fusionne que les champs encore presents en source : un champ vide/absent
+        // cote langue par defaut signifie que l'utilisateur l'a volontairement retire,
+        // et une traduction orpheline (heritee d'une duplication) ne doit pas le faire
+        // reapparaitre.
+        const content = { ...mod.content };
+        for (const [field, value] of Object.entries(modTr)) {
+          if (mod.content[field]) content[field] = value;
+        }
+        return { ...mod, content };
+      }),
     };
   }, [booklet, lang]);
 }

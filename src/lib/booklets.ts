@@ -159,6 +159,11 @@ export async function duplicateBooklet(booklet: Booklet, title?: string): Promis
     slug: newSlug,
     isPublished: false,
     viewCount: 0,
+    // Ne pas heriter des traductions de l'original : une fois la copie modifiee
+    // (contenu FR different, sections videes), les traductions figees de l'original
+    // deviennent obsoletes/orphelines et refont surface a l'affichage. On force une
+    // retraduction propre sur la copie plutot que de porter ce risque.
+    translations: {},
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
