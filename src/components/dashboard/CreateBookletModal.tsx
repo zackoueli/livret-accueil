@@ -36,7 +36,7 @@ const LAYOUTS = [
     id: "clean",
     label: "Halo",
     desc: "Style épuré et éditorial, fond lumineux à votre couleur. Navigation par menu, sans barre en bas.",
-    previewUrl: "https://app.bunkly.co/b/9gM1r69Boa?templateOverride=clean",
+    previewUrl: "https://app.bunkly.co/b/9gM1r69Boa?templateOverride=clean&accentOverride=%23F97316",
   },
 ];
 
@@ -173,6 +173,15 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
                   </button>
                 );
               })}
+
+              {/* Carte bientôt disponible — pleine largeur */}
+              <div className="col-span-2 flex items-center gap-4 rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-5 py-4">
+                <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl shrink-0">✨</div>
+                <div>
+                  <p className="text-sm font-semibold text-gray-500">Nouveaux designs à venir</p>
+                  <p className="text-xs text-gray-400 mt-0.5">D&apos;autres templates arrivent bientôt — suivez-nous sur Instagram pour les découvrir en avant-première.</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
