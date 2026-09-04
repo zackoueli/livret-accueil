@@ -91,30 +91,18 @@ function PageTitle({ children, sub }: { children: React.ReactNode; sub?: string 
   );
 }
 
-// Halo central flou, teinté par la couleur d'accent du livret, sur fond crème.
-// Rendu comme calque absolu flouté (blur) => vraie tache colorée douce, bien visible.
-function GlowBackdrop({ accent }: { accent: string }) {
-  return (
-    <div aria-hidden style={{ position: "absolute", inset: 0, overflow: "hidden", pointerEvents: "none", background: C.bg }}>
-      {/* Tache colorée centrale, très floue */}
-      <div style={{
-        position: "absolute", left: "50%", top: "48%", transform: "translate(-50%, -50%)",
-        width: "80%", height: "55%", borderRadius: "50%",
-        background: accent, opacity: 0.5, filter: "blur(120px)",
-      }} />
-      {/* Deuxième nappe plus large et encore plus diffuse pour étaler la couleur */}
-      <div style={{
-        position: "absolute", left: "50%", top: "50%", transform: "translate(-50%, -50%)",
-        width: "130%", height: "95%", borderRadius: "50%",
-        background: accent, opacity: 0.28, filter: "blur(150px)",
-      }} />
-      {/* Vignette crème : bords fondus en douceur, sans liseré net */}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: `radial-gradient(115% 95% at 50% 48%, rgba(246,245,242,0) 0%, rgba(246,245,242,0) 55%, rgba(246,245,242,0.55) 82%, ${C.bg} 100%)`,
-      }} />
-    </div>
-  );
+// Halo central teinté par la couleur d'accent, sur fond crème.
+// Rendu 100% via radial-gradients (aucun `filter: blur`, qui est plafonné/ignoré
+// par Safari iOS au-delà de ~30px et faisait disparaître le halo sur mobile).
+function haloBackground(accent: string) {
+  return [
+    // tache centrale dense
+    `radial-gradient(60% 45% at 50% 32%, ${accent}59 0%, ${accent}24 45%, ${accent}00 78%)`,
+    // nappe large et diffuse
+    `radial-gradient(95% 70% at 50% 45%, ${accent}2E 0%, ${accent}00 72%)`,
+    // base crème
+    C.bg,
+  ].join(", ");
 }
 
 // ─── Composants de base : style "fiche" ─────────────────────────────────────
@@ -270,9 +258,10 @@ function CleanMenu({ open, active, showServices, onSelect, onClose }: {
     { id: "safety",   label: tr("nav_safety") },
     { id: "checkout", label: tr("nav_checkout") },
   ];
+  const accent = useAccent();
   if (!open) return null;
   return (
-    <div style={{ position: "absolute", inset: 0, zIndex: 400, background: C.bg, display: "flex", flexDirection: "column", fontFamily: FONT }}>
+    <div style={{ position: "absolute", inset: 0, zIndex: 400, background: haloBackground(accent), display: "flex", flexDirection: "column", fontFamily: FONT }}>
       <div style={{ display: "flex", justifyContent: "flex-end", padding: "18px 18px 0", flexShrink: 0 }}>
         <button onClick={onClose} aria-label="Fermer"
           style={{ display: "flex", alignItems: "center", gap: 8, padding: "10px 18px", borderRadius: 999, border: `1px solid ${C.label}`, background: "transparent", color: C.label, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
@@ -1319,11 +1308,10 @@ function CleanContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; 
   return (
     <LangCtx.Provider value={lang}>
       <AccentCtx.Provider value={accent}>
-        <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%", background: C.bg, fontFamily: FONT, WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", overflow: "hidden" }}>
-          <GlowBackdrop accent={accent} />
+        <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%", background: haloBackground(accent), fontFamily: FONT, WebkitFontSmoothing: "antialiased", MozOsxFontSmoothing: "grayscale", overflow: "hidden" }}>
           <LangSelector booklet={rawBooklet} lang={lang} onSelect={setLang} />
           <CleanHeader booklet={booklet} onOpenMenu={() => setMenuOpen(true)} />
-          <div key={page} style={{ position: "relative", flex: 1, overflowY: "auto", touchAction: "pan-y" }}>
+          <div key={page} style={{ position: "relative", flex: 1, overflowY: "auto", touchAction: "pan-y", background: "transparent" }}>
             {page === "home"     && <PageHome     booklet={booklet} accent={accent} />}
             {page === "stay"     && <PageStay     booklet={booklet} accent={accent} />}
             {page === "area"     && <PageArea     booklet={booklet} accent={accent} />}
