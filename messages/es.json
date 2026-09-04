@@ -405,6 +405,8 @@
     "designGridDesc": "App móvil con paneles",
     "designPastel": "Pastel",
     "designPastelDesc": "Tarjetas suaves y coloridas",
+    "designClean": "Halo",
+    "designCleanDesc": "Sobrio, menú hamburguesa",
     "url": "URL del libro",
     "slugLocked": "Slug personalizado reservado a los planes Starter, Pro y Agencia",
     "slugAvailable": "URL disponible ✓",

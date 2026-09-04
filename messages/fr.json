@@ -405,6 +405,8 @@
     "designGridDesc": "App mobile avec drawers",
     "designPastel": "Pastel",
     "designPastelDesc": "Cartes douces et colorées",
+    "designClean": "Halo",
+    "designCleanDesc": "Minimal, menu hamburger",
     "url": "URL du livret",
     "slugLocked": "Slug personnalisé réservé aux plans Starter, Pro et Agence",
     "slugAvailable": "URL disponible ✓",
