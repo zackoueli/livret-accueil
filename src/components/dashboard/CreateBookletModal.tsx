@@ -32,6 +32,12 @@ const LAYOUTS = [
     desc: "Style doux et coloré, cartes pastel façon app bien-être. Navigation par onglets en bas.",
     previewUrl: "https://app.bunkly.co/b/9gM1r69Boa?templateOverride=pastel",
   },
+  {
+    id: "clean",
+    label: "Halo",
+    desc: "Style épuré et éditorial, fond lumineux à votre couleur. Navigation par menu, sans barre en bas.",
+    previewUrl: "https://app.bunkly.co/b/9gM1r69Boa?templateOverride=clean",
+  },
 ];
 
 function PhoneFrame({ url }: { url: string }) {
@@ -167,15 +173,6 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
                   </button>
                 );
               })}
-
-              {/* Carte bientôt disponible — pleine largeur */}
-              <div className="col-span-2 flex items-center gap-4 rounded-2xl border border-dashed border-gray-200 bg-gray-50 px-5 py-4">
-                <div className="w-10 h-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center text-xl shrink-0">✨</div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-500">Nouveaux designs à venir</p>
-                  <p className="text-xs text-gray-400 mt-0.5">D'autres templates arrivent bientôt — suivez-nous sur Instagram pour les découvrir en avant-première.</p>
-                </div>
-              </div>
             </div>
           </div>
         )}
@@ -260,7 +257,7 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
             {/* Récap */}
             <div className="bg-gray-50 rounded-2xl p-4 border border-gray-100 flex gap-3 items-center">
               <div className="w-9 h-9 rounded-xl bg-orange-100 flex items-center justify-center shrink-0 text-lg">
-                {selectedLayout.id === "grid" ? "📱" : "📜"}
+                {selectedLayout.id === "grid" ? "📱" : selectedLayout.id === "pastel" ? "🌸" : selectedLayout.id === "clean" ? "✨" : "📜"}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Votre sélection</p>
