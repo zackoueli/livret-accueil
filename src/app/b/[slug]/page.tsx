@@ -23,10 +23,10 @@ export default async function BookletPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ templateOverride?: string }>;
+  searchParams: Promise<{ templateOverride?: string; accentOverride?: string }>;
 }) {
   const { slug } = await params;
-  const { templateOverride } = await searchParams;
+  const { templateOverride, accentOverride } = await searchParams;
 
   const snap = await adminDb
     .collection("booklets")
@@ -40,8 +40,15 @@ export default async function BookletPage({
   const doc = snap.docs[0];
   const booklet = { ...doc.data(), id: doc.id } as Booklet;
 
-  const effectiveBooklet = templateOverride
-    ? { ...booklet, templateId: templateOverride }
+  // Overrides pour les apercus internes (modale de creation, editeur) : ne modifient
+  // jamais le livret stocke, juste le rendu de cette requete.
+  const validHex = accentOverride && /^#[0-9a-fA-F]{6}$/.test(accentOverride) ? accentOverride : undefined;
+  const effectiveBooklet = (templateOverride || validHex)
+    ? {
+        ...booklet,
+        ...(templateOverride ? { templateId: templateOverride } : {}),
+        ...(validHex ? { accentColor: validHex } : {}),
+      }
     : booklet;
 
   return <BookletViewer booklet={effectiveBooklet} />;

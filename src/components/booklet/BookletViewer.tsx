@@ -4,6 +4,7 @@ import { Booklet } from "@/types";
 import { ViewerSimple } from "./ViewerSimple";
 import { ViewerGrid } from "./ViewerGrid";
 import { ViewerPastel } from "./ViewerPastel";
+import { ViewerClean } from "./ViewerClean";
 import { useBookletTracking } from "./useBookletTracking";
 import { AddToHomeScreenBanner } from "./AddToHomeScreenBanner";
 
@@ -11,6 +12,7 @@ const VIEWERS: Record<string, typeof ViewerSimple> = {
   simple: ViewerSimple,
   grid: ViewerGrid,
   pastel: ViewerPastel,
+  clean: ViewerClean,
 };
 
 export function BookletViewer({ booklet }: { booklet: Booklet }) {
