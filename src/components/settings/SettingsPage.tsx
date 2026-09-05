@@ -27,6 +27,7 @@ function SettingsPageInner() {
     (searchParams.get("billing") as "monthly" | "yearly") ?? "yearly"
   );
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
   const [loadingPortal, setLoadingPortal] = useState(false);
   const [loadingCancel, setLoadingCancel] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
@@ -39,11 +40,11 @@ function SettingsPageInner() {
       const res = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ userId: user.uid, email: user.email, billingPeriod: billing, plan: planId, locale }),
+        body: JSON.stringify({ userId: user.uid, email: user.email, billingPeriod: billing, plan: planId, locale, promoCode: promoCode.trim() || undefined }),
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else toast.error(t("checkoutError"));
+      else toast.error(data.error ?? t("checkoutError"));
     } catch {
       toast.error(t("networkError"));
     } finally {
@@ -270,6 +271,12 @@ function SettingsPageInner() {
               {billing === "yearly" && (
                 <span className="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">{t("twoMonthsFree")}</span>
               )}
+              <input
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                placeholder={tp("promoCodePlaceholder")}
+                className="px-3 py-1.5 rounded-xl border border-gray-200 text-sm uppercase placeholder:normal-case focus:outline-none focus:border-orange-400 w-40"
+              />
             </div>
           </div>
 

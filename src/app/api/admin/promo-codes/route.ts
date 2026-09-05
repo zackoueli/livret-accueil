@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
         timesRedeemed: pc.times_redeemed,
         identifiedRedemptions: usageByPromoCodeId[pc.id] ?? 0,
         expiresAt: pc.expires_at ? pc.expires_at * 1000 : null,
+        billingRestriction: (pc.metadata?.billingRestriction as "monthly" | "yearly" | undefined) ?? "both",
         createdAt: pc.created * 1000,
       };
     });
@@ -50,13 +51,16 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { code, percentOff, expiresAt, maxRedemptions } = await request.json();
+    const { code, percentOff, expiresAt, maxRedemptions, billingRestriction } = await request.json();
 
     if (!code || !percentOff) {
       return NextResponse.json({ error: "Missing params" }, { status: 400 });
     }
     if (percentOff <= 0 || percentOff > 100) {
       return NextResponse.json({ error: "percentOff invalide" }, { status: 400 });
+    }
+    if (billingRestriction && !["monthly", "yearly", "both"].includes(billingRestriction)) {
+      return NextResponse.json({ error: "billingRestriction invalide" }, { status: 400 });
     }
 
     const coupon = await stripe.coupons.create({
@@ -69,6 +73,7 @@ export async function POST(request: NextRequest) {
       code: code.toUpperCase(),
       ...(expiresAt ? { expires_at: Math.floor(expiresAt / 1000) } : {}),
       ...(maxRedemptions ? { max_redemptions: maxRedemptions } : {}),
+      metadata: { billingRestriction: billingRestriction ?? "both" },
     });
 
     return NextResponse.json({ ok: true, id: promotionCode.id });
@@ -84,11 +89,17 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const { id, active } = await request.json();
+    const { id, active, billingRestriction } = await request.json();
     if (!id || typeof active !== "boolean") {
       return NextResponse.json({ error: "Missing params" }, { status: 400 });
     }
-    await stripe.promotionCodes.update(id, { active });
+    if (billingRestriction && !["monthly", "yearly", "both"].includes(billingRestriction)) {
+      return NextResponse.json({ error: "billingRestriction invalide" }, { status: 400 });
+    }
+    await stripe.promotionCodes.update(id, {
+      active,
+      ...(billingRestriction ? { metadata: { billingRestriction } } : {}),
+    });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error("[admin/promo-codes PATCH]", err);

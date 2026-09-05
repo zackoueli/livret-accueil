@@ -17,6 +17,7 @@ interface UpgradeModalProps {
 export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
   const [billing, setBilling] = useState<"monthly" | "yearly">("yearly");
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [promoCode, setPromoCode] = useState("");
   const locale = useLocale();
   const t = useTranslations("plans");
   const tSettings = useTranslations("settings");
@@ -32,11 +33,11 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
       const res = await fetch("/api/stripe/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ userId: user.uid, email: user.email, billingPeriod: billing, plan: planId, locale }),
+        body: JSON.stringify({ userId: user.uid, email: user.email, billingPeriod: billing, plan: planId, locale, promoCode: promoCode.trim() || undefined }),
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
-      else toast.error(tSettings("checkoutError"));
+      else toast.error(data.error ?? tSettings("checkoutError"));
     } catch {
       toast.error(tSettings("networkError"));
     } finally {
@@ -84,6 +85,12 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
               {t("twoMonthsFree")}
             </span>
           )}
+          <input
+            value={promoCode}
+            onChange={(e) => setPromoCode(e.target.value)}
+            placeholder={t("promoCodePlaceholder")}
+            className="ml-auto px-3 py-1.5 rounded-xl border border-gray-200 text-sm uppercase placeholder:normal-case focus:outline-none focus:border-orange-400 w-40"
+          />
         </div>
 
         {/* Plans */}

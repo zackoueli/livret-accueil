@@ -245,6 +245,7 @@
     "chooseArrow": "Scegli {name} →",
     "continueFree": "Continua gratis",
     "redirecting": "Reindirizzamento...",
+    "promoCodePlaceholder": "Codice promozionale",
     "questions": "Domande?",
     "free": {
       "name": "Gratuito",

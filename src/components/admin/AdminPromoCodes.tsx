@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Tag, Plus, CheckCircle2, XCircle } from "lucide-react";
 import { adminFetch } from "@/lib/adminFetch";
 
+type BillingRestriction = "monthly" | "yearly" | "both";
+
 interface PromoCode {
   id: string;
   code: string;
@@ -13,6 +15,7 @@ interface PromoCode {
   timesRedeemed: number;
   identifiedRedemptions: number;
   expiresAt: number | null;
+  billingRestriction: BillingRestriction;
   createdAt: number;
 }
 
@@ -26,6 +29,7 @@ export function AdminPromoCodes() {
   const [percentOff, setPercentOff] = useState("10");
   const [expiresAt, setExpiresAt] = useState("");
   const [maxRedemptions, setMaxRedemptions] = useState("");
+  const [billingRestriction, setBillingRestriction] = useState<BillingRestriction>("both");
 
   const fetchCodes = async () => {
     setLoading(true);
@@ -52,6 +56,7 @@ export function AdminPromoCodes() {
           percentOff: Number(percentOff),
           expiresAt: expiresAt ? new Date(expiresAt).getTime() : null,
           maxRedemptions: maxRedemptions ? Number(maxRedemptions) : null,
+          billingRestriction,
         }),
       });
       const data = await res.json();
@@ -63,6 +68,7 @@ export function AdminPromoCodes() {
       setPercentOff("10");
       setExpiresAt("");
       setMaxRedemptions("");
+      setBillingRestriction("both");
       await fetchCodes();
     } finally {
       setCreating(false);
@@ -121,6 +127,18 @@ export function AdminPromoCodes() {
               className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-indigo-500"
             />
           </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-400 mb-1.5">Valable sur</label>
+            <select
+              value={billingRestriction}
+              onChange={(e) => setBillingRestriction(e.target.value as BillingRestriction)}
+              className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-indigo-500"
+            >
+              <option value="both">Mensuel + Annuel</option>
+              <option value="monthly">Mensuel uniquement</option>
+              <option value="yearly">Annuel uniquement</option>
+            </select>
+          </div>
         </div>
         {error && <p className="text-red-400 text-sm">{error}</p>}
         <button type="submit" disabled={creating}
@@ -154,6 +172,7 @@ export function AdminPromoCodes() {
                     {c.maxRedemptions ? ` / ${c.maxRedemptions}` : ""}
                     {` · ${c.identifiedRedemptions} abonnement${c.identifiedRedemptions > 1 ? "s" : ""} identifié${c.identifiedRedemptions > 1 ? "s" : ""}`}
                     {c.expiresAt ? ` · expire le ${new Date(c.expiresAt).toLocaleDateString("fr-FR")}` : ""}
+                    {c.billingRestriction === "monthly" ? " · Mensuel uniquement" : c.billingRestriction === "yearly" ? " · Annuel uniquement" : " · Mensuel + Annuel"}
                   </p>
                 </div>
               </div>

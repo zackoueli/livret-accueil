@@ -3,7 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { adminDb, requireAuthUid } from "@/lib/firebase-admin";
 
 export async function POST(request: NextRequest) {
-  const { userId, email, billingPeriod, plan, locale } = await request.json();
+  const { userId, email, billingPeriod, plan, locale, promoCode } = await request.json();
 
   if (!userId || !email || !billingPeriod) {
     return Response.json({ error: "Missing parameters" }, { status: 400 });
@@ -12,6 +12,24 @@ export async function POST(request: NextRequest) {
   const authUid = await requireAuthUid(request);
   if (!authUid || authUid !== userId) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  let promotionCodeId: string | undefined;
+  if (promoCode && typeof promoCode === "string" && promoCode.trim()) {
+    const found = await stripe.promotionCodes.list({
+      code: promoCode.trim().toUpperCase(),
+      active: true,
+      limit: 1,
+    });
+    const pc = found.data[0];
+    if (!pc) {
+      return Response.json({ error: "Code promo invalide" }, { status: 400 });
+    }
+    const restriction = (pc.metadata?.billingRestriction as "monthly" | "yearly" | "both" | undefined) ?? "both";
+    if (restriction !== "both" && restriction !== billingPeriod) {
+      return Response.json({ error: "Ce code promo n'est pas valable pour cette formule de facturation" }, { status: 400 });
+    }
+    promotionCodeId = pc.id;
   }
 
   const isYearly = billingPeriod === "yearly";
@@ -64,7 +82,7 @@ export async function POST(request: NextRequest) {
     subscription_data: {
       metadata: { firebaseUid: userId },
     },
-    allow_promotion_codes: true,
+    ...(promotionCodeId ? { discounts: [{ promotion_code: promotionCodeId }] } : {}),
   });
 
   return Response.json({ url: session.url });
