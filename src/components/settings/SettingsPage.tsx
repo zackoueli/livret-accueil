@@ -248,8 +248,8 @@ function SettingsPageInner() {
         )}
 
         {/* Plans pricing */}
-        <section>
-          <div className="flex items-center justify-between mb-5">
+        <section className="bg-gray-100/70 rounded-3xl p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-5">
             <div>
               <h2 className="text-lg font-bold text-gray-900">
                 {currentPlan === "free" ? t("upgradeTitle") : t("changePlan")}
@@ -258,24 +258,24 @@ function SettingsPageInner() {
             </div>
             {/* Billing toggle */}
             <div className="flex items-center gap-3">
-              <div className="flex bg-gray-100 rounded-xl p-1">
+              <div className="flex bg-white rounded-xl p-1 shadow-sm">
                 <button onClick={() => setBilling("monthly")}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${billing === "monthly" ? "bg-white shadow-sm text-gray-900" : "text-gray-400"}`}>
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${billing === "monthly" ? "bg-gray-900 text-white" : "text-gray-400"}`}>
                   {t("monthly")}
                 </button>
                 <button onClick={() => setBilling("yearly")}
-                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${billing === "yearly" ? "bg-white shadow-sm text-gray-900" : "text-gray-400"}`}>
+                  className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${billing === "yearly" ? "bg-gray-900 text-white" : "text-gray-400"}`}>
                   {t("yearly")}
                 </button>
               </div>
               {billing === "yearly" && (
-                <span className="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">{t("twoMonthsFree")}</span>
+                <span className="text-xs font-semibold text-green-700 bg-green-100 px-2.5 py-1 rounded-full">{t("twoMonthsFree")}</span>
               )}
             </div>
           </div>
 
           {/* Code promo */}
-          <div className="flex items-center gap-2.5 mb-5 px-4 py-3 rounded-xl bg-orange-50 border border-orange-100 w-fit">
+          <div className="flex items-center gap-2.5 mb-6 px-4 py-3 rounded-xl bg-white border border-orange-200 w-fit shadow-sm">
             <Tag className="w-4 h-4 text-orange-500 shrink-0" />
             <label htmlFor="promo-code-input" className="text-sm font-semibold text-orange-700 whitespace-nowrap">
               {tp("promoCodeLabel")}
@@ -298,8 +298,12 @@ function SettingsPageInner() {
 
               return (
                 <div key={plan.id}
-                  className={`relative bg-white rounded-2xl border-2 p-6 flex flex-col transition-all ${
-                    plan.popular ? "border-orange-400 shadow-lg shadow-orange-100" : "border-gray-100 shadow-sm"
+                  className={`relative rounded-2xl border-2 p-6 flex flex-col transition-all ${
+                    plan.popular
+                      ? "bg-orange-50/60 border-orange-400 shadow-lg shadow-orange-100"
+                      : isCurrent
+                        ? "bg-gray-50 border-gray-200"
+                        : "bg-white border-gray-100 shadow-sm"
                   }`}>
 
                   {plan.popular && (
@@ -317,10 +321,11 @@ function SettingsPageInner() {
 
                   <div className="mb-4">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: plan.color + "20" }}>
-                        <Crown className="w-4 h-4" style={{ color: plan.color }} />
+                      <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isCurrent ? "bg-gray-200" : ""}`}
+                        style={isCurrent ? {} : { background: plan.color + "20" }}>
+                        <Crown className="w-4 h-4" style={{ color: isCurrent ? "#9ca3af" : plan.color }} />
                       </div>
-                      <span className="font-bold text-gray-900 text-lg">{planName(plan.id)}</span>
+                      <span className={`font-bold text-lg ${isCurrent ? "text-gray-500" : "text-gray-900"}`}>{planName(plan.id)}</span>
                     </div>
                     <p className="text-sm text-gray-400">{tp(`${plan.id}.description`)}</p>
                   </div>
@@ -362,8 +367,8 @@ function SettingsPageInner() {
             })}
           </div>
 
-          <p className="text-center text-sm text-gray-400 mt-6">
-            {t("question")} <a href="mailto:hello@bunkly.co" className="text-orange-500 hover:underline font-medium">hello@bunkly.co</a>
+          <p className="text-center text-sm text-gray-500 mt-6">
+            {t("question")} <a href="mailto:hello@bunkly.co" className="text-orange-600 hover:underline font-medium">hello@bunkly.co</a>
           </p>
         </section>
       </main>
