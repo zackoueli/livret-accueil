@@ -245,7 +245,8 @@
     "chooseArrow": "{name} wählen →",
     "continueFree": "Kostenlos weitermachen",
     "redirecting": "Weiterleitung...",
-    "promoCodePlaceholder": "Gutscheincode",
+    "promoCodeLabel": "Gutscheincode?",
+    "promoCodePlaceholder": "Code eingeben",
     "questions": "Fragen?",
     "free": {
       "name": "Kostenlos",

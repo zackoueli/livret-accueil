@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { X, Check, Zap, Crown, Lock } from "lucide-react";
+import { X, Check, Zap, Crown, Lock, Tag } from "lucide-react";
 import toast from "react-hot-toast";
 import { PLANS_CONFIG } from "@/lib/plans";
 import { usePlan } from "@/hooks/usePlan";
@@ -69,7 +69,7 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
         </div>
 
         {/* Billing toggle */}
-        <div className="flex items-center gap-3 px-6 pb-5">
+        <div className="flex items-center gap-3 px-6 pb-4">
           <div className="flex bg-gray-100 rounded-xl p-1">
             <button onClick={() => setBilling("monthly")}
               className={`px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${billing === "monthly" ? "bg-white shadow-sm text-gray-900" : "text-gray-400"}`}>
@@ -85,12 +85,23 @@ export function UpgradeModal({ onClose, reason }: UpgradeModalProps) {
               {t("twoMonthsFree")}
             </span>
           )}
-          <input
-            value={promoCode}
-            onChange={(e) => setPromoCode(e.target.value)}
-            placeholder={t("promoCodePlaceholder")}
-            className="ml-auto px-3 py-1.5 rounded-xl border border-gray-200 text-sm uppercase placeholder:normal-case focus:outline-none focus:border-orange-400 w-40"
-          />
+        </div>
+
+        {/* Code promo */}
+        <div className="px-6 pb-5">
+          <div className="flex items-center gap-2.5 px-4 py-3 rounded-xl bg-orange-50 border border-orange-100 w-fit">
+            <Tag className="w-4 h-4 text-orange-500 shrink-0" />
+            <label htmlFor="promo-code-input-modal" className="text-sm font-semibold text-orange-700 whitespace-nowrap">
+              {t("promoCodeLabel")}
+            </label>
+            <input
+              id="promo-code-input-modal"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder={t("promoCodePlaceholder")}
+              className="px-3 py-1.5 rounded-lg border border-orange-200 bg-white text-sm font-medium uppercase placeholder:normal-case placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 w-44"
+            />
+          </div>
         </div>
 
         {/* Plans */}

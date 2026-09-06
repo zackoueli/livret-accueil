@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import {
   Crown, Check, ArrowLeft, CreditCard,
-  LogOut, Calendar, Zap, Lock, ExternalLink, X,
+  LogOut, Calendar, Zap, Lock, ExternalLink, X, Tag,
 } from "lucide-react";
 import { BunklyLogo } from "@/components/ui/BunklyLogo";
 import toast from "react-hot-toast";
@@ -271,13 +271,22 @@ function SettingsPageInner() {
               {billing === "yearly" && (
                 <span className="text-xs font-semibold text-green-600 bg-green-50 px-2.5 py-1 rounded-full">{t("twoMonthsFree")}</span>
               )}
-              <input
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                placeholder={tp("promoCodePlaceholder")}
-                className="px-3 py-1.5 rounded-xl border border-gray-200 text-sm uppercase placeholder:normal-case focus:outline-none focus:border-orange-400 w-40"
-              />
             </div>
+          </div>
+
+          {/* Code promo */}
+          <div className="flex items-center gap-2.5 mb-5 px-4 py-3 rounded-xl bg-orange-50 border border-orange-100 w-fit">
+            <Tag className="w-4 h-4 text-orange-500 shrink-0" />
+            <label htmlFor="promo-code-input" className="text-sm font-semibold text-orange-700 whitespace-nowrap">
+              {tp("promoCodeLabel")}
+            </label>
+            <input
+              id="promo-code-input"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder={tp("promoCodePlaceholder")}
+              className="px-3 py-1.5 rounded-lg border border-orange-200 bg-white text-sm font-medium uppercase placeholder:normal-case placeholder:text-gray-400 placeholder:font-normal focus:outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 w-44"
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
