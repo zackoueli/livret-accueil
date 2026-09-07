@@ -144,7 +144,7 @@ function SettingsPageInner() {
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white border-b border-gray-100 sticky top-0 z-40">
-        <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-5 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => router.push(`/${locale}/dashboard`)}
               className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
@@ -161,7 +161,7 @@ function SettingsPageInner() {
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-5 py-10 space-y-8">
+      <main className="max-w-6xl mx-auto px-5 py-10 space-y-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
           <p className="text-sm text-gray-400 mt-0.5">{t("subtitle")}</p>
@@ -289,7 +289,7 @@ function SettingsPageInner() {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {PLANS_CONFIG.map((plan) => {
               const isCurrent = plan.id === currentPlan;
               const price = billing === "yearly" ? plan.price.yearly : plan.price.monthly;
