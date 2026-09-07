@@ -68,7 +68,7 @@ function PhoneFrame({ url }: { url: string }) {
 }
 
 export function CreateBookletModal({ onClose, onCreate }: Props) {
-  const { templateCount, can } = usePlan();
+  const { can } = usePlan();
   const canUseAllLayouts = can("template_grid");
   const [step, setStep] = useState<Step>("layout");
   const [selectedLayout, setSelectedLayout] = useState(LAYOUTS[0]);
@@ -77,11 +77,8 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
   const [loading, setLoading] = useState(false);
   const [showUpgrade, setShowUpgrade] = useState(false);
 
-  // "blank" est toujours accessible ; les modèles préremplis suivants sont limités par le plan
-  const unlockedIds = new Set([
-    "blank",
-    ...TEMPLATES.filter(t => t.id !== "blank").slice(0, Math.max(0, templateCount - 1)).map(t => t.id),
-  ]);
+  // Le point de départ du contenu (vierge ou modèle prérempli) est accessible à tous les plans.
+  // Seul le design/layout (étape 1) est limité selon le plan.
 
   const handleCreate = async () => {
     const t = title.trim() || selected.propertyName || "Mon livret";
@@ -192,27 +189,19 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {TEMPLATES.map(tpl => {
                 const isSelected = selected.id === tpl.id;
-                const isLocked = !unlockedIds.has(tpl.id);
                 return (
                   <button
                     key={tpl.id}
-                    onClick={() => isLocked ? setShowUpgrade(true) : setSelected(tpl)}
+                    onClick={() => setSelected(tpl)}
                     className={`relative text-left p-5 rounded-2xl border-2 transition-all ${
-                      isLocked
-                        ? "border-gray-100 opacity-60"
-                        : isSelected
-                          ? "border-orange-400 bg-orange-50 shadow-sm"
-                          : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
+                      isSelected
+                        ? "border-orange-400 bg-orange-50 shadow-sm"
+                        : "border-gray-100 hover:border-gray-200 hover:bg-gray-50"
                     }`}
                   >
-                    {isSelected && !isLocked && (
+                    {isSelected && (
                       <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
                         <Check className="w-3 h-3 text-white" />
-                      </div>
-                    )}
-                    {isLocked && (
-                      <div className="absolute top-3 right-3 flex items-center gap-1 text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded-full">
-                        <Lock className="w-2.5 h-2.5" /> Verrouillé
                       </div>
                     )}
                     <div className="w-full h-1.5 rounded-full mb-4" style={{ background: tpl.accentColor }} />
@@ -326,7 +315,7 @@ export function CreateBookletModal({ onClose, onCreate }: Props) {
 
       {showUpgrade && (
         <UpgradeModal
-          reason="Ce modèle est réservé à un plan supérieur"
+          reason="Ce design est réservé à un plan supérieur"
           onClose={() => setShowUpgrade(false)}
         />
       )}
