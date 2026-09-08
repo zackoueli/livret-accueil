@@ -308,9 +308,13 @@ export function parseServices(raw: string): Service[] {
   try { return JSON.parse(raw) as Service[]; } catch { return []; }
 }
 
+// Conserve toutes les lignes bien formées, y compris incomplètes (l'éditeur en a
+// besoin pendant la saisie). Les viewers filtrent eux-mêmes sur .url.
 export function parseReviewLinks(raw: string): ReviewLink[] {
   try {
     const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? (arr as ReviewLink[]).filter(r => r && r.platform && r.url) : [];
+    return Array.isArray(arr)
+      ? (arr as ReviewLink[]).filter(r => r && typeof r.id === "string")
+      : [];
   } catch { return []; }
 }

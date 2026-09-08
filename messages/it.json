@@ -639,6 +639,7 @@
       "review_airbnb": { "label": "Link recensione Airbnb", "placeholder": "https://airbnb.com/..." },
       "review_google": { "label": "Link recensione Google", "placeholder": "https://g.page/..." },
       "review_booking": { "label": "Link recensione Booking", "placeholder": "https://booking.com/..." },
+      "review_custom": { "label": "Altre piattaforme di recensioni", "placeholder": "", "hint": "Aggiungi altre piattaforme (Vrbo, Expedia...) con il loro link" },
       "thank_you": { "label": "Messaggio di ringraziamento", "placeholder": "Grazie per il vostro soggiorno! Speriamo di rivedervi presto. 🏡" }
     },
     "baby": {

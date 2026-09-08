@@ -639,6 +639,7 @@
       "review_airbnb": { "label": "Lien avis Airbnb", "placeholder": "https://airbnb.com/..." },
       "review_google": { "label": "Lien avis Google", "placeholder": "https://g.page/..." },
       "review_booking": { "label": "Lien avis Booking", "placeholder": "https://booking.com/..." },
+      "review_custom": { "label": "Autres plateformes d'avis", "placeholder": "", "hint": "Ajoutez d'autres plateformes (Abritel, Leboncoin, Gîtes de France...) avec leur lien" },
       "thank_you": { "label": "Message de remerciement", "placeholder": "Merci pour votre séjour ! Nous espérons vous revoir bientôt. 🏡" }
     },
     "baby": {

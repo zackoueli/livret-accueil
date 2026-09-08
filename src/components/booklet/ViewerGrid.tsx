@@ -1107,7 +1107,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
               { url: g(checkout, "review_airbnb"),  label: "Airbnb" },
               { url: g(checkout, "review_google"),  label: "Google" },
               { url: g(checkout, "review_booking"), label: "Booking.com" },
-              ...parseReviewLinks(g(checkout, "review_custom")).map(r => ({ url: r.url, label: r.platform })),
+              ...parseReviewLinks(g(checkout, "review_custom")).filter(r => r.url && r.platform).map(r => ({ url: r.url, label: r.platform })),
             ].filter(r => r.url);
             if (reviews.length === 0) return null;
             return (
