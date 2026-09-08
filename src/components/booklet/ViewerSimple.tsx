@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, createContext, useContext, Suspense } fro
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceChoiceItem } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
+import { geocodableAddress } from "@/lib/geoAddress";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Copy, Check, MapPin, Clock, Key, Car, Thermometer, Wind, Tv, Mailbox,
@@ -570,7 +571,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
             <Card>
               <div style={{ borderRadius: "20px 20px 0 0", overflow: "hidden", height: 160 }}>
                 <iframe
-                  src={`https://maps.google.com/maps?q=${encodeURIComponent(booklet.address)}&output=embed&z=15`}
+                  src={`https://maps.google.com/maps?q=${encodeURIComponent(geocodableAddress(booklet.address))}&output=embed&z=15`}
                   width="100%" height="160" style={{ border: 0, display: "block" }}
                   loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Carte" />
               </div>
@@ -580,13 +581,13 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
                   <p style={{ margin: 0, fontSize: 13, color: C.sub }}>{booklet.address}</p>
                 </div>
                 <div style={{ display: "flex", gap: 10 }}>
-                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`}
+                  <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`}
                     target="_blank" rel="noopener noreferrer"
                     style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "11px 0", borderRadius: 14, background: "#4285F412", textDecoration: "none", border: "1.5px solid #4285F420" }}>
                     <Navigation size={15} color="#4285F4" />
                     <span style={{ fontSize: 13, fontWeight: 700, color: "#4285F4" }}>{tr("google_maps")}</span>
                   </a>
-                  <a href={`https://waze.com/ul?q=${encodeURIComponent(booklet.address)}&navigate=yes`}
+                  <a href={`https://waze.com/ul?q=${encodeURIComponent(geocodableAddress(booklet.address))}&navigate=yes`}
                     target="_blank" rel="noopener noreferrer"
                     style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "11px 0", borderRadius: 14, background: "#33CCFF12", textDecoration: "none", border: "1.5px solid #33CCFF20" }}>
                     <Navigation size={15} color="#33AADD" />
@@ -856,7 +857,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
       {weatherModule && (
         <div style={{ marginBottom: 28 }}>
           <SectionTitle>{tr("weather")}</SectionTitle>
-          <WeatherSection address={booklet.address ?? ""} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} accent={accent} tr={tr} />
+          <WeatherSection address={geocodableAddress(booklet.address ?? "")} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} accent={accent} tr={tr} />
         </div>
       )}
     </div>
@@ -962,7 +963,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
   const activities = parseActivities(g(neighborhood, "activities_list"));
   const places     = neighborhood ? parsePlaces(g(neighborhood, "places")) : [];
-  const mapAddress = encodeURIComponent(booklet.address || booklet.propertyName || "");
+  const mapAddress = encodeURIComponent(geocodableAddress(booklet.address || "") || booklet.propertyName || "");
 
   const [activeFilter, setActiveFilter] = useState<string>("all");
 

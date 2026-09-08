@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, createContext, useContext, Suspense } fro
 import { Booklet, BookletModule, BookletService, ServiceChoiceItem, SupportedLang, SUPPORTED_LANGS, Plan } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
+import { geocodableAddress } from "@/lib/geoAddress";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Copy, Check, MapPin, Clock, Users, Phone, Mail, Navigation,
@@ -450,17 +451,17 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           <div style={{ borderRadius: RADIUS, overflow: "hidden", boxShadow: SHADOW, background: C.card }}>
             <div style={{ height: 170, overflow: "hidden" }}>
               <iframe
-                src={`https://maps.google.com/maps?q=${encodeURIComponent(booklet.address)}&output=embed&z=15`}
+                src={`https://maps.google.com/maps?q=${encodeURIComponent(geocodableAddress(booklet.address))}&output=embed&z=15`}
                 width="100%" height="170" style={{ border: 0, display: "block" }}
                 loading="lazy" referrerPolicy="no-referrer-when-downgrade" title="Carte" />
             </div>
             <div style={{ padding: "14px 16px", display: "flex", gap: 10 }}>
-              <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`}
+              <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`}
                 target="_blank" rel="noopener noreferrer"
                 style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, padding: "12px 0", borderRadius: 14, background: C.label, textDecoration: "none", color: "#fff", fontSize: 13, fontWeight: 700 }}>
                 <Navigation size={14} color="#fff" /> {tr("google_maps")}
               </a>
-              <a href={`https://waze.com/ul?q=${encodeURIComponent(booklet.address)}&navigate=yes`}
+              <a href={`https://waze.com/ul?q=${encodeURIComponent(geocodableAddress(booklet.address))}&navigate=yes`}
                 target="_blank" rel="noopener noreferrer"
                 style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 7, padding: "12px 0", borderRadius: 14, background: "transparent", border: `1.5px solid ${C.line}`, textDecoration: "none", color: C.label, fontSize: 13, fontWeight: 700 }}>
                 <Navigation size={14} color={C.label} /> {tr("waze")}
@@ -780,7 +781,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
 
   const activities = parseActivities(g(neighborhood, "activities_list"));
   const places     = neighborhood ? parsePlaces(g(neighborhood, "places")) : [];
-  const mapAddress = encodeURIComponent(booklet.address || booklet.propertyName || "");
+  const mapAddress = encodeURIComponent(geocodableAddress(booklet.address || "") || booklet.propertyName || "");
   const [activeFilter, setActiveFilter] = useState("all");
 
   const CATS = [
@@ -891,7 +892,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
       {weatherMod && (
         <div style={{ marginBottom: 26 }}>
           <p style={{ margin: "0 4px 10px", fontSize: 12, fontWeight: 700, color: C.label, textTransform: "uppercase", letterSpacing: 1.6 }}>{tr("weather")}</p>
-          <CleanWeather address={booklet.address ?? ""} cityOverride={g(weatherMod, "city_override")} note={g(weatherMod, "note")} />
+          <CleanWeather address={geocodableAddress(booklet.address ?? "")} cityOverride={g(weatherMod, "city_override")} note={g(weatherMod, "note")} />
         </div>
       )}
 

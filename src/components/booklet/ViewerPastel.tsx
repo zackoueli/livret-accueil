@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, createContext, useContext, Suspense } fro
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceChoiceItem } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
+import { geocodableAddress } from "@/lib/geoAddress";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, ScrollText,
@@ -408,7 +409,7 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
           <div style={{ borderRadius: 16, background: C.card, border: `1px solid ${C.sep}`, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
             <MapPin size={14} color={C.muted} style={{ flexShrink: 0 }} />
             <p style={{ margin: 0, flex: 1, fontSize: 12, color: C.sub, lineHeight: 1.4, fontWeight: 600 }}>{booklet.address}</p>
-            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`} target="_blank" rel="noopener noreferrer"
+            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`} target="_blank" rel="noopener noreferrer"
               style={{ padding: "5px 10px", borderRadius: 10, background: C.bg, fontSize: 11, fontWeight: 700, color: C.ink, textDecoration: "none", flexShrink: 0 }}>
               Maps
             </a>
@@ -599,7 +600,7 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
       </Sheet>
 
       <Sheet open={sheet === "weather"} onClose={onClose} tint={C.yellow} icon={<Sun size={18} color={C.ink} />} title={tr("weather")}>
-        <WeatherSheetContent address={booklet.address ?? ""} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} tr={tr} />
+        <WeatherSheetContent address={geocodableAddress(booklet.address ?? "")} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} tr={tr} />
       </Sheet>
     </>
   );
@@ -614,7 +615,7 @@ function PageArea({ booklet, onSelectAct }: { booklet: Booklet; onSelectAct: (a:
   const neighborhood = useMod(booklet, "neighborhood");
   const activities = parseActivities(g(neighborhood, "activities_list"));
   const places = neighborhood ? parsePlaces(g(neighborhood, "places")) : [];
-  const mapAddress = encodeURIComponent(booklet.address || booklet.propertyName || "");
+  const mapAddress = encodeURIComponent(geocodableAddress(booklet.address || "") || booklet.propertyName || "");
   const [activeFilter, setActiveFilter] = useState("all");
 
   const catTint = CAT_TINT;

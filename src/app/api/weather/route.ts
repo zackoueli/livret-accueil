@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { geocodableAddress } from "@/lib/geoAddress";
 
 // Codes météo WMO → description + emoji
 const WMO_CODES: Record<number, { label: string; emoji: string }> = {
@@ -96,7 +97,7 @@ export async function GET(req: NextRequest) {
   const address = req.nextUrl.searchParams.get("address");
   const cityOverride = req.nextUrl.searchParams.get("city");
 
-  const query = cityOverride || address;
+  const query = cityOverride || (address ? geocodableAddress(address) : null);
   if (!query) return NextResponse.json({ error: "Missing address or city" }, { status: 400 });
 
   const geo = await geocode(query);

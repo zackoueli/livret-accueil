@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, createContext, useContext, Suspense } fro
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceChoiceItem } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
+import { geocodableAddress } from "@/lib/geoAddress";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
@@ -453,11 +454,11 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
             <MapPin size={14} color="rgba(255,255,255,0.55)" style={{ flexShrink: 0 }} />
             <p style={{ margin: 0, flex: 1, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>{booklet.address}</p>
             <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
-              <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(booklet.address)}`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`} target="_blank" rel="noopener noreferrer"
                 style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
                 Maps
               </a>
-              <a href={`https://waze.com/ul?q=${encodeURIComponent(booklet.address)}&navigate=yes`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://waze.com/ul?q=${encodeURIComponent(geocodableAddress(booklet.address))}&navigate=yes`} target="_blank" rel="noopener noreferrer"
                 style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
                 Waze
               </a>
@@ -684,7 +685,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
       </Drawer>
 
       <Drawer open={drawer === "weather"} onClose={onClose} title={tr("weather")} icon={<Sun size={20} color="#F59E0B" />} color="#F59E0B">
-        <WeatherDrawerContent address={booklet.address ?? ""} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} tr={tr} accent="#F59E0B" />
+        <WeatherDrawerContent address={geocodableAddress(booklet.address ?? "")} cityOverride={g(weatherModule, "city_override")} note={g(weatherModule, "note")} tr={tr} accent="#F59E0B" />
       </Drawer>
     </>
   );
@@ -706,7 +707,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const neighborhood = useMod(booklet, "neighborhood");
   const activities = parseActivities(g(neighborhood, "activities_list"));
   const places = neighborhood ? parsePlaces(g(neighborhood, "places")) : [];
-  const mapAddress = encodeURIComponent(booklet.address || booklet.propertyName || "");
+  const mapAddress = encodeURIComponent(geocodableAddress(booklet.address || "") || booklet.propertyName || "");
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedAct, setSelectedAct] = useState<Activity | null>(null);
 
