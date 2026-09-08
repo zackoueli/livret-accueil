@@ -454,6 +454,8 @@
     "serviceName": "Nombre (ej.: Piscina)",
     "serviceDetail": "Detalle (ej.: 8h – 22h)",
     "addService": "Añadir un servicio",
+    "reviewPlatformName": "Nombre de la plataforma (ej: Vrbo)",
+    "addReviewPlatform": "Añadir una plataforma",
     "addonsCommissionRate": "Comisión de la plataforma: {rate}%",
     "addonsCommissionHint": "Mejora tu plan para reducir tu comisión en cada venta.",
     "addonsConnectRequired": "Activa los pagos para que los huéspedes puedan comprar estos servicios.",

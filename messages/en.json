@@ -454,6 +454,8 @@
     "serviceName": "Name (e.g.: Pool)",
     "serviceDetail": "Detail (e.g.: 8am – 10pm)",
     "addService": "Add a service",
+    "reviewPlatformName": "Platform name (e.g. Vrbo)",
+    "addReviewPlatform": "Add a platform",
     "addonsCommissionRate": "Platform commission: {rate}%",
     "addonsCommissionHint": "Upgrade to a higher plan to reduce your commission on every sale.",
     "addonsConnectRequired": "Activate payments to let guests purchase these services.",

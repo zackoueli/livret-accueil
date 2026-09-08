@@ -454,6 +454,8 @@
     "serviceName": "Nom (ex: Piscine)",
     "serviceDetail": "Détail (ex: 8h – 22h)",
     "addService": "Ajouter un service",
+    "reviewPlatformName": "Nom de la plateforme (ex: Abritel)",
+    "addReviewPlatform": "Ajouter une plateforme",
     "addonsCommissionRate": "Commission plateforme : {rate}%",
     "addonsCommissionHint": "Passez à un plan supérieur pour réduire votre commission sur chaque vente.",
     "addonsConnectRequired": "Activez les paiements pour rendre ces services achetables par vos voyageurs.",

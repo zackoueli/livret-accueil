@@ -1,6 +1,6 @@
 import { ModuleType } from "@/types";
 
-export type FieldType = "text" | "textarea" | "time" | "phone" | "url" | "photo" | "number" | "places" | "activities" | "services" | "addon_services";
+export type FieldType = "text" | "textarea" | "time" | "phone" | "url" | "photo" | "number" | "places" | "activities" | "services" | "addon_services" | "review_links";
 
 export interface ModuleField {
   key: string;
@@ -131,6 +131,8 @@ export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
     { key: "review_airbnb",    label: "Lien avis Airbnb",         placeholder: "https://airbnb.com/...",  type: "url" },
     { key: "review_google",    label: "Lien avis Google",         placeholder: "https://g.page/...",      type: "url" },
     { key: "review_booking",   label: "Lien avis Booking",        placeholder: "https://booking.com/...", type: "url" },
+    { key: "review_custom",    label: "Autres plateformes d'avis", placeholder: "",                       type: "review_links",
+      hint: "Ajoutez d'autres plateformes (Abritel, Leboncoin, Gîtes de France...) avec leur lien" },
     { key: "thank_you",        label: "Message de remerciement",  placeholder: "Merci pour votre séjour ! Nous espérons vous revoir bientôt. 🏡", type: "textarea" },
   ],
 
@@ -282,6 +284,12 @@ export interface Service {
   description: string;
 }
 
+export interface ReviewLink {
+  id: string;
+  platform: string;
+  url: string;
+}
+
 export const ACTIVITY_CATEGORIES = [
   { value: "restaurant", label: "Restaurant & Café", emoji: "🍽️" },
   { value: "activity",   label: "Activité & Visite",  emoji: "🎯" },
@@ -298,4 +306,11 @@ export function parseActivities(raw: string): Activity[] {
 
 export function parseServices(raw: string): Service[] {
   try { return JSON.parse(raw) as Service[]; } catch { return []; }
+}
+
+export function parseReviewLinks(raw: string): ReviewLink[] {
+  try {
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? (arr as ReviewLink[]).filter(r => r && r.platform && r.url) : [];
+  } catch { return []; }
 }

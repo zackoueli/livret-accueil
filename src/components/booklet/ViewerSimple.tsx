@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceChoiceItem } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
-import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
+import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Copy, Check, MapPin, Clock, Key, Car, Thermometer, Wind, Tv, Mailbox,
@@ -1499,16 +1499,20 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
         </div>
       )}
 
-      {(g(checkout, "review_airbnb") || g(checkout, "review_google") || g(checkout, "review_booking")) && (
+      {(() => {
+        const reviews = [
+          { url: g(checkout, "review_airbnb"),  label: "Airbnb" },
+          { url: g(checkout, "review_google"),  label: "Google" },
+          { url: g(checkout, "review_booking"), label: "Booking.com" },
+          ...parseReviewLinks(g(checkout, "review_custom")).map(r => ({ url: r.url, label: r.platform })),
+        ].filter(r => r.url);
+        if (reviews.length === 0) return null;
+        return (
         <div style={{ marginBottom: 28 }}>
           <SectionTitle>{tr("leave_review")}</SectionTitle>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[
-              { key: "review_airbnb",  label: "Airbnb",       sub: tr("leave_review") },
-              { key: "review_google",  label: "Google",       sub: tr("leave_review") },
-              { key: "review_booking", label: "Booking.com",  sub: tr("leave_review") },
-            ].filter(r => g(checkout, r.key)).map(r => (
-              <a key={r.key} href={g(checkout, r.key)} target="_blank" rel="noopener noreferrer"
+            {reviews.map((r, i) => (
+              <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px", borderRadius: 20, background: C.card, boxShadow: "0 1px 3px rgba(0,0,0,0.06)", textDecoration: "none", border: "1px solid rgba(0,0,0,0.04)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <div style={{ width: 44, height: 44, borderRadius: 14, background: `${accent}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1516,7 +1520,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
                   </div>
                   <div>
                     <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: C.label }}>{r.label}</p>
-                    <p style={{ margin: "2px 0 0", fontSize: 12, color: C.sub }}>{r.sub}</p>
+                    <p style={{ margin: "2px 0 0", fontSize: 12, color: C.sub }}>{tr("leave_review")}</p>
                   </div>
                 </div>
                 <ChevronRight size={18} color={C.muted} />
@@ -1524,7 +1528,8 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
             ))}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {g(checkout, "thank_you") && (
         <div style={{ textAlign: "center", padding: "24px 16px 8px" }}>

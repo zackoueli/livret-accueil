@@ -454,6 +454,8 @@
     "serviceName": "Nome (es.: Piscina)",
     "serviceDetail": "Dettaglio (es.: 8 – 22)",
     "addService": "Aggiungi un servizio",
+    "reviewPlatformName": "Nome della piattaforma (es: Vrbo)",
+    "addReviewPlatform": "Aggiungi una piattaforma",
     "addonsCommissionRate": "Commissione piattaforma: {rate}%",
     "addonsCommissionHint": "Passa a un piano superiore per ridurre la tua commissione su ogni vendita.",
     "addonsConnectRequired": "Attiva i pagamenti per rendere questi servizi acquistabili dagli ospiti.",

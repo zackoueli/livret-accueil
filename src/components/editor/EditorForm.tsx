@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { useEditorStore } from "@/store/editorStore";
-import { MODULE_META, MODULE_FIELDS, ACTIVITY_CATEGORIES, SERVICE_EMOJIS, parseActivities, parseServices, Activity, Service } from "@/lib/modules";
+import { MODULE_META, MODULE_FIELDS, ACTIVITY_CATEGORIES, SERVICE_EMOJIS, parseActivities, parseServices, parseReviewLinks, Activity, Service, ReviewLink } from "@/lib/modules";
 import { PORTS } from "@/app/api/tides/route";
 import { EyeOff, ExternalLink, Plus, Trash2, ChevronDown, ChevronUp, ImagePlus, Loader2, X, GripVertical, Search } from "lucide-react";
 import { nanoid } from "nanoid";
@@ -430,6 +430,45 @@ function ServiceEditor({ value, onChange }: { value: string; onChange: (v: strin
   );
 }
 
+function ReviewLinksEditor({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const t = useTranslations("editor");
+  const items = parseReviewLinks(value);
+  const save = (next: ReviewLink[]) => onChange(JSON.stringify(next));
+
+  const add = () => save([...items, { id: nanoid(), platform: "", url: "" }]);
+  const update = (id: string, patch: Partial<ReviewLink>) =>
+    save(items.map(it => it.id === id ? { ...it, ...patch } : it));
+  const remove = (id: string) => save(items.filter(it => it.id !== id));
+
+  const normalizeUrl = (id: string, url: string) => {
+    if (url && !/^https?:\/\//i.test(url)) update(id, { url: "https://" + url });
+  };
+
+  return (
+    <div className="space-y-2">
+      {items.map((item) => (
+        <div key={item.id} className="flex items-center gap-3 bg-gray-50 rounded-xl border border-gray-100 px-3 py-2.5">
+          <div className="flex-1 grid grid-cols-2 gap-2">
+            <input type="text" value={item.platform} onChange={e => update(item.id, { platform: e.target.value })}
+              placeholder={t("reviewPlatformName")} className={`${input} text-sm`} />
+            <input type="text" value={item.url} onChange={e => update(item.id, { url: e.target.value })}
+              onBlur={e => normalizeUrl(item.id, e.target.value)}
+              placeholder="https://..." className={`${input} text-sm`} />
+          </div>
+          <button onClick={() => remove(item.id)} className="p-1 text-gray-300 hover:text-red-400 transition-colors flex-shrink-0">
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ))}
+
+      <button onClick={add}
+        className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 border-dashed border-orange-200 text-orange-500 font-semibold text-sm hover:bg-orange-50 transition-colors">
+        <Plus className="w-4 h-4" /> {t("addReviewPlatform")}
+      </button>
+    </div>
+  );
+}
+
 // ── Composants réutilisables ──────────────────────────────────────────────────
 
 const input = "w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent placeholder-gray-300";
@@ -561,6 +600,10 @@ export function EditorForm() {
 
               {field.type === "services" && (
                 <ServiceEditor value={get(field.key)} onChange={v => set(field.key, v)} />
+              )}
+
+              {field.type === "review_links" && (
+                <ReviewLinksEditor value={get(field.key)} onChange={v => set(field.key, v)} />
               )}
 
               {field.type === "addon_services" && (

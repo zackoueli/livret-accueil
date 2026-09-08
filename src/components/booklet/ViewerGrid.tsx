@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
 import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceChoiceItem } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
-import { formatTime, parseActivities, parseServices, Activity } from "@/lib/modules";
+import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
@@ -1101,16 +1101,20 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
           )}
 
           {/* Avis */}
-          {(g(checkout, "review_airbnb") || g(checkout, "review_google") || g(checkout, "review_booking")) && (
+          {(() => {
+            const reviews = [
+              { url: g(checkout, "review_airbnb"),  label: "Airbnb" },
+              { url: g(checkout, "review_google"),  label: "Google" },
+              { url: g(checkout, "review_booking"), label: "Booking.com" },
+              ...parseReviewLinks(g(checkout, "review_custom")).map(r => ({ url: r.url, label: r.platform })),
+            ].filter(r => r.url);
+            if (reviews.length === 0) return null;
+            return (
             <div>
               <p style={{ margin: "0 0 10px", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("leave_review")}</p>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {[
-                  { key: "review_airbnb", label: "Airbnb" },
-                  { key: "review_google", label: "Google" },
-                  { key: "review_booking", label: "Booking.com" },
-                ].filter(r => g(checkout, r.key)).map(r => (
-                  <a key={r.key} href={g(checkout, r.key)} target="_blank" rel="noopener noreferrer"
+                {reviews.map((r, i) => (
+                  <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
                     style={{ ...GLASS_CARD, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "14px 16px", textDecoration: "none" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
                       <div style={{ width: 40, height: 40, borderRadius: 12, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1123,7 +1127,8 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
                 ))}
               </div>
             </div>
-          )}
+            );
+          })()}
 
           {g(checkout, "thank_you") && (
             <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: "rgba(255,255,255,0.6)", fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>

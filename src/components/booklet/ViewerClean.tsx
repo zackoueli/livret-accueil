@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
 import { Booklet, BookletModule, BookletService, ServiceChoiceItem, SupportedLang, SUPPORTED_LANGS, Plan } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
-import { formatTime, parseActivities, Activity } from "@/lib/modules";
+import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Copy, Check, MapPin, Clock, Users, Phone, Mail, Navigation,
@@ -1225,16 +1225,20 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
         </FieldCard>
       )}
 
-      {(g(checkout, "review_airbnb") || g(checkout, "review_google") || g(checkout, "review_booking")) && (
+      {(() => {
+        const reviews = [
+          { url: g(checkout, "review_airbnb"),  label: "Airbnb" },
+          { url: g(checkout, "review_google"),  label: "Google" },
+          { url: g(checkout, "review_booking"), label: "Booking.com" },
+          ...parseReviewLinks(g(checkout, "review_custom")).map(r => ({ url: r.url, label: r.platform })),
+        ].filter(r => r.url);
+        if (reviews.length === 0) return null;
+        return (
         <div style={{ marginBottom: 26 }}>
           <p style={{ margin: "0 4px 10px", fontSize: 12, fontWeight: 700, color: C.label, textTransform: "uppercase", letterSpacing: 1.6 }}>{tr("leave_review")}</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {[
-              { key: "review_airbnb",  label: "Airbnb" },
-              { key: "review_google",  label: "Google" },
-              { key: "review_booking", label: "Booking.com" },
-            ].filter(r => g(checkout, r.key)).map(r => (
-              <a key={r.key} href={g(checkout, r.key)} target="_blank" rel="noopener noreferrer"
+            {reviews.map((r, i) => (
+              <a key={i} href={r.url} target="_blank" rel="noopener noreferrer"
                 style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "18px 20px", borderRadius: RADIUS, background: C.card, boxShadow: SHADOW, textDecoration: "none" }}>
                 <span style={{ fontSize: 15.5, fontWeight: 600, color: C.label }}>{r.label}</span>
                 <ChevronRight size={18} color={C.label} />
@@ -1242,7 +1246,8 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
             ))}
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {g(checkout, "thank_you") && (
         <div style={{ textAlign: "center", padding: "24px 16px 8px" }}>
