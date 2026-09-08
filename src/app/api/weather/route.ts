@@ -109,7 +109,10 @@ export async function GET(req: NextRequest) {
   meteoUrl.searchParams.set("longitude", lon.toFixed(4));
   meteoUrl.searchParams.set("current", "temperature_2m,apparent_temperature,weathercode,windspeed_10m,relativehumidity_2m,uv_index");
   meteoUrl.searchParams.set("daily", "weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max");
-  meteoUrl.searchParams.set("timezone", "Europe/Paris");
+  // "auto" : Open-Meteo déduit le fuseau des coordonnées géocodées.
+  // Indispensable pour les DOM-TOM (Guadeloupe UTC−4, Réunion UTC+4, etc.) —
+  // sinon les journées de prévision sont découpées sur l'heure de Paris.
+  meteoUrl.searchParams.set("timezone", "auto");
   meteoUrl.searchParams.set("forecast_days", "5");
 
   const meteoRes = await fetch(meteoUrl.toString(), { next: { revalidate: 1800 } });
@@ -123,11 +126,15 @@ export async function GET(req: NextRequest) {
   const wmo = WMO_CODES[code] ?? { label: "Météo inconnue", emoji: "🌡️" };
 
   const forecast = (daily.time as string[]).map((dateStr: string, i: number) => {
-    const d = new Date(dateStr);
+    // dateStr = "YYYY-MM-DD" déjà exprimé dans le fuseau local du lieu (timezone=auto).
+    // On calcule le jour de la semaine en UTC à midi pour éviter tout re-décalage
+    // via le fuseau du serveur.
+    const [y, mo, da] = dateStr.split("-").map(Number);
+    const d = new Date(Date.UTC(y, mo - 1, da, 12));
     const wmoDay = WMO_CODES[daily.weathercode[i] as number] ?? { label: "–", emoji: "🌡️" };
     return {
       date: dateStr,
-      dayLabel: DAY_LABELS_FR[d.getDay()],
+      dayLabel: DAY_LABELS_FR[d.getUTCDay()],
       tempMax: Math.round(daily.temperature_2m_max[i]),
       tempMin: Math.round(daily.temperature_2m_min[i]),
       weatherCode: daily.weathercode[i],

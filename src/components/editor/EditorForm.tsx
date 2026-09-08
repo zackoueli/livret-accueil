@@ -587,9 +587,16 @@ export function EditorForm() {
                   className={`${input} cursor-pointer`}
                 >
                   <option value="">{t("choosePort")}</option>
-                  {PORTS.map(p => (
-                    <option key={p.id} value={p.id}>{p.name}</option>
-                  ))}
+                  <optgroup label="Métropole">
+                    {PORTS.filter(p => !p.coords).map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Outre-mer">
+                    {PORTS.filter(p => p.coords).map(p => (
+                      <option key={p.id} value={p.id}>{p.name}</option>
+                    ))}
+                  </optgroup>
                 </select>
               )}
 
