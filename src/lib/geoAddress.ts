@@ -1,9 +1,10 @@
 // Désambiguïsation des adresses françaises d'outre-mer pour le géocodage.
 //
-// Problème : "5 rue X, 97116 Pointe-Noire, France" est résolu par Google /
-// Nominatim comme "Pointe-Noire, Congo" — le code postal seul ne suffit pas à
-// lever l'ambiguïté. On injecte le nom du territoire (déductible du préfixe du
-// code postal) dans la chaîne envoyée au géocodeur.
+// Problème : "5 rue X, 97116 Pointe-Noire, France" est résolu par Google Maps
+// comme "Pointe-Noire, Congo" — le code postal seul ne suffit pas à lever
+// l'ambiguïté, et garder "France" en fin de chaîne aggrave le cas. On remplace
+// donc le pays par le nom du territoire (déduit du préfixe du code postal), ce
+// qui donne "..., 97116 Pointe-Noire, Guadeloupe" — sans "France" à la fin.
 
 const DOM_TOM_BY_PREFIX: { prefix: string; name: string }[] = [
   { prefix: "971", name: "Guadeloupe" },
@@ -36,22 +37,24 @@ export function domTomFromPostalCode(raw: string): string | null {
 
 /**
  * Prépare une adresse pour un géocodeur / une carte : si elle contient un code
- * postal d'outre-mer, on insère le nom du territoire avant le pays (si absent).
+ * postal d'outre-mer, on remplace le pays final ("France") par le nom du
+ * territoire. Garder "..., Guadeloupe, France" fait échouer Google Maps ; on
+ * termine donc la chaîne sur le territoire.
  * Les adresses métropolitaines sont renvoyées inchangées.
  */
 export function geocodableAddress(address: string): string {
   if (!address) return address;
   const territory = domTomFromPostalCode(address);
   if (!territory) return address;
-  if (new RegExp(territory.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i").test(address)) {
-    return address;
-  }
+
   const parts = address.split(",").map(s => s.trim()).filter(Boolean);
-  // Si le dernier segment ressemble à "France", on insère juste avant.
-  if (parts.length && /^france$/i.test(parts[parts.length - 1])) {
-    parts.splice(parts.length - 1, 0, territory);
-  } else {
-    parts.push(territory, "France");
+  // Retire un éventuel "France" final.
+  if (parts.length && /^(france|fr)$/i.test(parts[parts.length - 1])) {
+    parts.pop();
+  }
+  // Ajoute le territoire s'il n'est pas déjà présent en dernière position.
+  if (!parts.length || parts[parts.length - 1].toLowerCase() !== territory.toLowerCase()) {
+    parts.push(territory);
   }
   return parts.join(", ");
 }
