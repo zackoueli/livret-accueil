@@ -9,6 +9,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { registerWithEmail, loginWithEmail, loginWithGoogle, resetPassword } from "@/lib/auth";
 import { useAuthStore } from "@/store/authStore";
 import { getRefCookie, setRefCookie, clearRefCookie, isValidCode } from "@/lib/referral";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 type Mode = "login" | "register";
 
@@ -154,6 +155,11 @@ export function AuthPage() {
       {/* ── Fond photo plein écran, flouté ── */}
       <img src={BG_IMAGE} alt="" className="absolute inset-0 w-full h-full object-cover scale-110" style={{ filter: "blur(14px)" }} />
       <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/55 to-orange-950/50" />
+
+      {/* ── Sélecteur de langue ── */}
+      <div className="absolute top-4 right-4 z-30">
+        <LanguageSwitcher variant="dark" />
+      </div>
 
       {/* ── Vitrine : 2 designs à gauche + login + 2 à droite (desktop) ── */}
       <div className="relative z-20 flex items-center justify-center gap-4 xl:gap-8 w-full max-w-[1700px]">
