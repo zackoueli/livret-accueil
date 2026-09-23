@@ -6,6 +6,7 @@ import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
+import { linkify } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, ScrollText,
@@ -196,7 +197,7 @@ function InfoBlock({ label, value }: { label: string; value: string }) {
   return (
     <div style={{ background: C.card, border: `1px solid ${C.sep}`, borderRadius: 18, padding: "14px 16px", marginBottom: 10 }}>
       <p style={{ margin: "0 0 4px", fontSize: 10.5, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{label}</p>
-      <p style={{ margin: 0, fontSize: 14, color: C.label, lineHeight: 1.65, whiteSpace: "pre-line" }}>{value}</p>
+      <p style={{ margin: 0, fontSize: 14, color: C.label, lineHeight: 1.65, whiteSpace: "pre-line" }}>{linkify(value)}</p>
     </div>
   );
 }
@@ -549,7 +550,7 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
         {g(safety, "emergency") && (
           <div style={{ background: "#FBE4DC", borderRadius: 18, padding: "14px 16px", marginBottom: 10, border: `1px solid ${C.red}30` }}>
             <p style={{ margin: "0 0 6px", fontSize: 10.5, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("emergency_numbers")}</p>
-            <p style={{ margin: 0, fontSize: 14, color: C.ink, lineHeight: 1.8, whiteSpace: "pre-line", fontWeight: 600 }}>{g(safety, "emergency")}</p>
+            <p style={{ margin: 0, fontSize: 14, color: C.ink, lineHeight: 1.8, whiteSpace: "pre-line", fontWeight: 600 }}>{linkify(g(safety, "emergency"))}</p>
           </div>
         )}
         <InfoBlock label={tr("fire_extinguisher")} value={g(safety, "fire_extinguisher")} />
@@ -570,7 +571,7 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
             </div>
           </div>
         )}
-        {g(contact, "about") && <p style={{ margin: "0 0 14px", fontSize: 13.5, color: C.sub, lineHeight: 1.6 }}>{g(contact, "about")}</p>}
+        {g(contact, "about") && <p style={{ margin: "0 0 14px", fontSize: 13.5, color: C.sub, lineHeight: 1.6 }}>{linkify(g(contact, "about"))}</p>}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {g(contact, "host_phone") && <a href={`tel:${g(contact, "host_phone")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 16, background: C.blue, color: C.ink, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Phone size={15} /> {tr("call")}</a>}
           {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 16, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Phone size={15} /> {tr("email")}</a>}
@@ -731,7 +732,7 @@ function ActivitySheetContent({ act, tr }: { act: Activity; tr: (k: I18nKey) => 
           <img src={act.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
         </div>
       )}
-      {act.description && <p style={{ margin: "0 0 14px", fontSize: 13.5, color: C.sub, lineHeight: 1.65 }}>{act.description}</p>}
+      {act.description && <p style={{ margin: "0 0 14px", fontSize: 13.5, color: C.sub, lineHeight: 1.65 }}>{linkify(act.description)}</p>}
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 14 }}>
         {act.distance && <span style={{ fontSize: 12, color: C.sub, background: C.card, border: `1px solid ${C.sep}`, borderRadius: 20, padding: "4px 10px", fontWeight: 600 }}>📍 {act.distance}</span>}
         {act.openHours && <span style={{ fontSize: 12, color: C.sub, background: C.card, border: `1px solid ${C.sep}`, borderRadius: 20, padding: "4px 10px", fontWeight: 600 }}>🕐 {act.openHours}</span>}
@@ -841,7 +842,7 @@ function AddonsPastelSection({ booklet }: { booklet: Booklet }) {
                   </p>
                 </div>
               </div>
-              {s.description && <p style={{ margin: "8px 0 0", fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>{s.description}</p>}
+              {s.description && <p style={{ margin: "8px 0 0", fontSize: 12.5, color: C.sub, lineHeight: 1.5 }}>{linkify(s.description)}</p>}
 
               {s.priceType === "per_day" && (
                 <AddonQuantityPicker label={tr("addons_quantity")} min={1} max={9999} value={getQty(s)} onChange={(v) => setQty(s, v)} />
@@ -923,7 +924,7 @@ function PageCheckout({ booklet }: { booklet: Booklet }) {
             </div>
             <p style={{ margin: "0 0 4px", fontSize: 10.5, fontWeight: 700, color: C.ink, opacity: 0.7, textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("checkout_time")}</p>
             <p style={{ margin: 0, fontSize: 44, fontWeight: 800, color: C.ink, letterSpacing: -2, lineHeight: 1 }}>{formatTime(g(checkout, "checkout_time"))}</p>
-            {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 12.5, color: C.ink, opacity: 0.75 }}>{g(checkout, "late_checkout_info")}</p>}
+            {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 12.5, color: C.ink, opacity: 0.75 }}>{linkify(g(checkout, "late_checkout_info"))}</p>}
           </div>
         )}
 
@@ -983,7 +984,7 @@ function PageCheckout({ booklet }: { booklet: Booklet }) {
         })()}
 
         {g(checkout, "thank_you") && (
-          <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
+          <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{linkify(g(checkout, "thank_you"))}</p>
         )}
       </div>
       <BunklyCredit ownerPlan={booklet.ownerPlan} />

@@ -6,6 +6,7 @@ import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
+import { linkify } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Copy, Check, MapPin, Clock, Users, Phone, Mail, Navigation,
@@ -184,7 +185,7 @@ function Disclosure({ title, content, last = false }: { title: string; content: 
         </div>
       </button>
       {open && (
-        <p style={{ margin: "0 0 14px", fontSize: 14.5, color: C.label, lineHeight: 1.7, whiteSpace: "pre-line", opacity: 0.85 }}>{content}</p>
+        <p style={{ margin: "0 0 14px", fontSize: 14.5, color: C.label, lineHeight: 1.7, whiteSpace: "pre-line", opacity: 0.85 }}>{linkify(content)}</p>
       )}
     </div>
   );
@@ -400,7 +401,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
               </div>
             )}
             {welcomeMsg && (
-              <p style={{ margin: 0, fontSize: 14.5, color: C.label, lineHeight: 1.75, opacity: 0.85 }}>{welcomeMsg}</p>
+              <p style={{ margin: 0, fontSize: 14.5, color: C.label, lineHeight: 1.75, opacity: 0.85 }}>{linkify(welcomeMsg)}</p>
             )}
           </div>
         </div>
@@ -451,7 +452,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           {wifiInfo && (
             <>
               <Div />
-              <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, lineHeight: 1.65, opacity: 0.8, whiteSpace: "pre-line" }}>{wifiInfo}</p>
+              <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, lineHeight: 1.65, opacity: 0.8, whiteSpace: "pre-line" }}>{linkify(wifiInfo)}</p>
             </>
           )}
         </FieldCard>
@@ -672,7 +673,7 @@ function CleanTides({ portId, portName, note }: { portId: string; portName: stri
           {i < data.tides.length - 1 && <Div />}
         </div>
       ))}
-      {note && <><Div /><p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.6, whiteSpace: "pre-line" }}>{note}</p></>}
+      {note && <><Div /><p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.6, whiteSpace: "pre-line" }}>{linkify(note)}</p></>}
     </>
   );
 }
@@ -721,7 +722,7 @@ function CleanWeather({ address, cityOverride, note }: { address: string; cityOv
           {day.precipProbability > 0 && <span style={{ fontSize: 12, fontWeight: 700, color: C.label, opacity: 0.7 }}>{day.precipProbability}%</span>}
         </div>
       ))}
-      {note && <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.6, whiteSpace: "pre-line" }}>{note}</p>}
+      {note && <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.6, whiteSpace: "pre-line" }}>{linkify(note)}</p>}
     </>
   );
 }
@@ -870,7 +871,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
           <p style={{ margin: "0 4px 10px", fontSize: 12, fontWeight: 700, color: C.label, textTransform: "uppercase", letterSpacing: 1.6 }}>{tr("host_picks")}</p>
           <div style={{ background: C.card, borderRadius: RADIUS, boxShadow: SHADOW, padding: "20px", display: "flex", gap: 14 }}>
             <Star size={18} color={accent} fill={accent} style={{ flexShrink: 0, marginTop: 2 }} />
-            <p style={{ margin: 0, fontSize: 14.5, color: C.label, lineHeight: 1.7, opacity: 0.9 }}>{g(neighborhood, "hidden_gems")}</p>
+            <p style={{ margin: 0, fontSize: 14.5, color: C.label, lineHeight: 1.7, opacity: 0.9 }}>{linkify(g(neighborhood, "hidden_gems"))}</p>
           </div>
         </div>
       )}
@@ -879,7 +880,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <FieldCard title={tr("transport")}>
           {g(neighborhood, "transport") && (
             <>
-              <p style={{ margin: "14px 0", fontSize: 14.5, color: C.label, lineHeight: 1.7, opacity: 0.9, whiteSpace: "pre-line" }}>{g(neighborhood, "transport")}</p>
+              <p style={{ margin: "14px 0", fontSize: 14.5, color: C.label, lineHeight: 1.7, opacity: 0.9, whiteSpace: "pre-line" }}>{linkify(g(neighborhood, "transport"))}</p>
               {hasTransportRows && <Div />}
             </>
           )}
@@ -951,7 +952,7 @@ function PageSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
               <Phone size={18} color={accent} />
               <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: C.label, textTransform: "uppercase", letterSpacing: 1 }}>{tr("emergency_numbers")}</p>
             </div>
-            <p style={{ margin: 0, fontSize: 16, color: C.label, lineHeight: 1.95, whiteSpace: "pre-line", fontWeight: 500 }}>{g(safety, "emergency")}</p>
+            <p style={{ margin: 0, fontSize: 16, color: C.label, lineHeight: 1.95, whiteSpace: "pre-line", fontWeight: 500 }}>{linkify(g(safety, "emergency"))}</p>
           </div>
         </div>
       )}
@@ -972,7 +973,7 @@ function PageSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
               </div>
             </div>
             {g(contact, "about") && (
-              <p style={{ margin: "0 0 18px", fontSize: 14.5, color: C.label, lineHeight: 1.7, opacity: 0.85 }}>{g(contact, "about")}</p>
+              <p style={{ margin: "0 0 18px", fontSize: 14.5, color: C.label, lineHeight: 1.7, opacity: 0.85 }}>{linkify(g(contact, "about"))}</p>
             )}
             <div style={{ display: "flex", gap: 10 }}>
               {g(contact, "host_phone") && (
@@ -1142,7 +1143,7 @@ function PageServices({ booklet }: { booklet: Booklet }) {
                   </div>
 
                   {s.description && (
-                    <p style={{ margin: "12px 0 0", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.6 }}>{s.description}</p>
+                    <p style={{ margin: "12px 0 0", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.6 }}>{linkify(s.description)}</p>
                   )}
 
                   {s.priceType === "per_day" && (
@@ -1205,7 +1206,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
               {formatTime(g(checkout, "checkout_time"))}
             </p>
             {g(checkout, "late_checkout_info") && (
-              <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, opacity: 0.75, lineHeight: 1.5 }}>{g(checkout, "late_checkout_info")}</p>
+              <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, opacity: 0.75, lineHeight: 1.5 }}>{linkify(g(checkout, "late_checkout_info"))}</p>
             )}
           </div>
         </div>
@@ -1264,7 +1265,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 
       {g(checkout, "thank_you") && (
         <div style={{ textAlign: "center", padding: "24px 16px 8px" }}>
-          <p style={{ margin: 0, fontFamily: SERIF, fontSize: 17, color: C.label, fontStyle: "italic", lineHeight: 1.7, opacity: 0.85 }}>{g(checkout, "thank_you")}</p>
+          <p style={{ margin: 0, fontFamily: SERIF, fontSize: 17, color: C.label, fontStyle: "italic", lineHeight: 1.7, opacity: 0.85 }}>{linkify(g(checkout, "thank_you"))}</p>
         </div>
       )}
 

@@ -6,6 +6,7 @@ import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
+import { linkify } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Copy, Check, MapPin, Clock, Key, Car, Thermometer, Wind, Tv, Mailbox,
@@ -188,7 +189,7 @@ function TidesSection({ portId, portName, note, accent, tr }: { portId: string; 
       ))}
       {note && (
         <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.sep}` }}>
-          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{linkify(note)}</p>
         </div>
       )}
     </Card>
@@ -246,7 +247,7 @@ function WeatherSection({ address, cityOverride, note, accent, tr }: { address: 
       ))}
       {note && (
         <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.sep}` }}>
-          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{linkify(note)}</p>
         </div>
       )}
     </Card>
@@ -293,7 +294,7 @@ function ExpandableRow({ icon, title, content, accent, last = false }: {
       </button>
       {open && (
         <div style={{ padding: "0 16px 16px 70px", borderBottom: !last ? `1px solid ${C.sep}` : "none" }}>
-          <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.7, whiteSpace: "pre-line" }}>{content}</p>
+          <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.7, whiteSpace: "pre-line" }}>{linkify(content)}</p>
         </div>
       )}
     </div>
@@ -450,7 +451,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 </div>
               )}
               {welcomeMsg && (
-                <p style={{ margin: 0, padding: "14px 16px", fontSize: 14, color: C.sub, lineHeight: 1.7 }}>{welcomeMsg}</p>
+                <p style={{ margin: 0, padding: "14px 16px", fontSize: 14, color: C.sub, lineHeight: 1.7 }}>{linkify(welcomeMsg)}</p>
               )}
             </Card>
           </div>
@@ -557,7 +558,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
               {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} security={wifiSecurity} accent={accent} />}
               {wifiInfo && (
                 <div style={{ padding: "12px 16px", borderTop: `1px solid ${C.sep}` }}>
-                  <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{wifiInfo}</p>
+                  <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{linkify(wifiInfo)}</p>
                 </div>
               )}
             </Card>
@@ -576,7 +577,7 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
                   <div style={{ padding: "16px 14px" }}>
                     <p style={{ margin: "0 0 6px", fontSize: 22 }}>{s.emoji}</p>
                     <p style={{ margin: "0 0 3px", fontSize: 14, fontWeight: 700, color: C.label }}>{s.name}</p>
-                    {s.description && <p style={{ margin: 0, fontSize: 12, color: C.sub, lineHeight: 1.4 }}>{s.description}</p>}
+                    {s.description && <p style={{ margin: 0, fontSize: 12, color: C.sub, lineHeight: 1.4 }}>{linkify(s.description)}</p>}
                   </div>
                 </Card>
               ))}
@@ -727,7 +728,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
                   </button>
                   {isOpen && (
                     <div style={{ padding: "0 20px 16px 84px", borderBottom: i < equipRows.length - 1 ? `1px solid ${C.sep}` : "none" }}>
-                      <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.7, whiteSpace: "pre-line" }}>{content}</p>
+                      <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.7, whiteSpace: "pre-line" }}>{linkify(content)}</p>
                     </div>
                   )}
                 </div>
@@ -929,7 +930,7 @@ function ActivityCard({ act, accent }: {
         <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 700, color: C.label, letterSpacing: -0.2 }}>{act.name}</p>
         {act.description && (
           <p style={{ margin: "0 0 8px", fontSize: 13, color: C.sub, lineHeight: 1.45, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>
-            {act.description}
+            {linkify(act.description)}
           </p>
         )}
         {(act.distance || act.openHours || act.priceRange) && (
@@ -1110,7 +1111,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 <div style={{ width: 36, height: 36, borderRadius: 12, background: `${C.orange}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <Star size={18} color={C.orange} fill={C.orange} />
                 </div>
-                <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.7, flex: 1 }}>{g(neighborhood, "hidden_gems")}</p>
+                <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.7, flex: 1 }}>{linkify(g(neighborhood, "hidden_gems"))}</p>
               </div>
             </Card>
           </div>
@@ -1123,7 +1124,7 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
             <Card>
               {g(neighborhood, "transport") && (
                 <div style={{ padding: "14px 16px", borderBottom: transport ? `1px solid ${C.sep}` : "none" }}>
-                  <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{g(neighborhood, "transport")}</p>
+                  <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{linkify(g(neighborhood, "transport"))}</p>
                 </div>
               )}
               {transport && [
@@ -1213,7 +1214,7 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 </div>
                 <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr("emergency_numbers")}</p>
               </div>
-              <p style={{ margin: 0, fontSize: 15, color: "#374151", lineHeight: 1.9, whiteSpace: "pre-line", fontWeight: 500 }}>{g(safety, "emergency")}</p>
+              <p style={{ margin: 0, fontSize: 15, color: "#374151", lineHeight: 1.9, whiteSpace: "pre-line", fontWeight: 500 }}>{linkify(g(safety, "emergency"))}</p>
             </div>
           </Card>
         </div>
@@ -1237,7 +1238,7 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
             </div>
             {g(contact, "about") && (
               <div style={{ padding: "14px 16px", borderBottom: `1px solid ${C.sep}` }}>
-                <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.65 }}>{g(contact, "about")}</p>
+                <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.65 }}>{linkify(g(contact, "about"))}</p>
               </div>
             )}
             <div style={{ display: "flex" }}>
@@ -1382,7 +1383,7 @@ function AddonsSimpleSection({ booklet, accent }: { booklet: Booklet; accent: st
                   </p>
                 </div>
               </div>
-              {s.description && <p style={{ margin: "10px 0 0", fontSize: 13, color: C.sub, lineHeight: 1.55 }}>{s.description}</p>}
+              {s.description && <p style={{ margin: "10px 0 0", fontSize: 13, color: C.sub, lineHeight: 1.55 }}>{linkify(s.description)}</p>}
 
               {s.priceType === "per_day" && (
                 <AddonQuantityPicker label={tr("addons_quantity")} min={1} max={9999} value={getQty(s)} onChange={(v) => setQty(s, v)} />
@@ -1465,7 +1466,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
                 {formatTime(g(checkout, "checkout_time"))}
               </p>
               {g(checkout, "late_checkout_info") && (
-                <p style={{ margin: "12px 0 0", fontSize: 13, color: C.sub, lineHeight: 1.5 }}>{g(checkout, "late_checkout_info")}</p>
+                <p style={{ margin: "12px 0 0", fontSize: 13, color: C.sub, lineHeight: 1.5 }}>{linkify(g(checkout, "late_checkout_info"))}</p>
               )}
             </div>
           </Card>
@@ -1513,7 +1514,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
               <IconBox color="#F59E0B"><Key size={18} color="#F59E0B" /></IconBox>
               <div>
                 <p style={{ margin: "0 0 3px", fontSize: 13, fontWeight: 600, color: C.sub, textTransform: "uppercase", letterSpacing: 0.4 }}>{tr("key_return")}</p>
-                <p style={{ margin: 0, fontSize: 14, color: C.label, lineHeight: 1.6 }}>{g(checkout, "keys_return")}</p>
+                <p style={{ margin: 0, fontSize: 14, color: C.label, lineHeight: 1.6 }}>{linkify(g(checkout, "keys_return"))}</p>
               </div>
             </div>
           </Card>
@@ -1554,7 +1555,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
 
       {g(checkout, "thank_you") && (
         <div style={{ textAlign: "center", padding: "24px 16px 8px" }}>
-          <p style={{ margin: 0, fontSize: 14, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
+          <p style={{ margin: 0, fontSize: 14, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{linkify(g(checkout, "thank_you"))}</p>
         </div>
       )}
     </div>

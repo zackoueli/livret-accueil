@@ -6,6 +6,7 @@ import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
+import { linkify } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
@@ -158,7 +159,7 @@ function InfoRow({ icon, label, value, color, last = false }: {
       </div>
       <div style={{ flex: 1 }}>
         <p style={{ margin: "0 0 3px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{label}</p>
-        <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{value}</p>
+        <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{linkify(value)}</p>
       </div>
     </div>
   );
@@ -293,7 +294,7 @@ function TidesDrawerContent({ portId, portName, note, tr, accent }: { portId: st
       ))}
       {note && (
         <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 12, background: `${accent}08` }}>
-          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{linkify(note)}</p>
         </div>
       )}
       <p style={{ margin: "16px 0 0", fontSize: 11, color: C.muted, textAlign: "center" }}>{tr("tides_source")}</p>
@@ -368,7 +369,7 @@ function WeatherDrawerContent({ address, cityOverride, note, tr, accent }: { add
       ))}
       {note && (
         <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 12, background: `${accent}08` }}>
-          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{note}</p>
+          <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.6 }}>{linkify(note)}</p>
         </div>
       )}
       <p style={{ margin: "16px 0 0", fontSize: 11, color: C.muted, textAlign: "center" }}>{tr("weather_source")}</p>
@@ -578,7 +579,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         {(wifiName || wifiPass) && <WifiQRCode ssid={wifiName} password={wifiPass} security={wifiSecurity} accent={accent} />}
         {g(accommodation, "wifi_info") && (
           <div style={{ marginTop: 16, padding: "12px 14px", borderRadius: 12, background: `${accent}08` }}>
-            <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{g(accommodation, "wifi_info")}</p>
+            <p style={{ margin: 0, fontSize: 13, color: C.sub, lineHeight: 1.65, whiteSpace: "pre-line" }}>{linkify(g(accommodation, "wifi_info"))}</p>
           </div>
         )}
       </Drawer>
@@ -630,7 +631,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         {g(safety, "emergency") && (
           <div style={{ background: "#FFF5F5", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: "1px solid #FEE2E2" }}>
             <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("emergency_numbers")}</p>
-            <p style={{ margin: 0, fontSize: 15, color: "#374151", lineHeight: 1.9, whiteSpace: "pre-line", fontWeight: 500 }}>{g(safety, "emergency")}</p>
+            <p style={{ margin: 0, fontSize: 15, color: "#374151", lineHeight: 1.9, whiteSpace: "pre-line", fontWeight: 500 }}>{linkify(g(safety, "emergency"))}</p>
           </div>
         )}
         <InfoRow icon={<Flame size={18} color={C.red} />} label={tr("fire_extinguisher")} value={g(safety, "fire_extinguisher")} color={C.red} />
@@ -649,7 +650,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
             </div>
           </div>
         )}
-        {g(contact, "about") && <p style={{ margin: "12px 0", fontSize: 14, color: C.sub, lineHeight: 1.65 }}>{g(contact, "about")}</p>}
+        {g(contact, "about") && <p style={{ margin: "12px 0", fontSize: 14, color: C.sub, lineHeight: 1.65 }}>{linkify(g(contact, "about"))}</p>}
         <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
           {g(contact, "host_phone") && <a href={`tel:${g(contact, "host_phone")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> {tr("call")}</a>}
           {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> {tr("email")}</a>}
@@ -829,7 +830,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 <img src={selectedAct.photo} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
               </div>
             )}
-            {selectedAct.description && <p style={{ margin: "0 0 16px", fontSize: 14, color: C.sub, lineHeight: 1.7 }}>{selectedAct.description}</p>}
+            {selectedAct.description && <p style={{ margin: "0 0 16px", fontSize: 14, color: C.sub, lineHeight: 1.7 }}>{linkify(selectedAct.description)}</p>}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>
               {selectedAct.distance && <span style={{ fontSize: 12, color: C.sub, background: C.sep, borderRadius: 20, padding: "4px 10px" }}>📍 {selectedAct.distance}</span>}
               {selectedAct.openHours && <span style={{ fontSize: 12, color: C.sub, background: C.sep, borderRadius: 20, padding: "4px 10px" }}>🕐 {selectedAct.openHours}</span>}
@@ -943,7 +944,7 @@ function AddonsGridSection({ booklet, accent }: { booklet: Booklet; accent: stri
                   </p>
                 </div>
               </div>
-              {s.description && <p style={{ margin: "8px 0 0", fontSize: 12.5, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>{s.description}</p>}
+              {s.description && <p style={{ margin: "8px 0 0", fontSize: 12.5, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>{linkify(s.description)}</p>}
 
               {s.priceType === "per_day" && (
                 <AddonQuantityPicker label={tr("addons_quantity")} min={1} max={9999} value={getQty(s)} onChange={(v) => setQty(s, v)} />
@@ -1069,7 +1070,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
               </div>
               <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("checkout_time")}</p>
               <p style={{ margin: 0, fontSize: 52, fontWeight: 800, color: "#fff", letterSpacing: -2, lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>{formatTime(g(checkout, "checkout_time"))}</p>
-              {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{g(checkout, "late_checkout_info")}</p>}
+              {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{linkify(g(checkout, "late_checkout_info"))}</p>}
             </div>
           )}
 
@@ -1106,7 +1107,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
               </div>
               <div>
                 <p style={{ margin: "0 0 3px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("key_return")}</p>
-                <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{g(checkout, "keys_return")}</p>
+                <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{linkify(g(checkout, "keys_return"))}</p>
               </div>
             </div>
           )}
@@ -1142,7 +1143,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
           })()}
 
           {g(checkout, "thank_you") && (
-            <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: "rgba(255,255,255,0.6)", fontStyle: "italic", lineHeight: 1.7 }}>{g(checkout, "thank_you")}</p>
+            <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: "rgba(255,255,255,0.6)", fontStyle: "italic", lineHeight: 1.7 }}>{linkify(g(checkout, "thank_you"))}</p>
           )}
         </div>
         <BunklyCredit dark ownerPlan={booklet.ownerPlan} />
