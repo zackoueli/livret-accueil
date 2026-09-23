@@ -5,6 +5,7 @@ import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletSe
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
+import { externalHref, displayUrl } from "@/lib/url";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
@@ -452,7 +453,16 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
         {booklet.address && (
           <div style={{ margin: "0 16px 16px", borderRadius: 20, background: "rgba(255,255,255,0.13)", backdropFilter: "blur(20px)", border: "1px solid rgba(255,255,255,0.22)", padding: "12px 16px", display: "flex", alignItems: "center", gap: 10 }}>
             <MapPin size={14} color="rgba(255,255,255,0.55)" style={{ flexShrink: 0 }} />
-            <p style={{ margin: 0, flex: 1, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>{booklet.address}</p>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 12, color: "rgba(255,255,255,0.7)", lineHeight: 1.4 }}>{booklet.address}</p>
+              {booklet.websiteUrl?.trim() && (
+                <a href={externalHref(booklet.websiteUrl)} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3, fontSize: 12, color: "#fff", fontWeight: 600, textDecoration: "none" }}>
+                  <Globe size={11} color="rgba(255,255,255,0.7)" style={{ flexShrink: 0 }} />
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: "underline" }}>{displayUrl(booklet.websiteUrl)}</span>
+                </a>
+              )}
+            </div>
             <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
               <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`} target="_blank" rel="noopener noreferrer"
                 style={{ padding: "5px 10px", borderRadius: 10, background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.25)", fontSize: 11, fontWeight: 700, color: "#fff", textDecoration: "none" }}>

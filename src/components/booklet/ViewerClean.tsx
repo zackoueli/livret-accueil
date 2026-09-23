@@ -5,6 +5,7 @@ import { Booklet, BookletModule, BookletService, ServiceChoiceItem, SupportedLan
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
+import { externalHref, displayUrl } from "@/lib/url";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Copy, Check, MapPin, Clock, Users, Phone, Mail, Navigation,
@@ -364,10 +365,21 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </div>
       )}
 
-      {booklet.address && (
-        <div style={{ display: "flex", alignItems: "center", gap: 7, margin: "0 4px 26px" }}>
-          <MapPin size={14} color={C.label} />
-          <p style={{ margin: 0, fontSize: 13.5, color: C.label, fontWeight: 500 }}>{booklet.address}</p>
+      {(booklet.address || booklet.websiteUrl?.trim()) && (
+        <div style={{ margin: "0 4px 26px", display: "flex", flexDirection: "column", gap: 6 }}>
+          {booklet.address && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <MapPin size={14} color={C.label} />
+              <p style={{ margin: 0, fontSize: 13.5, color: C.label, fontWeight: 500 }}>{booklet.address}</p>
+            </div>
+          )}
+          {booklet.websiteUrl?.trim() && (
+            <a href={externalHref(booklet.websiteUrl)} target="_blank" rel="noopener noreferrer"
+              style={{ display: "flex", alignItems: "center", gap: 7, textDecoration: "none", minWidth: 0 }}>
+              <Globe size={14} color={C.label} style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 13.5, color: C.label, fontWeight: 500, textDecoration: "underline", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayUrl(booklet.websiteUrl)}</span>
+            </a>
+          )}
         </div>
       )}
 

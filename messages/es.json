@@ -396,6 +396,8 @@
     "zip": "Código postal",
     "city": "Ciudad",
     "country": "País",
+    "websiteUrl": "Enlace (bajo la dirección)",
+    "websiteUrlPlaceholder": "https://www.mialojamiento.es",
     "shortDesc": "Descripción corta",
     "descPlaceholder": "Magnífica villa provenzal con piscina...",
     "mainColor": "Color principal",

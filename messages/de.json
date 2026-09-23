@@ -396,6 +396,8 @@
     "zip": "Postleitzahl",
     "city": "Stadt",
     "country": "Land",
+    "websiteUrl": "Link (unter der Adresse)",
+    "websiteUrlPlaceholder": "https://www.meineunterkunft.de",
     "shortDesc": "Kurzbeschreibung",
     "descPlaceholder": "Wunderschöne provenzalische Villa mit Pool...",
     "mainColor": "Hauptfarbe",

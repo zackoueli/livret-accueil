@@ -201,6 +201,8 @@ export interface Booklet {
   accentColor: string;
   propertyName: string;
   address?: string;
+  /** Lien affiché sous l'adresse dans le livret (site du logement, annonce…) */
+  websiteUrl?: string;
   modules: BookletModule[];
   /** Langue dans laquelle le contenu de base du livret est rédigé (langue de l'interface à la création) */
   defaultLang?: SupportedLang;

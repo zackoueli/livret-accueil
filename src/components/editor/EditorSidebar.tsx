@@ -403,6 +403,13 @@ function SidebarAppearance() {
           ibase={ibase}
         />
 
+        {/* Lien affiché sous l'adresse */}
+        <div>
+          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("websiteUrl")}</label>
+          <input type="url" value={booklet.websiteUrl || ""} onChange={(e) => updateBookletField("websiteUrl", e.target.value)}
+            placeholder={t("websiteUrlPlaceholder")} className={ibase} />
+        </div>
+
         {/* Description */}
         <div>
           <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{t("shortDesc")}</label>

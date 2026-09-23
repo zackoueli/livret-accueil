@@ -396,6 +396,8 @@
     "zip": "CAP",
     "city": "Città",
     "country": "Paese",
+    "websiteUrl": "Link (sotto l'indirizzo)",
+    "websiteUrlPlaceholder": "https://www.miastruttura.it",
     "shortDesc": "Descrizione breve",
     "descPlaceholder": "Magnifica villa provenzale con piscina...",
     "mainColor": "Colore principale",

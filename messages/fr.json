@@ -396,6 +396,8 @@
     "zip": "Code postal",
     "city": "Ville",
     "country": "Pays",
+    "websiteUrl": "Lien (sous l'adresse)",
+    "websiteUrlPlaceholder": "https://www.monlogement.fr",
     "shortDesc": "Description courte",
     "descPlaceholder": "Magnifique villa provençale avec piscine...",
     "mainColor": "Couleur principale",

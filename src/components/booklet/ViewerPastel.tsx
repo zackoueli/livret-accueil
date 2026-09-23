@@ -5,6 +5,7 @@ import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletSe
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
+import { externalHref, displayUrl } from "@/lib/url";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, ScrollText,
@@ -408,11 +409,26 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
         {booklet.address && (
           <div style={{ borderRadius: 16, background: C.card, border: `1px solid ${C.sep}`, padding: "10px 14px", display: "flex", alignItems: "center", gap: 10 }}>
             <MapPin size={14} color={C.muted} style={{ flexShrink: 0 }} />
-            <p style={{ margin: 0, flex: 1, fontSize: 12, color: C.sub, lineHeight: 1.4, fontWeight: 600 }}>{booklet.address}</p>
-            <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`} target="_blank" rel="noopener noreferrer"
-              style={{ padding: "5px 10px", borderRadius: 10, background: C.bg, fontSize: 11, fontWeight: 700, color: C.ink, textDecoration: "none", flexShrink: 0 }}>
-              Maps
-            </a>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ margin: 0, fontSize: 12, color: C.sub, lineHeight: 1.4, fontWeight: 600 }}>{booklet.address}</p>
+              {booklet.websiteUrl?.trim() && (
+                <a href={externalHref(booklet.websiteUrl)} target="_blank" rel="noopener noreferrer"
+                  style={{ display: "flex", alignItems: "center", gap: 4, marginTop: 3, fontSize: 12, color: C.ink, fontWeight: 700, textDecoration: "none" }}>
+                  <Globe size={11} color={C.muted} style={{ flexShrink: 0 }} />
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textDecoration: "underline" }}>{displayUrl(booklet.websiteUrl)}</span>
+                </a>
+              )}
+            </div>
+            <div style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+              <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`} target="_blank" rel="noopener noreferrer"
+                style={{ padding: "5px 10px", borderRadius: 10, background: C.bg, fontSize: 11, fontWeight: 700, color: C.ink, textDecoration: "none" }}>
+                Maps
+              </a>
+              <a href={`https://waze.com/ul?q=${encodeURIComponent(geocodableAddress(booklet.address))}&navigate=yes`} target="_blank" rel="noopener noreferrer"
+                style={{ padding: "5px 10px", borderRadius: 10, background: C.bg, fontSize: 11, fontWeight: 700, color: C.ink, textDecoration: "none" }}>
+                Waze
+              </a>
+            </div>
           </div>
         )}
       </div>

@@ -396,6 +396,8 @@
     "zip": "Postal code",
     "city": "City",
     "country": "Country",
+    "websiteUrl": "Link (below the address)",
+    "websiteUrlPlaceholder": "https://www.myproperty.com",
     "shortDesc": "Short description",
     "descPlaceholder": "Beautiful Provençal villa with pool...",
     "mainColor": "Main color",

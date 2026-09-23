@@ -5,6 +5,7 @@ import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletSe
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
+import { externalHref, displayUrl } from "@/lib/url";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Copy, Check, MapPin, Clock, Key, Car, Thermometer, Wind, Tv, Mailbox,
@@ -324,6 +325,25 @@ function BookletHero({ booklet, accent }: { booklet: Booklet; accent: string }) 
             <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
               <MapPin size={13} color="rgba(255,255,255,0.65)" />
               <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.65)" }}>{booklet.address}</p>
+            </div>
+          )}
+          {booklet.websiteUrl?.trim() && (
+            <a href={externalHref(booklet.websiteUrl)} target="_blank" rel="noopener noreferrer"
+              style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 4, textDecoration: "none", minWidth: 0 }}>
+              <Globe size={13} color="rgba(255,255,255,0.65)" style={{ flexShrink: 0 }} />
+              <span style={{ fontSize: 13, color: "rgba(255,255,255,0.85)", textDecoration: "underline", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{displayUrl(booklet.websiteUrl)}</span>
+            </a>
+          )}
+          {booklet.address && (
+            <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
+              <a href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(geocodableAddress(booklet.address))}`} target="_blank" rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 12, background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.25)", backdropFilter: "blur(12px)", fontSize: 12, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                <Navigation size={13} color="#fff" /> Google Maps
+              </a>
+              <a href={`https://waze.com/ul?q=${encodeURIComponent(geocodableAddress(booklet.address))}&navigate=yes`} target="_blank" rel="noopener noreferrer"
+                style={{ display: "flex", alignItems: "center", gap: 6, padding: "7px 12px", borderRadius: 12, background: "rgba(255,255,255,0.18)", border: "1px solid rgba(255,255,255,0.25)", backdropFilter: "blur(12px)", fontSize: 12, fontWeight: 700, color: "#fff", textDecoration: "none" }}>
+                <Navigation size={13} color="#fff" /> Waze
+              </a>
             </div>
           )}
         </div>
