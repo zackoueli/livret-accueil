@@ -363,7 +363,7 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
   // Logement & Règles ont leur propre onglet — l'accueil garde les essentiels + modules annexes
   const cards = [
     { id: "horaires",  label: tr("schedule"),      icon: <Clock size={18} color={C.ink} />,           tint: C.green,  show: !!(checkinTime || checkoutTime), order: moduleOrder("arrival") },
-    { id: "access",    label: tr("access_keys"),   icon: <Key size={18} color={C.ink} />,             tint: C.yellow, show: !!accessCode,                    order: moduleOrder("arrival") - 0.1 },
+    { id: "access",    label: tr("access_keys"),   icon: <Key size={18} color={C.ink} />,             tint: C.yellow, show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking")), order: moduleOrder("arrival") - 0.1 },
     { id: "wifi",      label: tr("wifi"),           icon: <Wifi size={18} color={C.ink} />,            tint: C.blue,   show: !!(wifiName || wifiPass),        order: moduleOrder("accommodation") },
     { id: "safety",    label: tr("nav_safety"),     icon: <Shield size={18} color={C.ink} />,          tint: C.pink,   show: !!safety,                         order: moduleOrder("safety") },
     { id: "contact",   label: tr("contact"),        icon: <Phone size={18} color={C.ink} />,           tint: C.blue,   show: !!contact,                        order: moduleOrder("contact") },

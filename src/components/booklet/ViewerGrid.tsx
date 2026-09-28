@@ -408,7 +408,7 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
 
   const buttons = [
     { id: "wifi",      label: tr("wifi"),             icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass),                                                          order: moduleOrder("accommodation") },
-    { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!accessCode,                                                                      order: moduleOrder("arrival") - 0.1 },
+    { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking")),             order: moduleOrder("arrival") - 0.1 },
     { id: "horaires",  label: tr("schedule"),          icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime),                                                   order: moduleOrder("arrival") },
     { id: "rules",     label: tr("rules"),             icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules,                                                                           order: moduleOrder("rules") },
     { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: !!(accommodation && (g(accommodation, "heating") || g(accommodation, "ac") || g(accommodation, "tv"))), order: moduleOrder("accommodation") + 0.1 },
