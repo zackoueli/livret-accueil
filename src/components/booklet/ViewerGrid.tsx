@@ -444,8 +444,8 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
             <p style={{ margin: "0 0 8px", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{tr("your_host")} · {hostName}</p>
           )}
           {welcomeMsg && (
-            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.55, maxWidth: 260, marginLeft: "auto", marginRight: "auto" }}>
-              {welcomeMsg.length > 80 ? welcomeMsg.slice(0, 80) + "…" : welcomeMsg}
+            <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.75)", lineHeight: 1.55, maxWidth: 300, marginLeft: "auto", marginRight: "auto", whiteSpace: "pre-line", overflowWrap: "anywhere" }}>
+              {linkify(welcomeMsg)}
             </p>
           )}
         </div>

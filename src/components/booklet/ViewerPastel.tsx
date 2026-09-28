@@ -403,8 +403,8 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
           </div>
         </div>
         {welcomeMsg && (
-          <p style={{ margin: "0 0 14px", fontSize: 13, color: C.sub, lineHeight: 1.55 }}>
-            {welcomeMsg.length > 110 ? welcomeMsg.slice(0, 110) + "…" : welcomeMsg}
+          <p style={{ margin: "0 0 14px", fontSize: 13, color: C.sub, lineHeight: 1.55, whiteSpace: "pre-line", overflowWrap: "anywhere" }}>
+            {linkify(welcomeMsg)}
           </p>
         )}
         {booklet.address && (
