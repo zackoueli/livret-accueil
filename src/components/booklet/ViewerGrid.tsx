@@ -6,7 +6,7 @@ import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
-import { linkify } from "./linkify";
+import { linkify, shortLinks } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
@@ -565,7 +565,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
             {g(arrival, "checkin_process").split("\n").filter(Boolean).map((step, i, arr) => (
               <div key={i} style={{ display: "flex", gap: 14, padding: "10px 0", borderBottom: i < arr.length - 1 ? `1px solid ${C.sep}` : "none" }}>
                 <div style={{ width: 26, height: 26, borderRadius: "50%", background: `${C.green}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}><span style={{ fontSize: 11, fontWeight: 700, color: C.green }}>{i + 1}</span></div>
-                <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.6, paddingTop: 2 }}>{step}</p>
+                <p style={{ margin: 0, fontSize: 14, color: C.sub, lineHeight: 1.6, paddingTop: 2 }}>{linkify(step)}</p>
               </div>
             ))}
           </div>
@@ -800,7 +800,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
                     {act.recommended && <Star size={11} color={C.orange} fill={C.orange} />}
                   </div>
                   <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.name}</p>
-                  {act.description && <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.description}</p>}
+                  {act.description && <p style={{ margin: 0, fontSize: 11, color: "rgba(255,255,255,0.6)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortLinks(act.description)}</p>}
                   <div style={{ display: "flex", gap: 8, marginTop: 3 }}>
                     {act.distance && <span style={{ fontSize: 10, color: "rgba(255,255,255,0.5)" }}>📍 {act.distance}</span>}
                     {act.priceRange && <span style={{ fontSize: 10, color: C.orange, fontWeight: 700 }}>{act.priceRange}</span>}
@@ -1084,13 +1084,13 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
                 <span style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,0.7)" }}>{doneCount}/{tasks.length}</span>
               </div>
               {tasks.map((task, i) => (
-                <button key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
+                <div role="button" tabIndex={0} key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
                   style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 18px", background: "none", border: "none", borderBottom: i < tasks.length - 1 ? "1px solid rgba(255,255,255,0.1)" : "none", cursor: "pointer", textAlign: "left" }}>
                   <div style={{ width: 24, height: 24, borderRadius: "50%", flexShrink: 0, background: checked[i] ? accent : "transparent", border: `2px solid ${checked[i] ? accent : "rgba(255,255,255,0.4)"}`, display: "flex", alignItems: "center", justifyContent: "center", transition: "all 0.18s" }}>
                     {checked[i] && <Check size={12} color="#fff" strokeWidth={3} />}
                   </div>
-                  <p style={{ margin: 0, fontSize: 14, color: checked[i] ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.9)", textDecoration: checked[i] ? "line-through" : "none", flex: 1 }}>{task}</p>
-                </button>
+                  <p style={{ margin: 0, fontSize: 14, color: checked[i] ? "rgba(255,255,255,0.4)" : "rgba(255,255,255,0.9)", textDecoration: checked[i] ? "line-through" : "none", flex: 1 }}>{linkify(task)}</p>
+                </div>
               ))}
               {doneCount === tasks.length && tasks.length > 0 && (
                 <div style={{ padding: "12px 18px", background: `${accent}30`, display: "flex", alignItems: "center", gap: 8 }}>

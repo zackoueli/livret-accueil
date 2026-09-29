@@ -1,5 +1,4 @@
 import { Fragment, ReactNode } from "react";
-import { Globe } from "lucide-react";
 import { externalHref } from "@/lib/url";
 
 // [texte](url) au format Markdown, URL (http(s):// ou www.) ou adresse e-mail
@@ -26,11 +25,23 @@ function siteName(url: string): string {
   }
 }
 
-const linkStyle = { color: "inherit", textDecoration: "underline", textUnderlineOffset: 2, wordBreak: "break-word", fontWeight: 600 } as const;
+/** Version texte (non cliquable) pour les aperçus : les URLs sont remplacées par leur nom court. */
+export function shortLinks(text: string): string {
+  return text.replace(LINK_RE, (_all, label, _url, raw) => {
+    if (label) return label;
+    if (!/^(https?:\/\/|www\.)/i.test(raw)) return raw;
+    const trailing = raw.match(TRAILING_RE)?.[0] ?? "";
+    return trailing && !(trailing.startsWith(")") && raw.includes("("))
+      ? siteName(raw.slice(0, -trailing.length)) + trailing
+      : siteName(raw);
+  });
+}
+
+const linkStyle ={ color: "inherit", textDecoration: "underline", textUnderlineOffset: 2, wordBreak: "break-word", fontWeight: 600 } as const;
 
 /**
  * Transforme les liens d'un texte libre en liens cliquables.
- * Les URLs s'affichent sous forme courte (🌐 Airbnb) ; `[texte](url)` permet de choisir le libellé.
+ * Les URLs s'affichent sous forme courte (Airbnb) ; `[texte](url)` permet de choisir le libellé.
  */
 export function linkify(text: string | undefined | null): ReactNode {
   if (!text) return text;
@@ -64,8 +75,7 @@ export function linkify(text: string | undefined | null): ReactNode {
       </a>
     ) : (
       <a key={start} href={externalHref(raw)} target="_blank" rel="noopener noreferrer" title={raw}
-        onClick={e => e.stopPropagation()} style={{ ...linkStyle, whiteSpace: "nowrap" }}>
-        <Globe size="0.95em" strokeWidth={2.2} style={{ verticalAlign: "-0.12em", marginRight: 3 }} />
+        onClick={e => e.stopPropagation()} style={linkStyle}>
         {siteName(raw)}
       </a>
     ));

@@ -6,7 +6,7 @@ import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
-import { linkify } from "./linkify";
+import { linkify, shortLinks } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Copy, Check, MapPin, Clock, Key, Car, Thermometer, Wind, Tv, Mailbox,
@@ -285,7 +285,7 @@ function ExpandableRow({ icon, title, content, accent, last = false }: {
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: C.label }}>{title}</p>
           {!open && content.length < 60 && (
-            <p style={{ margin: "2px 0 0", fontSize: 13, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{content}</p>
+            <p style={{ margin: "2px 0 0", fontSize: 13, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortLinks(content)}</p>
           )}
         </div>
         <div style={{ transform: open ? "rotate(180deg)" : "none", transition: "transform 0.2s", flexShrink: 0 }}>
@@ -691,7 +691,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           </div>
           <Card>
             {steps.map((step, i) => (
-              <button key={i} onClick={() => setCheckinDone(p => ({ ...p, [i]: !p[i] }))}
+              <div role="button" tabIndex={0} key={i} onClick={() => setCheckinDone(p => ({ ...p, [i]: !p[i] }))}
                 style={{ width: "100%", display: "flex", gap: 14, padding: "14px 16px", borderBottom: i < steps.length - 1 ? `1px solid ${C.sep}` : "none", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
                 <div style={{
                   width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
@@ -706,9 +706,9 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
                   }
                 </div>
                 <p style={{ margin: 0, fontSize: 15, color: checkinDone[i] ? C.muted : C.label, textDecoration: checkinDone[i] ? "line-through" : "none", flex: 1, lineHeight: 1.5, transition: "all 0.15s" }}>
-                  {step}
+                  {linkify(step)}
                 </p>
-              </button>
+              </div>
             ))}
             {checkinCount === steps.length && steps.length > 0 && (
               <div style={{ padding: "14px 16px", background: `${accent}08`, display: "flex", alignItems: "center", gap: 8 }}>
@@ -736,7 +736,7 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <p style={{ margin: 0, fontSize: 15, fontWeight: 500, color: C.label }}>{r.label}</p>
                       {!isOpen && content.length < 55 && (
-                        <p style={{ margin: "2px 0 0", fontSize: 13, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{content}</p>
+                        <p style={{ margin: "2px 0 0", fontSize: 13, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortLinks(content)}</p>
                       )}
                     </div>
                     <div style={{ transform: isOpen ? "rotate(180deg)" : "none", transition: "transform 0.2s" }}>
@@ -1500,7 +1500,7 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
           </div>
           <Card>
             {tasks.map((task, i) => (
-              <button key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
+              <div role="button" tabIndex={0} key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "14px 16px", background: "none", border: "none", borderBottom: i < tasks.length - 1 ? `1px solid ${C.sep}` : "none", cursor: "pointer", textAlign: "left" }}>
                 <div style={{
                   width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
@@ -1512,9 +1512,9 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
                   {checked[i] && <Check size={13} color="#fff" strokeWidth={3} />}
                 </div>
                 <p style={{ margin: 0, fontSize: 15, color: checked[i] ? C.muted : C.label, textDecoration: checked[i] ? "line-through" : "none", flex: 1, lineHeight: 1.4, transition: "all 0.15s" }}>
-                  {task}
+                  {linkify(task)}
                 </p>
-              </button>
+              </div>
             ))}
             {doneCount === tasks.length && tasks.length > 0 && (
               <div style={{ padding: "14px 16px", background: `${accent}08`, display: "flex", alignItems: "center", gap: 8 }}>

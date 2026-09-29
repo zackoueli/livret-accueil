@@ -6,7 +6,7 @@ import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
-import { linkify } from "./linkify";
+import { linkify, shortLinks } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import {
   Wifi, Key, ScrollText,
@@ -519,7 +519,7 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
                 <div style={{ width: 22, height: 22, borderRadius: "50%", background: C.green, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                   <span style={{ fontSize: 11, fontWeight: 800, color: C.ink }}>{i + 1}</span>
                 </div>
-                <p style={{ margin: 0, fontSize: 13.5, color: C.label, lineHeight: 1.55, paddingTop: 1 }}>{step}</p>
+                <p style={{ margin: 0, fontSize: 13.5, color: C.label, lineHeight: 1.55, paddingTop: 1 }}>{linkify(step)}</p>
               </div>
             ))}
           </div>
@@ -690,7 +690,7 @@ function PageArea({ booklet, onSelectAct }: { booklet: Booklet; onSelectAct: (a:
                   {act.recommended && <Star size={11} color={C.peach} fill={C.peach} />}
                 </div>
                 <p style={{ margin: "0 0 2px", fontSize: 14, fontWeight: 700, color: C.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.name}</p>
-                {act.description && <p style={{ margin: 0, fontSize: 11.5, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{act.description}</p>}
+                {act.description && <p style={{ margin: 0, fontSize: 11.5, color: C.sub, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortLinks(act.description)}</p>}
                 <div style={{ display: "flex", gap: 8, marginTop: 3 }}>
                   {act.distance && <span style={{ fontSize: 10.5, color: C.muted }}>📍 {act.distance}</span>}
                   {act.priceRange && <span style={{ fontSize: 10.5, color: C.sub, fontWeight: 700 }}>{act.priceRange}</span>}
@@ -937,13 +937,13 @@ function PageCheckout({ booklet }: { booklet: Booklet }) {
               <span style={{ fontSize: 12.5, fontWeight: 700, color: C.sub }}>{doneCount}/{tasks.length}</span>
             </div>
             {tasks.map((task, i) => (
-              <button key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
+              <div role="button" tabIndex={0} key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 18px", background: "none", border: "none", borderBottom: i < tasks.length - 1 ? `1px solid ${C.sep}` : "none", cursor: "pointer", textAlign: "left" }}>
                 <div style={{ width: 22, height: 22, borderRadius: "50%", flexShrink: 0, background: checked[i] ? C.green : "transparent", border: `2px solid ${checked[i] ? C.green : C.muted}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   {checked[i] && <Check size={12} color={C.ink} strokeWidth={3} />}
                 </div>
-                <p style={{ margin: 0, fontSize: 13.5, color: checked[i] ? C.muted : C.label, textDecoration: checked[i] ? "line-through" : "none", flex: 1 }}>{task}</p>
-              </button>
+                <p style={{ margin: 0, fontSize: 13.5, color: checked[i] ? C.muted : C.label, textDecoration: checked[i] ? "line-through" : "none", flex: 1 }}>{linkify(task)}</p>
+              </div>
             ))}
             {doneCount === tasks.length && tasks.length > 0 && (
               <div style={{ padding: "12px 18px", background: C.green, display: "flex", alignItems: "center", gap: 8 }}>

@@ -571,7 +571,7 @@
   },
   "moduleFields": {
     "arrival": {
-      "welcome_message": { "label": "Welcome message", "placeholder": "Welcome to our home! We hope you'll feel right at home.", "hint": "Links are shown in short form (🌐 Airbnb). To choose the link text: [my listing](https://…)" },
+      "welcome_message": { "label": "Welcome message", "placeholder": "Welcome to our home! We hope you'll feel right at home.", "hint": "Links are shown in short form (Airbnb). To choose the link text: [my listing](https://…)" },
       "checkin_time": { "label": "Check-in time", "placeholder": "16:00" },
       "checkout_time": { "label": "Check-out time", "placeholder": "11:00" },
       "access_code": { "label": "Access code / keypad", "placeholder": "1234" },

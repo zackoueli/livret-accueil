@@ -49,7 +49,7 @@ export const MODULE_META: Record<ModuleType, ModuleMeta> = {
 export const MODULE_FIELDS: Record<ModuleType, ModuleField[]> = {
   arrival: [
     { key: "welcome_message", label: "Message de bienvenue",  placeholder: "Bienvenue dans notre maison ! Nous espérons que vous vous y sentirez comme chez vous.", type: "textarea",
-      hint: "Les liens s'affichent en court (🌐 Airbnb). Pour choisir le texte du lien : [mon annonce](https://…)" },
+      hint: "Les liens s'affichent en court (Airbnb). Pour choisir le texte du lien : [mon annonce](https://…)" },
     { key: "checkin_time",    label: "Heure d'arrivée",       placeholder: "16:00",                              type: "time" },
     { key: "checkout_time",   label: "Heure de départ",       placeholder: "11:00",                              type: "time" },
     { key: "access_code",     label: "Code d'accès / digicode", placeholder: "1234",                             type: "text" },

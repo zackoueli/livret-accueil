@@ -143,7 +143,7 @@ function Field({ label, value, mono = false, action }: {
             fontFamily: mono ? "ui-monospace,'SF Mono',monospace" : FONT,
             wordBreak: "break-word",
           }}>
-            {value}
+            {mono ? value : linkify(value)}
           </p>
         </div>
         {action && <div style={{ flexShrink: 0, paddingTop: 2 }}>{action}</div>}
@@ -554,7 +554,7 @@ function PageStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         <FieldCard title={tr("checkin_process")} count={`${checkinCount}/${steps.length}`}>
           <div style={{ paddingTop: 6 }}>
             {steps.map((step, i) => (
-              <button key={i} onClick={() => setCheckinDone(p => ({ ...p, [i]: !p[i] }))}
+              <div role="button" tabIndex={0} key={i} onClick={() => setCheckinDone(p => ({ ...p, [i]: !p[i] }))}
                 style={{ width: "100%", display: "flex", gap: 14, padding: "13px 0", alignItems: "center", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
                 <div style={{
                   width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
@@ -566,8 +566,8 @@ function PageStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
                     ? <Check size={13} color="#fff" strokeWidth={3} />
                     : <span style={{ fontSize: 11, fontWeight: 700, color: C.muted }}>{i + 1}</span>}
                 </div>
-                <span style={{ fontSize: 15, color: checkinDone[i] ? C.muted : C.label, textDecoration: checkinDone[i] ? "line-through" : "none", flex: 1, lineHeight: 1.5 }}>{step}</span>
-              </button>
+                <span style={{ fontSize: 15, color: checkinDone[i] ? C.muted : C.label, textDecoration: checkinDone[i] ? "line-through" : "none", flex: 1, lineHeight: 1.5 }}>{linkify(step)}</span>
+              </div>
             ))}
           </div>
         </FieldCard>
@@ -1224,7 +1224,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
         <FieldCard title={tr("checkout_checklist")} count={`${doneCount}/${tasks.length}`}>
           <div style={{ paddingTop: 6 }}>
             {tasks.map((task, i) => (
-              <button key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
+              <div role="button" tabIndex={0} key={i} onClick={() => setChecked(p => ({ ...p, [i]: !p[i] }))}
                 style={{ width: "100%", display: "flex", alignItems: "center", gap: 14, padding: "13px 0", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
                 <div style={{
                   width: 26, height: 26, borderRadius: "50%", flexShrink: 0,
@@ -1234,8 +1234,8 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
                 }}>
                   {checked[i] && <Check size={13} color="#fff" strokeWidth={3} />}
                 </div>
-                <span style={{ fontSize: 15, color: checked[i] ? C.muted : C.label, textDecoration: checked[i] ? "line-through" : "none", flex: 1, lineHeight: 1.4 }}>{task}</span>
-              </button>
+                <span style={{ fontSize: 15, color: checked[i] ? C.muted : C.label, textDecoration: checked[i] ? "line-through" : "none", flex: 1, lineHeight: 1.4 }}>{linkify(task)}</span>
+              </div>
             ))}
           </div>
         </FieldCard>
