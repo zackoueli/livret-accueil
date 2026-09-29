@@ -345,7 +345,8 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const accessCode   = g(arrival, "access_code");
   const keyLocation  = g(arrival, "key_location");
   const parking      = g(arrival, "parking");
-  const wifiName     = g(accommodation, "wifi_name");
+  const earlyCheckin = g(arrival, "early_checkin");
+  const wifiName    = g(accommodation, "wifi_name");
   const wifiPass     = g(accommodation, "wifi_password");
   const wifiSecurity = g(accommodation, "wifi_security");
   const wifiInfo     = g(accommodation, "wifi_info");
@@ -407,13 +408,18 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </div>
       )}
 
-      {(checkinTime || checkoutTime) && (
+      {(checkinTime || checkoutTime || earlyCheckin) && (
         <div style={{ marginBottom: 26 }}>
           <p style={{ margin: "0 4px 10px", fontSize: 12, fontWeight: 700, color: C.label, textTransform: "uppercase", letterSpacing: 1.6 }}>{tr("schedule")}</p>
           <div style={{ display: "grid", gridTemplateColumns: checkinTime && checkoutTime ? "1fr 1fr" : "1fr", gap: 12 }}>
             {checkinTime && <StatBlock label={tr("checkin")} value={formatTime(checkinTime)} />}
             {checkoutTime && <StatBlock label={tr("checkout")} value={formatTime(checkoutTime)} />}
           </div>
+          {earlyCheckin && (
+            <div style={{ marginTop: checkinTime || checkoutTime ? 12 : 0, background: C.card, borderRadius: RADIUS, boxShadow: SHADOW, padding: "4px 20px" }}>
+              <Field label={tr("early_checkin")} value={earlyCheckin} />
+            </div>
+          )}
         </div>
       )}
 
@@ -443,7 +449,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </FieldCard>
       )}
 
-      {(wifiName || wifiPass) && (
+      {(wifiName || wifiPass || wifiInfo) && (
         <FieldCard title={tr("wifi")}>
           <Field label={tr("network")} value={wifiName} action={wifiName ? <CopyChip value={wifiName} /> : undefined} />
           {wifiName && wifiPass && <Div />}
@@ -451,7 +457,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           <WifiQR ssid={wifiName} password={wifiPass} security={wifiSecurity} />
           {wifiInfo && (
             <>
-              <Div />
+              {(wifiName || wifiPass) && <Div />}
               <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, lineHeight: 1.65, opacity: 0.8, whiteSpace: "pre-line" }}>{linkify(wifiInfo)}</p>
             </>
           )}
@@ -747,7 +753,7 @@ function ActivityCard({ act }: { act: Activity }) {
         </div>
         <p style={{ margin: "0 0 6px", fontFamily: SERIF, fontSize: 19, fontWeight: 600, color: C.label, letterSpacing: -0.3 }}>{act.name}</p>
         {act.description && (
-          <p style={{ margin: "0 0 12px", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" } as React.CSSProperties}>{act.description}</p>
+          <p style={{ margin: "0 0 12px", fontSize: 13.5, color: C.label, opacity: 0.8, lineHeight: 1.5, whiteSpace: "pre-line", overflowWrap: "anywhere" }}>{linkify(act.description)}</p>
         )}
         {(act.distance || act.openHours || act.priceRange) && (
           <div style={{ display: "flex", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
@@ -850,8 +856,8 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
             <div key={i}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "14px 0" }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: 15.5, fontWeight: 600, color: C.label, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.name}</p>
-                  {p.address && <p style={{ margin: "2px 0 0", fontSize: 12.5, color: C.label, opacity: 0.7, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{p.address}</p>}
+                  <p style={{ margin: 0, fontSize: 15.5, fontWeight: 600, color: C.label, overflowWrap: "anywhere" }}>{p.name}</p>
+                  {p.address && <p style={{ margin: "2px 0 0", fontSize: 12.5, color: C.label, opacity: 0.7, overflowWrap: "anywhere" }}>{p.address}</p>}
                 </div>
                 {p.address && (
                   <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(p.address)}`} target="_blank" rel="noopener noreferrer"
@@ -957,7 +963,7 @@ function PageSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </div>
       )}
 
-      {contact && (g(contact, "host_name") || g(contact, "host_phone")) && (
+      {contact && (g(contact, "host_name") || g(contact, "host_phone") || g(contact, "host_email") || g(contact, "about")) && (
         <div style={{ marginBottom: 26 }}>
           <p style={{ margin: "0 4px 10px", fontSize: 12, fontWeight: 700, color: C.label, textTransform: "uppercase", letterSpacing: 1.6 }}>{tr("your_host")}</p>
           <div style={{ background: C.card, borderRadius: RADIUS, boxShadow: SHADOW, padding: "22px" }}>
@@ -1198,15 +1204,17 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
 
       <PageTitle>{tr("nav_checkout")}</PageTitle>
 
-      {g(checkout, "checkout_time") && (
+      {(g(checkout, "checkout_time") || g(checkout, "late_checkout_info")) && (
         <div style={{ marginBottom: 26 }}>
           <div style={{ background: C.card, borderRadius: RADIUS, boxShadow: SHADOW, padding: "30px 20px", textAlign: "center" }}>
-            <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 1 }}>{tr("checkout_time")}</p>
-            <p style={{ margin: 0, fontFamily: SERIF, fontSize: 56, fontWeight: 600, color: C.label, letterSpacing: -2, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
-              {formatTime(g(checkout, "checkout_time"))}
-            </p>
+            {g(checkout, "checkout_time") && <>
+              <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 1 }}>{tr("checkout_time")}</p>
+              <p style={{ margin: 0, fontFamily: SERIF, fontSize: 56, fontWeight: 600, color: C.label, letterSpacing: -2, lineHeight: 1, fontVariantNumeric: "tabular-nums" }}>
+                {formatTime(g(checkout, "checkout_time"))}
+              </p>
+            </>}
             {g(checkout, "late_checkout_info") && (
-              <p style={{ margin: "14px 0 0", fontSize: 13.5, color: C.label, opacity: 0.75, lineHeight: 1.5 }}>{linkify(g(checkout, "late_checkout_info"))}</p>
+              <p style={{ margin: g(checkout, "checkout_time") ? "14px 0 0" : 0, fontSize: 13.5, color: C.label, opacity: 0.75, lineHeight: 1.5, whiteSpace: "pre-line" }}>{linkify(g(checkout, "late_checkout_info"))}</p>
             )}
           </div>
         </div>

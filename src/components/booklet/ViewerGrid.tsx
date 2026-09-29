@@ -16,7 +16,7 @@ import {
   Flame, Zap, Droplets, Hospital, ConciergeBell, Wrench,
   Pill, Stethoscope, Store, Building2, WashingMachine, Users,
   Mailbox, Volume2, Cigarette, PartyPopper, ShoppingBag,
-  Home, LogOut, QrCode, Sun, Droplet, Minus, Plus, CreditCard,
+  Home, LogOut, QrCode, Sun, Droplet, Minus, Plus, CreditCard, Mail,
 } from "lucide-react";
 
 // ─── i18n Context ─────────────────────────────────────────────────────────────
@@ -407,13 +407,13 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const moduleOrder = (type: string) => booklet.modules.find(m => m.type === type)?.order ?? 999;
 
   const buttons = [
-    { id: "wifi",      label: tr("wifi"),             icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass),                                                          order: moduleOrder("accommodation") },
+    { id: "wifi",      label: tr("wifi"),             icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass || g(accommodation, "wifi_info")),                         order: moduleOrder("accommodation") },
     { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking")),             order: moduleOrder("arrival") - 0.1 },
-    { id: "horaires",  label: tr("schedule"),          icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime),                                                   order: moduleOrder("arrival") },
+    { id: "horaires",  label: tr("schedule"),          icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime || g(arrival, "checkin_process") || g(arrival, "early_checkin")), order: moduleOrder("arrival") },
     { id: "rules",     label: tr("rules"),             icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules,                                                                           order: moduleOrder("rules") },
-    { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: !!(accommodation && (g(accommodation, "heating") || g(accommodation, "ac") || g(accommodation, "tv"))), order: moduleOrder("accommodation") + 0.1 },
+    { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: ["heating", "ac", "tv", "appliances", "checkin_code", "other"].some(k => g(accommodation, k)), order: moduleOrder("accommodation") + 0.1 },
     { id: "kitchen",   label: tr("kitchen_equip"),     icon: <UtensilsCrossed size={20} color="#fff" />, color: MODULE_COLORS.kitchen,   show: !!kitchen,                                                                         order: moduleOrder("kitchen") },
-    { id: "cleaning",  label: tr("menage_dechets"),    icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: !!(kitchen && g(kitchen, "cleaning")),                                             order: moduleOrder("kitchen") + 0.1 },
+    { id: "cleaning",  label: tr("menage_dechets"),    icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: ["cleaning", "linen", "trash"].some(k => g(kitchen, k)),                            order: moduleOrder("kitchen") + 0.1 },
     { id: "safety",    label: tr("nav_safety"),        icon: <Shield size={20} color="#fff" />,          color: MODULE_COLORS.safety,    show: !!safety,                                                                          order: moduleOrder("safety") },
     { id: "contact",   label: tr("contact"),           icon: <Phone size={20} color="#fff" />,           color: MODULE_COLORS.contact,   show: !!contact,                                                                         order: moduleOrder("contact") },
     { id: "pool",      label: tr("pool"),              icon: <Waves size={20} color="#fff" />,           color: MODULE_COLORS.pool,      show: !!pool,                                                                            order: moduleOrder("pool") },
@@ -653,7 +653,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         {g(contact, "about") && <p style={{ margin: "12px 0", fontSize: 14, color: C.sub, lineHeight: 1.65 }}>{linkify(g(contact, "about"))}</p>}
         <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
           {g(contact, "host_phone") && <a href={`tel:${g(contact, "host_phone")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> {tr("call")}</a>}
-          {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Phone size={16} color={accent} /> {tr("email")}</a>}
+          {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 14, background: `${accent}12`, color: accent, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 7, fontWeight: 600, fontSize: 14 }}><Mail size={16} color={accent} /> {tr("email")}</a>}
         </div>
         <InfoRow icon={<ConciergeBell size={18} color="#8B5CF6" />} label={tr("concierge")} value={g(contact, "concierge")} color="#8B5CF6" />
         <InfoRow icon={<Wrench size={18} color={C.orange} />} label={tr("maintenance")} value={g(contact, "maintenance")} color={C.orange} last />
@@ -1063,14 +1063,16 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
         <div style={{ padding: "0 16px 32px", display: "flex", flexDirection: "column", gap: 14 }}>
 
           {/* Heure */}
-          {g(checkout, "checkout_time") && (
+          {(g(checkout, "checkout_time") || g(checkout, "late_checkout_info")) && (
             <div style={{ ...GLASS_CARD, padding: "24px 20px", textAlign: "center" }}>
               <div style={{ width: 52, height: 52, borderRadius: "50%", background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
                 <Clock size={26} color="#fff" />
               </div>
-              <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("checkout_time")}</p>
-              <p style={{ margin: 0, fontSize: 52, fontWeight: 800, color: "#fff", letterSpacing: -2, lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>{formatTime(g(checkout, "checkout_time"))}</p>
-              {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>{linkify(g(checkout, "late_checkout_info"))}</p>}
+              {g(checkout, "checkout_time") && <>
+                <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.6)", textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("checkout_time")}</p>
+                <p style={{ margin: 0, fontSize: 52, fontWeight: 800, color: "#fff", letterSpacing: -2, lineHeight: 1, textShadow: "0 2px 12px rgba(0,0,0,0.3)" }}>{formatTime(g(checkout, "checkout_time"))}</p>
+              </>}
+              {g(checkout, "late_checkout_info") && <p style={{ margin: g(checkout, "checkout_time") ? "10px 0 0" : 0, fontSize: 13, color: "rgba(255,255,255,0.7)", whiteSpace: "pre-line" }}>{linkify(g(checkout, "late_checkout_info"))}</p>}
             </div>
           )}
 

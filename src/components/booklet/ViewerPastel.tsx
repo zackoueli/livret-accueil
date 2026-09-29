@@ -14,7 +14,7 @@ import {
   Check, Copy, Globe, X, ChevronRight,
   Baby, Dog, Waves, Briefcase, Info, Bus,
   Users, Volume2, Cigarette, PartyPopper,
-  Home, LogOut, QrCode, Sun, Heart, ShoppingBag, Minus, Plus,
+  Home, LogOut, QrCode, Sun, Heart, ShoppingBag, Minus, Plus, Mail,
 } from "lucide-react";
 
 // ─── i18n Context ─────────────────────────────────────────────────────────────
@@ -362,9 +362,9 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
 
   // Logement & Règles ont leur propre onglet — l'accueil garde les essentiels + modules annexes
   const cards = [
-    { id: "horaires",  label: tr("schedule"),      icon: <Clock size={18} color={C.ink} />,           tint: C.green,  show: !!(checkinTime || checkoutTime), order: moduleOrder("arrival") },
+    { id: "horaires",  label: tr("schedule"),      icon: <Clock size={18} color={C.ink} />,           tint: C.green,  show: !!(checkinTime || checkoutTime || g(arrival, "checkin_process") || g(arrival, "early_checkin")), order: moduleOrder("arrival") },
     { id: "access",    label: tr("access_keys"),   icon: <Key size={18} color={C.ink} />,             tint: C.yellow, show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking")), order: moduleOrder("arrival") - 0.1 },
-    { id: "wifi",      label: tr("wifi"),           icon: <Wifi size={18} color={C.ink} />,            tint: C.blue,   show: !!(wifiName || wifiPass),        order: moduleOrder("accommodation") },
+    { id: "wifi",      label: tr("wifi"),           icon: <Wifi size={18} color={C.ink} />,            tint: C.blue,   show: !!(wifiName || wifiPass || g(accommodation, "wifi_info")), order: moduleOrder("accommodation") },
     { id: "safety",    label: tr("nav_safety"),     icon: <Shield size={18} color={C.ink} />,          tint: C.pink,   show: !!safety,                         order: moduleOrder("safety") },
     { id: "contact",   label: tr("contact"),        icon: <Phone size={18} color={C.ink} />,           tint: C.blue,   show: !!contact,                        order: moduleOrder("contact") },
     { id: "pool",      label: tr("pool"),           icon: <Waves size={18} color={C.ink} />,           tint: C.blue,   show: !!pool,                           order: moduleOrder("pool") },
@@ -574,7 +574,7 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
         {g(contact, "about") && <p style={{ margin: "0 0 14px", fontSize: 13.5, color: C.sub, lineHeight: 1.6 }}>{linkify(g(contact, "about"))}</p>}
         <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
           {g(contact, "host_phone") && <a href={`tel:${g(contact, "host_phone")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 16, background: C.blue, color: C.ink, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Phone size={15} /> {tr("call")}</a>}
-          {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 16, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Phone size={15} /> {tr("email")}</a>}
+          {g(contact, "host_email") && <a href={`mailto:${g(contact, "host_email")}`} style={{ flex: 1, padding: "12px 0", borderRadius: 16, background: C.bg, border: `1px solid ${C.sep}`, color: C.ink, textDecoration: "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, fontWeight: 700, fontSize: 13 }}><Mail size={15} /> {tr("email")}</a>}
         </div>
         <InfoBlock label={tr("concierge")} value={g(contact, "concierge")} />
         <InfoBlock label={tr("maintenance")} value={g(contact, "maintenance")} />
@@ -916,15 +916,17 @@ function PageCheckout({ booklet }: { booklet: Booklet }) {
       </div>
 
       <div style={{ padding: "0 16px 32px", display: "flex", flexDirection: "column", gap: 12 }}>
-        {g(checkout, "checkout_time") && (
+        {(g(checkout, "checkout_time") || g(checkout, "late_checkout_info")) && (
           <div style={{ background: C.peach, borderRadius: 20, padding: "22px 18px", textAlign: "center", position: "relative", overflow: "hidden" }}>
             <Blob color="rgba(255,255,255,0.5)" size={30} style={{ top: 10, right: 16 }} />
             <div style={{ width: 46, height: 46, borderRadius: "50%", background: "rgba(255,255,255,0.55)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px" }}>
               <Clock size={22} color={C.ink} />
             </div>
-            <p style={{ margin: "0 0 4px", fontSize: 10.5, fontWeight: 700, color: C.ink, opacity: 0.7, textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("checkout_time")}</p>
-            <p style={{ margin: 0, fontSize: 44, fontWeight: 800, color: C.ink, letterSpacing: -2, lineHeight: 1 }}>{formatTime(g(checkout, "checkout_time"))}</p>
-            {g(checkout, "late_checkout_info") && <p style={{ margin: "10px 0 0", fontSize: 12.5, color: C.ink, opacity: 0.75 }}>{linkify(g(checkout, "late_checkout_info"))}</p>}
+            {g(checkout, "checkout_time") && <>
+              <p style={{ margin: "0 0 4px", fontSize: 10.5, fontWeight: 700, color: C.ink, opacity: 0.7, textTransform: "uppercase", letterSpacing: 0.8 }}>{tr("checkout_time")}</p>
+              <p style={{ margin: 0, fontSize: 44, fontWeight: 800, color: C.ink, letterSpacing: -2, lineHeight: 1 }}>{formatTime(g(checkout, "checkout_time"))}</p>
+            </>}
+            {g(checkout, "late_checkout_info") && <p style={{ margin: g(checkout, "checkout_time") ? "10px 0 0" : 0, fontSize: 12.5, color: C.ink, opacity: 0.75, whiteSpace: "pre-line" }}>{linkify(g(checkout, "late_checkout_info"))}</p>}
           </div>
         )}
 
