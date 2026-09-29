@@ -571,7 +571,7 @@
   },
   "moduleFields": {
     "arrival": {
-      "welcome_message": { "label": "Willkommensnachricht", "placeholder": "Willkommen in unserem Haus! Wir hoffen, Sie fühlen sich wie zu Hause." },
+      "welcome_message": { "label": "Willkommensnachricht", "placeholder": "Willkommen in unserem Haus! Wir hoffen, Sie fühlen sich wie zu Hause.", "hint": "Links werden kurz angezeigt (🌐 Airbnb). Um den Linktext zu wählen: [mein Inserat](https://…)" },
       "checkin_time": { "label": "Check-in-Zeit", "placeholder": "16:00" },
       "checkout_time": { "label": "Check-out-Zeit", "placeholder": "11:00" },
       "access_code": { "label": "Zugangscode", "placeholder": "1234" },
