@@ -10,6 +10,7 @@ import { registerWithEmail, loginWithEmail, loginWithGoogle, resetPassword } fro
 import { useAuthStore } from "@/store/authStore";
 import { getRefCookie, setRefCookie, clearRefCookie, isValidCode } from "@/lib/referral";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { SITE_URL } from "@/lib/url";
 
 type Mode = "login" | "register";
 
@@ -27,6 +28,48 @@ const DESIGNS: DesignItem[] = [
   { id: "grid",   template: "grid",   accent: "8B5CF6", label: "Grille" },
   { id: "pastel", template: "pastel", accent: "F43F5E", label: "Pastel" },
   { id: "halo",   template: "clean",  accent: "F97316", label: "Halo" },
+];
+
+// Réseaux sociaux affichés en pied de page. lucide-react ne fournit plus les
+// logos de marques, d'où les tracés SVG inline (même style trait que lucide).
+const SOCIALS: { label: string; href: string; icon: React.ReactNode }[] = [
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/bunkly_co/",
+    icon: (
+      <>
+        <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+        <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+      </>
+    ),
+  },
+  {
+    label: "YouTube",
+    href: "https://www.youtube.com/@Bunkly_co",
+    icon: (
+      <>
+        <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17" />
+        <path d="m10 15 5-3-5-3z" />
+      </>
+    ),
+  },
+  {
+    label: "Facebook",
+    href: "https://www.facebook.com/profile.php?id=61590686469323",
+    icon: <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />,
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/company/bunkly-co/",
+    icon: (
+      <>
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+        <rect width="4" height="12" x="2" y="9" />
+        <circle cx="4" cy="4" r="2" />
+      </>
+    ),
+  },
 ];
 
 function DesignMock({ item }: { item: DesignItem }) {
@@ -150,19 +193,27 @@ export function AuthPage() {
   };
 
   return (
-    <div className="relative h-screen w-full overflow-hidden flex items-center justify-center px-4">
+    <div className="relative min-h-screen w-full flex flex-col items-center px-4">
 
-      {/* ── Fond photo plein écran, flouté ── */}
-      <img src={BG_IMAGE} alt="" className="absolute inset-0 w-full h-full object-cover scale-110" style={{ filter: "blur(14px)" }} />
-      <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/55 to-orange-950/50" />
+      {/* ── Fond photo plein écran, flouté (fixe : la page peut défiler sur petits écrans) ── */}
+      <div className="fixed inset-0 overflow-hidden">
+        <img src={BG_IMAGE} alt="" className="absolute inset-0 w-full h-full object-cover scale-110" style={{ filter: "blur(14px)" }} />
+        <div className="absolute inset-0 bg-gradient-to-br from-black/70 via-black/55 to-orange-950/50" />
+      </div>
 
       {/* ── Sélecteur de langue ── */}
       <div className="absolute top-4 right-4 z-30">
         <LanguageSwitcher variant="dark" />
       </div>
 
+      {/* ── Accroche ── */}
+      <header className="relative z-20 text-center pt-16 lg:pt-8 pb-6">
+        <h1 className="text-2xl sm:text-3xl xl:text-4xl font-black text-white">{t("welcomeTitle")}</h1>
+        <p className="mt-1.5 text-sm sm:text-base xl:text-lg font-medium text-white/75">{t("welcomeSubtitle")}</p>
+      </header>
+
       {/* ── Vitrine : 2 designs à gauche + login + 2 à droite (desktop) ── */}
-      <div className="relative z-20 flex items-center justify-center gap-4 xl:gap-8 w-full max-w-[1700px]">
+      <div className="relative z-20 flex-1 flex items-center justify-center gap-4 xl:gap-8 w-full max-w-[1700px]">
 
         {/* Groupe gauche — les 2 mockups côte à côte */}
         <div className="hidden lg:flex gap-3 xl:gap-5">
@@ -171,15 +222,15 @@ export function AuthPage() {
 
         {/* Panneau login, carte blanche opaque */}
         <div
-          className="w-full max-w-sm bg-white rounded-[1.75rem] px-6 sm:px-8 py-6 shrink-0 max-h-[92vh] overflow-y-auto"
+          className="w-full max-w-sm bg-white rounded-[1.75rem] px-6 sm:px-8 py-6 shrink-0"
           style={{ boxShadow: "0 40px 90px -20px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,0,0,0.04)" }}
         >
         {/* Header */}
         <div className="mb-4 text-center">
           <img src="/Logo.png" alt="Bunkly" className="h-8 w-auto mx-auto mb-3" />
-          <h1 className="text-xl font-black text-gray-900">
+          <h2 className="text-xl font-black text-gray-900">
             {mode === "register" ? t("registerTitle") : t("loginTitle")}
-          </h1>
+          </h2>
         </div>
 
         {/* Tabs */}
@@ -307,6 +358,24 @@ export function AuthPage() {
         </div>
 
       </div>
+
+      {/* ── Pied de page : site vitrine + réseaux sociaux ── */}
+      <footer className="relative z-20 flex flex-wrap items-center justify-center gap-x-5 gap-y-3 py-6">
+        <a href={SITE_URL} target="_blank" rel="noopener noreferrer"
+          className="text-sm font-semibold text-white/80 hover:text-white transition-colors">
+          {t("visitSite")} →
+        </a>
+        <div className="flex items-center gap-2">
+          {SOCIALS.map((s) => (
+            <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} title={s.label}
+              className="w-9 h-9 flex items-center justify-center rounded-full text-white/80 hover:text-white bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/15 transition-colors">
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                {s.icon}
+              </svg>
+            </a>
+          ))}
+        </div>
+      </footer>
     </div>
   );
 }
