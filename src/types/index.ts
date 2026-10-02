@@ -178,10 +178,14 @@ export interface TrackingEvent {
 // Lien de tracking marketing interne (ex. "Vidéo YouTube titre", "Post insta 10 août"),
 // créé manuellement dans l'admin. Distinct des codes d'affiliation : pas d'utilisateur
 // rattaché, pas de commission, ne doit jamais apparaître dans l'onglet Affiliés.
+export type MarketingLinkDestination = "app" | "site";
+
 export interface MarketingLink {
   id: string;
   name: string;
   code: string;
+  /** Où le lien redirige : l'app (app.bunkly.co) ou le site vitrine (bunkly.co). Absent = "app". */
+  destination?: MarketingLinkDestination;
   clickCount: number;
   signupCount: number;
   createdAt: number;

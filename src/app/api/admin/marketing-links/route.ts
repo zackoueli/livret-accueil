@@ -22,9 +22,12 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { name } = await request.json();
+    const { name, destination = "app" } = await request.json();
     if (!name || typeof name !== "string" || !name.trim()) {
       return NextResponse.json({ error: "Missing name" }, { status: 400 });
+    }
+    if (destination !== "app" && destination !== "site") {
+      return NextResponse.json({ error: "Invalid destination" }, { status: 400 });
     }
 
     // Collision quasi improbable (charset 33^7) mais autant vérifier, même
@@ -41,6 +44,7 @@ export async function POST(request: NextRequest) {
       id: ref.id,
       name: name.trim(),
       code,
+      destination,
       clickCount: 0,
       signupCount: 0,
       createdAt: Date.now(),

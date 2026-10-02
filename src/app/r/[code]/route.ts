@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { isValidCode, buildRefCookieHeader } from "@/lib/referral";
+import { SITE_URL } from "@/lib/url";
 
 // Lien de partage d'affiliation (ex. bunkly.com/r/ABC-1234) : trace le clic
 // puis redirige vers la landing avec le cookie de parrainage posé.
@@ -15,7 +16,7 @@ export async function GET(
   { params }: { params: Promise<{ code: string }> }
 ) {
   const { code } = await params;
-  const redirectUrl = new URL("/", request.url);
+  let redirectUrl = new URL("/", request.url);
 
   if (!isValidCode(code)) {
     return NextResponse.redirect(redirectUrl);
@@ -49,6 +50,12 @@ export async function GET(
         .limit(1)
         .get();
       if (!marketingSnap.empty) {
+        // Destination "site" : on envoie vers le site vitrine. Le cookie reste
+        // posé sur le domaine de l'app, donc l'inscription est quand même
+        // attribuée quand le visiteur passe ensuite du site à l'app.
+        if (marketingSnap.docs[0].data().destination === "site") {
+          redirectUrl = new URL(SITE_URL);
+        }
         await marketingSnap.docs[0].ref.update({ clickCount: FieldValue.increment(1) });
       }
     }

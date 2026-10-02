@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { Link2, Plus, Copy, Check, Trash2 } from "lucide-react";
 import { adminFetch } from "@/lib/adminFetch";
-import type { MarketingLink } from "@/types";
+import type { MarketingLink, MarketingLinkDestination } from "@/types";
+
+const DESTINATION_LABELS: Record<MarketingLinkDestination, string> = {
+  app: "app.bunkly.co",
+  site: "bunkly.co",
+};
 
 export function AdminMarketingLinks() {
   const [links, setLinks] = useState<MarketingLink[]>([]);
@@ -11,6 +16,7 @@ export function AdminMarketingLinks() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState("");
   const [name, setName] = useState("");
+  const [destination, setDestination] = useState<MarketingLinkDestination>("app");
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const fetchLinks = async () => {
@@ -33,7 +39,7 @@ export function AdminMarketingLinks() {
       const res = await adminFetch("/api/admin/marketing-links", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ name: name.trim(), destination }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -82,6 +88,16 @@ export function AdminMarketingLinks() {
             className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-indigo-500"
           />
         </div>
+        <div className="sm:w-48">
+          <label className="block text-xs font-semibold text-gray-400 mb-1.5">Redirige vers</label>
+          <select
+            value={destination} onChange={(e) => setDestination(e.target.value as MarketingLinkDestination)}
+            className="w-full px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700 text-white text-sm focus:outline-none focus:border-indigo-500"
+          >
+            <option value="app">{DESTINATION_LABELS.app}</option>
+            <option value="site">{DESTINATION_LABELS.site}</option>
+          </select>
+        </div>
         <button type="submit" disabled={creating}
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm transition-colors disabled:opacity-50 shrink-0">
           <Plus className="w-4 h-4" /> Créer le lien
@@ -113,6 +129,8 @@ export function AdminMarketingLinks() {
                     {l.clickCount} clic{l.clickCount !== 1 ? "s" : ""} · {l.signupCount} compte{l.signupCount !== 1 ? "s" : ""} créé{l.signupCount !== 1 ? "s" : ""}
                     {" · "}
                     <span className="font-mono">app.bunkly.co/r/{l.code}</span>
+                    {" → "}
+                    {DESTINATION_LABELS[l.destination ?? "app"]}
                   </p>
                 </div>
               </div>
