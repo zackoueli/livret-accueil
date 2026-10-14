@@ -25,6 +25,7 @@ export interface UserProfile {
   cancelAtPeriodEnd?: boolean;
   proTrial?: boolean; // essai Pro en cours, sans Stripe (inscription ou admin)
   trialUsed?: boolean; // l'essai Pro de bienvenue a déjà été accordé
+  welcomeVideoSeen?: boolean; // vidéo de présentation déjà affichée à la 1re visite
   createdAt: number;
   translationCharsUsed?: number;
   translationCharsMonth?: string; // "YYYY-MM"

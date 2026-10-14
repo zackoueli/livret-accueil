@@ -6,7 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Suspense } from "react";
 import {
   Plus, BookOpen, Eye, Pencil, Trash2, Share2, Lock,
-  LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, HelpCircle,
+  LogOut, Crown, Globe, Clock, MoreHorizontal, Settings, BarChart2, Copy, HelpCircle, PlayCircle,
   Monitor, Smartphone, Search, ArrowRight, Star, Folder, FolderOpen, FolderPlus, X, Check, ChevronRight, AlertTriangle, Gift, Wallet,
 } from "lucide-react";
 import toast from "react-hot-toast";
@@ -21,8 +21,14 @@ import { CreateBookletModal } from "./CreateBookletModal";
 import { AnalyticsModal } from "./AnalyticsModal";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { ReferralSourceModal } from "./ReferralSourceModal";
+import { WelcomeVideoModal } from "./WelcomeVideoModal";
+import { doc, setDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 import { usePlan } from "@/hooks/usePlan";
+
+// Seuls les comptes créés après la mise en ligne de la vidéo la voient s'ouvrir automatiquement
+const WELCOME_VIDEO_SINCE = Date.UTC(2026, 9, 14);
 
 function PromoSidebar() {
   const t = useTranslations("dashboard");
@@ -135,6 +141,20 @@ function DashboardPageInner() {
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [dismissedReferralModal, setDismissedReferralModal] = useState(false);
   const showReferralModal = !!user && !!profile && !profile.referralSource && !dismissedReferralModal;
+
+  // Vidéo de présentation : ouverte automatiquement à la 1re visite (après la question
+  // « comment nous avez-vous connus ? »), puis accessible depuis le bouton d'aide.
+  const [showWelcomeVideo, setShowWelcomeVideo] = useState(false);
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
+  const autoWelcomeVideo = !!user && !!profile && !showReferralModal && !profile.welcomeVideoSeen
+    && (profile.createdAt ?? 0) >= WELCOME_VIDEO_SINCE;
+  const closeWelcomeVideo = () => {
+    setShowWelcomeVideo(false);
+    if (user && profile && !profile.welcomeVideoSeen) {
+      useAuthStore.getState().setProfile({ ...profile, welcomeVideoSeen: true });
+      setDoc(doc(db, "users", user.uid), { welcomeVideoSeen: true }, { merge: true }).catch(() => {});
+    }
+  };
 
   const requirePlan = (reason: string) => {
     setUpgradeReason(reason);
@@ -291,14 +311,38 @@ function DashboardPageInner() {
 
             <LanguageSwitcher variant="light" />
 
-            <a
-              href="https://www.youtube.com/@Bunkly_co"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2.5 rounded-xl hover:bg-red-50 transition-colors text-gray-400 hover:text-red-500"
-              title={t("youtubeTitle")}>
-              <HelpCircle className="w-4 h-4" />
-            </a>
+            <div className="relative">
+              <button
+                onClick={() => setShowHelpMenu(v => !v)}
+                className={`p-2.5 rounded-xl transition-colors ${showHelpMenu ? "bg-red-50 text-red-500" : "text-gray-400 hover:bg-red-50 hover:text-red-500"}`}
+                title={t("help")}>
+                <HelpCircle className="w-4 h-4" />
+              </button>
+              {showHelpMenu && (
+                <>
+                  <div className="fixed inset-0 z-40" onClick={() => setShowHelpMenu(false)} />
+                  <div className="absolute right-0 top-full mt-2 z-50 w-60 bg-white rounded-2xl border border-gray-100 shadow-xl p-1.5">
+                    <button
+                      onClick={() => { setShowHelpMenu(false); setShowWelcomeVideo(true); }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left">
+                      <PlayCircle className="w-4 h-4 text-orange-500 shrink-0" />
+                      {t("helpMenuVideo")}
+                    </button>
+                    <a
+                      href="https://www.youtube.com/@Bunkly_co"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setShowHelpMenu(false)}
+                      className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+                      <svg className="w-4 h-4 text-red-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                      {t("youtubeTitle")}
+                    </a>
+                  </div>
+                </>
+              )}
+            </div>
             <button onClick={handleSignOut}
               className="p-2.5 rounded-xl hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
               <LogOut className="w-4 h-4" />
@@ -556,6 +600,11 @@ function DashboardPageInner() {
       {/* Referral source modal (nouvel utilisateur) */}
       {showReferralModal && (
         <ReferralSourceModal uid={user!.uid} onClose={() => setDismissedReferralModal(true)} />
+      )}
+
+      {/* Vidéo de présentation */}
+      {(showWelcomeVideo || autoWelcomeVideo) && (
+        <WelcomeVideoModal onClose={closeWelcomeVideo} />
       )}
 
       {/* Folder modal */}
