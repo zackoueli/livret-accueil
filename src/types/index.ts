@@ -23,6 +23,8 @@ export interface UserProfile {
   subscriptionStatus?: "active" | "canceled" | "past_due" | "trialing";
   subscriptionEndDate?: number;
   cancelAtPeriodEnd?: boolean;
+  proTrial?: boolean; // essai Pro en cours, sans Stripe (inscription ou admin)
+  trialUsed?: boolean; // l'essai Pro de bienvenue a déjà été accordé
   createdAt: number;
   translationCharsUsed?: number;
   translationCharsMonth?: string; // "YYYY-MM"

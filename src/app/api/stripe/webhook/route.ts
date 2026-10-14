@@ -3,6 +3,7 @@ import { stripe } from "@/lib/stripe";
 import { adminDb } from "@/lib/firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import Stripe from "stripe";
+import { unpublishBeyondFreePlan } from "@/lib/proTrial";
 import { sendPurchaseConfirmation, sendSubscriptionExpired, sendAffiliateCommissionEmail, sendServicePurchaseNotification } from "@/lib/emails";
 
 export const runtime = "nodejs";
@@ -200,6 +201,7 @@ export async function POST(request: NextRequest) {
           subscriptionStatus: sub.status,
           subscriptionEndDate: getEndDate(sub),
           cancelAtPeriodEnd: sub.cancel_at_period_end,
+          proTrial: false,
         },
         { merge: true }
       );
@@ -259,6 +261,7 @@ export async function POST(request: NextRequest) {
           subscriptionStatus: sub.status,
           subscriptionEndDate: getEndDate(sub),
           cancelAtPeriodEnd: sub.cancel_at_period_end,
+          proTrial: false,
         },
         { merge: true }
       );
@@ -287,26 +290,10 @@ export async function POST(request: NextRequest) {
       );
       await syncOwnerPlan(uid, "free");
 
-      // Dépublier tous les livrets au-delà de la limite gratuite (2)
+      // Dépublier les livrets qui ne respectent plus le plan gratuit (design conservé)
       try {
-        const FREE_LIMIT = 2;
-        const bookletsSnap = await adminDb.collection("booklets")
-          .where("userId", "==", uid)
-          .where("isPublished", "==", true)
-          .get();
-
-        const publishedDocs = bookletsSnap.docs.sort((a, b) =>
-          (b.data().updatedAt ?? 0) - (a.data().updatedAt ?? 0)
-        );
-
-        // Garder les 2 plus récents publiés, dépublier le reste
-        const toUnpublish = publishedDocs.slice(FREE_LIMIT);
-        const batch = adminDb.batch();
-        for (const doc of toUnpublish) {
-          batch.update(doc.ref, { isPublished: false });
-        }
-        if (toUnpublish.length > 0) await batch.commit();
-        console.log(`[webhook] unpublished ${toUnpublish.length} booklet(s) for user ${uid}`);
+        const count = await unpublishBeyondFreePlan(uid);
+        console.log(`[webhook] unpublished ${count} booklet(s) for user ${uid}`);
       } catch (e) {
         console.error("[webhook] Failed to unpublish booklets:", e);
       }

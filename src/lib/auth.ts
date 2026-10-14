@@ -6,11 +6,30 @@ import {
   signInWithPopup,
   updateProfile,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  User,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { UserProfile } from "@/types";
 import { getRefCookie } from "./referral";
+import { useAuthStore } from "@/store/authStore";
+
+// Essai Pro de 14 jours offert à l'inscription (accordé côté serveur), puis
+// rafraîchit le profil en mémoire pour que le plan Pro s'applique tout de suite.
+async function startWelcomeTrial(user: User) {
+  try {
+    const token = await user.getIdToken();
+    const res = await fetch("/api/account/start-trial", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return;
+    const profileDoc = await getDoc(doc(db, "users", user.uid));
+    if (profileDoc.exists()) useAuthStore.getState().setProfile(profileDoc.data() as UserProfile);
+  } catch {
+    // non-bloquant
+  }
+}
 
 export async function registerWithEmail(
   email: string,
@@ -29,6 +48,7 @@ export async function registerWithEmail(
     createdAt: Date.now(),
   };
   await setDoc(doc(db, "users", cred.user.uid), profile);
+  await startWelcomeTrial(cred.user);
 
   try {
     await fetch("/api/notify-signup", {
@@ -68,7 +88,6 @@ export async function loginWithGoogle() {
     // Ne jamais écraser plan — on écrit seulement les champs de profil de base
     // et on initialise plan à "free" uniquement si le document n'existe pas encore
     const userRef = doc(db, "users", result.user.uid);
-    const { getDoc } = await import("firebase/firestore");
     const existing = await getDoc(userRef);
     const profile = {
       uid: result.user.uid,
@@ -78,6 +97,7 @@ export async function loginWithGoogle() {
       ...(existing.exists() ? {} : { plan: "free", createdAt: Date.now() }),
     };
     await setDoc(userRef, profile, { merge: true });
+    if (!existing.exists()) await startWelcomeTrial(result.user);
 
     // Générer le code de parrainage si c'est un nouveau user Google
     if (!existing.exists()) {

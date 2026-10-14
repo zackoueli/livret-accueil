@@ -15,7 +15,7 @@ import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { ShareModal } from "@/components/dashboard/ShareModal";
 import { usePlan } from "@/hooks/usePlan";
 import { useAuthStore } from "@/store/authStore";
-import { PLAN_LIMITS } from "@/lib/plans";
+import { PLAN_LIMITS, planAllowsDesign } from "@/lib/plans";
 import { BookletTranslations } from "@/types";
 
 export function EditorHeader({ onSave }: { onSave: () => void }) {
@@ -55,6 +55,10 @@ export function EditorHeader({ onSave }: { onSave: () => void }) {
   };
 
   const togglePublish = async () => {
+    if (!booklet.isPublished && !planAllowsDesign(plan, booklet.templateId)) {
+      openUpgrade(t("designPublishLocked"));
+      return;
+    }
     if (!booklet.isPublished && !canPublish) {
       openUpgrade(t("publishLimit", { limit }));
       return;

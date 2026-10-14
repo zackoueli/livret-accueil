@@ -279,6 +279,8 @@ function SidebarAppearance() {
   const { booklet, updateBookletField } = useEditorStore();
   const { can } = usePlan();
   const canCustomSlug = can("custom_slug");
+  const canUseAllDesigns = can("template_grid");
+  const [showDesignUpgrade, setShowDesignUpgrade] = useState(false);
   const [slugInput, setSlugInput] = useState("");
   const [slugStatus, setSlugStatus] = useState<"idle" | "checking" | "available" | "taken" | "too_short">("idle");
   const [uploading, setUploading] = useState(false);
@@ -454,10 +456,13 @@ function SidebarAppearance() {
               { id: "pastel", label: t("designPastel"), desc: t("designPastelDesc"), emoji: "🌸" },
               { id: "clean",  label: t("designClean"),  desc: t("designCleanDesc"),  emoji: "✨" },
             ].map((d) => {
+              // Plan gratuit : seul le design Scroll peut être choisi
+              const isLocked = d.id !== "simple" && !canUseAllDesigns;
               const isActive = (booklet.templateId ?? "simple") === d.id;
               return (
-                <button key={d.id} onClick={() => updateBookletField("templateId", d.id)}
-                  className={`flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all text-center ${isActive ? "border-orange-400 bg-orange-50" : "border-gray-200 hover:border-gray-300"}`}>
+                <button key={d.id} onClick={() => isLocked ? setShowDesignUpgrade(true) : updateBookletField("templateId", d.id)}
+                  className={`relative flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all text-center ${isActive ? "border-orange-400 bg-orange-50" : isLocked ? "border-gray-100 opacity-60" : "border-gray-200 hover:border-gray-300"}`}>
+                  {isLocked && <Lock className="absolute top-2 right-2 w-3 h-3 text-orange-500" />}
                   <span className="text-2xl">{d.emoji}</span>
                   <span className={`text-xs font-bold ${isActive ? "text-orange-500" : "text-gray-600"}`}>{d.label}</span>
                   <span className="text-[10px] text-gray-400 leading-tight">{d.desc}</span>
@@ -465,6 +470,11 @@ function SidebarAppearance() {
               );
             })}
           </div>
+          {!canUseAllDesigns && (booklet.templateId ?? "simple") !== "simple" && (
+            <p className="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 leading-relaxed">
+              {t("designPublishLocked")}
+            </p>
+          )}
         </div>
 
         {/* URL */}
@@ -496,6 +506,13 @@ function SidebarAppearance() {
           </p>
         </div>
       </div>
+
+      {showDesignUpgrade && (
+        <UpgradeModal
+          reason={t("designReason")}
+          onClose={() => setShowDesignUpgrade(false)}
+        />
+      )}
 
       {showSlugUpgrade && (
         <UpgradeModal

@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { adminDb } from "@/lib/firebase-admin";
-import { Booklet } from "@/types";
+import { Booklet, Plan } from "@/types";
+import { planAllowsDesign } from "@/lib/plans";
 import { BookletViewer } from "@/components/booklet/BookletViewer";
 import { notFound } from "next/navigation";
 
@@ -39,6 +40,11 @@ export default async function BookletPage({
 
   const doc = snap.docs[0];
   const booklet = { ...doc.data(), id: doc.id } as Booklet;
+
+  // Un livret au design réservé aux abonnés ne peut pas être publié par un compte gratuit
+  // (l'éditeur bloque, et la fin d'abonnement dépublie) : filet de sécurité côté serveur.
+  const ownerPlan = ((booklet.ownerPlan as string) === "actif" ? "pro" : booklet.ownerPlan ?? "free") as Plan;
+  if (!planAllowsDesign(ownerPlan, booklet.templateId)) notFound();
 
   // Overrides pour les apercus internes (modale de creation, editeur) : ne modifient
   // jamais le livret stocke, juste le rendu de cette requete.

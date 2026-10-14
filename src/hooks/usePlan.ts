@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import {
   planHasFeature,
@@ -14,9 +15,15 @@ import { Plan } from "@/types";
 
 export function usePlan() {
   const { profile } = useAuthStore();
+  const [now] = useState(() => Date.now());
   // "actif" est l'ancien nom du plan pro — on le mappe vers "pro"
   const rawPlan = profile?.plan as string;
-  const plan: Plan = (rawPlan === "actif" ? "pro" : (rawPlan as Plan)) || "free";
+  // Essai admin expiré : free immédiatement, sans attendre le cron qui met à jour Firestore
+  const proTrialExpired =
+    !!profile?.proTrial && !!profile.subscriptionEndDate && profile.subscriptionEndDate * 1000 < now;
+  const plan: Plan = proTrialExpired
+    ? "free"
+    : (rawPlan === "actif" ? "pro" : (rawPlan as Plan)) || "free";
 
   return {
     plan,

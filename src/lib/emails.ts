@@ -157,6 +157,39 @@ export async function sendExpirationWarning({
   });
 }
 
+// ── 2b. Fin d'essai Pro proche (essai sans Stripe) ───────────────────────────
+
+export async function sendTrialEndingSoon({
+  to, name, daysLeft, endDate,
+}: { to: string; name: string; daysLeft: number; endDate: string }) {
+  const content = `
+    <h1 style="margin:0 0 8px;font-size:22px;font-weight:800;color:#111827;">Votre essai Pro se termine bientôt ⏳</h1>
+    <p style="margin:0 0 24px;font-size:15px;color:#6b7280;line-height:1.6;">
+      Bonjour ${name || ""},<br><br>
+      Votre essai gratuit du plan Pro se termine dans <strong>${daysLeft} jour${daysLeft > 1 ? "s" : ""}</strong> (le ${endDate}).
+      <br>Abonnez-vous pour garder tous vos livrets en ligne, vos designs et les fonctionnalités Pro.
+    </p>
+    <div style="background:#fef3c7;border-radius:16px;padding:20px;margin-bottom:24px;border-left:4px solid #f59e0b;">
+      <p style="margin:0;font-size:14px;color:#92400e;line-height:1.7;">
+        ⚠️ Sans abonnement, votre compte repassera sur le plan Gratuit : un seul livret au design Scroll restera publié, les autres seront <strong>mis en pause</strong>. Vos livrets et leurs designs sont conservés.
+      </p>
+    </div>
+    <div style="text-align:center;">
+      ${btn("Choisir mon abonnement →", `${APP_URL}/dashboard/settings`)}
+    </div>
+    <p style="margin:24px 0 0;font-size:13px;color:#9ca3af;text-align:center;">
+      Besoin d'aide ? <a href="mailto:hello@bunkly.co" style="color:#f97316;">hello@bunkly.co</a>
+    </p>
+  `;
+
+  return resend.emails.send({
+    from: FROM,
+    to,
+    subject: `⏳ Votre essai Pro Bunkly se termine dans ${daysLeft} jour${daysLeft > 1 ? "s" : ""}`,
+    html: layout(content),
+  });
+}
+
 // ── 3. Abonnement expiré → passage en free ────────────────────────────────────
 
 export async function sendSubscriptionExpired({

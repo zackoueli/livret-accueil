@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
   let sent = 0;
   for (const doc of snap.docs) {
     const user = doc.data();
-    if (!user.email) continue;
+    if (!user.email || user.proTrial) continue;
     const renewalDate = new Date(user.subscriptionEndDate * 1000).toLocaleDateString("fr-FR", {
       day: "numeric", month: "long", year: "numeric",
     });

@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { LayoutDashboard, BookOpen, LogOut, Lock, Users2, Tag, Link2, Menu, X } from "lucide-react";
+import { LayoutDashboard, BookOpen, LogOut, Lock, Users2, UserRound, Tag, Link2, Menu, X } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { adminFetch } from "@/lib/adminFetch";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/users", label: "Utilisateurs", icon: UserRound },
   { href: "/admin/booklets", label: "Livrets", icon: BookOpen },
   { href: "/admin/affiliates", label: "Affiliés", icon: Users2 },
   { href: "/admin/promo-codes", label: "Codes promo", icon: Tag },

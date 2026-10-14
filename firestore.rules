@@ -16,7 +16,9 @@ service cloud.firestore {
                     && !("stripeSubscriptionId" in request.resource.data)
                     && !("subscriptionStatus" in request.resource.data)
                     && !("subscriptionEndDate" in request.resource.data)
-                    && !("cancelAtPeriodEnd" in request.resource.data);
+                    && !("cancelAtPeriodEnd" in request.resource.data)
+                    && !("proTrial" in request.resource.data)
+                    && !("trialUsed" in request.resource.data);
 
       allow update: if request.auth != null && request.auth.uid == userId
                     && request.resource.data.plan == resource.data.plan
@@ -25,7 +27,9 @@ service cloud.firestore {
                     && request.resource.data.get("stripeSubscriptionId", null) == resource.data.get("stripeSubscriptionId", null)
                     && request.resource.data.get("subscriptionStatus", null) == resource.data.get("subscriptionStatus", null)
                     && request.resource.data.get("subscriptionEndDate", null) == resource.data.get("subscriptionEndDate", null)
-                    && request.resource.data.get("cancelAtPeriodEnd", null) == resource.data.get("cancelAtPeriodEnd", null);
+                    && request.resource.data.get("cancelAtPeriodEnd", null) == resource.data.get("cancelAtPeriodEnd", null)
+                    && request.resource.data.get("proTrial", null) == resource.data.get("proTrial", null)
+                    && request.resource.data.get("trialUsed", null) == resource.data.get("trialUsed", null);
     }
 
     // Livrets : lecture/écriture de ses propres livrets

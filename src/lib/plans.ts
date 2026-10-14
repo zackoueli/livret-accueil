@@ -50,6 +50,13 @@ export function planHasFeature(plan: Plan, feature: PlanFeature): boolean {
   return PLAN_FEATURES[plan]?.includes(feature) ?? false;
 }
 
+// Designs de livret (templateId) utilisables sans la fonctionnalité "template_grid"
+export const FREE_DESIGNS = ["simple"];
+
+export function planAllowsDesign(plan: Plan, templateId: string | undefined): boolean {
+  return FREE_DESIGNS.includes(templateId ?? "simple") || planHasFeature(plan, "template_grid");
+}
+
 export const PLAN_LIMITS: Record<Plan, { booklets: number }> = {
   free:    { booklets: 1 },
   starter: { booklets: 5 },

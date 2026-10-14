@@ -195,14 +195,14 @@ function SettingsPageInner() {
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600 flex items-center gap-2"><CreditCard className="w-4 h-4 text-gray-400" /> {t("planRow")}</span>
                 <span className="text-sm font-semibold text-gray-900">
-                  {planName(currentPlan)} · {profile.billingPeriod === "yearly" ? t("yearly") : t("monthly")}
+                  {planName(currentPlan)}{!profile.proTrial && <> · {profile.billingPeriod === "yearly" ? t("yearly") : t("monthly")}</>}
                 </span>
               </div>
               {profile.subscriptionStatus && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">{t("status")}</span>
-                  <span className={`text-sm font-semibold ${profile.cancelAtPeriodEnd ? "text-amber-600" : profile.subscriptionStatus === "active" ? "text-green-600" : profile.subscriptionStatus === "past_due" ? "text-red-500" : "text-gray-500"}`}>
-                    {profile.cancelAtPeriodEnd ? t("statusCancelScheduled") : profile.subscriptionStatus === "active" ? t("statusActive") : profile.subscriptionStatus === "past_due" ? t("statusPastDue") : profile.subscriptionStatus === "canceled" ? t("statusCanceled") : profile.subscriptionStatus}
+                  <span className={`text-sm font-semibold ${profile.proTrial ? "text-indigo-600" : profile.cancelAtPeriodEnd ? "text-amber-600" : profile.subscriptionStatus === "active" ? "text-green-600" : profile.subscriptionStatus === "past_due" ? "text-red-500" : "text-gray-500"}`}>
+                    {profile.proTrial ? t("statusTrial") : profile.cancelAtPeriodEnd ? t("statusCancelScheduled") : profile.subscriptionStatus === "active" ? t("statusActive") : profile.subscriptionStatus === "past_due" ? t("statusPastDue") : profile.subscriptionStatus === "canceled" ? t("statusCanceled") : profile.subscriptionStatus}
                   </span>
                 </div>
               )}
@@ -213,6 +213,8 @@ function SettingsPageInner() {
                 </div>
               )}
             </div>
+            {/* Essai Pro sans Stripe : rien à gérer côté facturation */}
+            {!profile.proTrial && (
             <div className="mt-5 pt-5 border-t border-gray-100 flex flex-wrap items-center gap-x-6 gap-y-3">
               <button onClick={handlePortal} disabled={loadingPortal}
                 className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-gray-900 transition-colors disabled:opacity-40">
@@ -244,6 +246,7 @@ function SettingsPageInner() {
                 </button>
               )}
             </div>
+            )}
           </section>
         )}
 
