@@ -265,7 +265,7 @@
     "pro": {
       "name": "Pro",
       "description": "Para anfitriones que lo quieren todo",
-      "features": ["Hasta 20 alojamientos", "5 plantillas de libro a elegir", "Módulo de mareas y meteo", "Traducción automática a 6 idiomas", "URL y código QR personalizables", "Actividades ilimitadas", "Importación con IA", "Interfaz de marca blanca", "Soporte prioritario", "Datos de analíticas"]
+      "features": ["Hasta 20 alojamientos", "5 plantillas de libro a elegir", "Módulo de mareas y meteo", "Traducción automática a 6 idiomas", "URL y código QR personalizables", "Actividades ilimitadas", "Importación con IA", "Soporte prioritario", "Datos de analíticas"]
     },
     "agency": {
       "name": "Agencia",

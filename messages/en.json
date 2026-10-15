@@ -265,7 +265,7 @@
     "pro": {
       "name": "Pro",
       "description": "For hosts who want it all",
-      "features": ["Up to 20 properties", "5 book templates to choose from", "Tides & weather module", "Auto-translation into 6 languages", "Customizable URL and QR code", "Unlimited activities", "AI import", "White-label interface", "Priority customer support", "Analytics data"]
+      "features": ["Up to 20 properties", "5 book templates to choose from", "Tides & weather module", "Auto-translation into 6 languages", "Customizable URL and QR code", "Unlimited activities", "AI import", "Priority customer support", "Analytics data"]
     },
     "agency": {
       "name": "Agency",

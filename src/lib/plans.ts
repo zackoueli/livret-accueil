@@ -8,8 +8,7 @@ export type PlanFeature =
   | "custom_slug"          // slug personnalisé
   | "folders"              // dossiers
   | "analytics"            // analytics
-  | "qr_custom"            // personnalisation du QR code
-  | "white_label";         // white-label complet
+  | "qr_custom";           // personnalisation du QR code
 
 export const PLAN_FEATURES: Record<Plan, PlanFeature[]> = {
   free: [],
@@ -28,7 +27,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeature[]> = {
     "folders",
     "analytics",
     "qr_custom",
-    "white_label",
   ],
   agency: [
     "template_grid",
@@ -39,7 +37,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeature[]> = {
     "folders",
     "analytics",
     "qr_custom",
-    "white_label",
   ],
 };
 
@@ -146,7 +143,6 @@ export const PLANS_CONFIG = [
       { label: "URL et QR code personnalisables", included: true },
       { label: "Activités en illimité", included: true },
       { label: "Import IA", included: true },
-      { label: "Interface en marque blanche", included: true },
       { label: "Support client prioritaire", included: true },
       { label: "Données analytics", included: true },
     ],

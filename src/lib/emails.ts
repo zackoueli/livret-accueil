@@ -93,7 +93,6 @@ export async function sendPurchaseConfirmation({
           <li>Jusqu'à 100 logements</li>
           <li>Toutes les fonctionnalités Pro</li>
           <li>Import IA & Analytics</li>
-          <li>White-label</li>
         </ul>` : plan === "pro" ? `
         <ul style="margin:0;padding-left:20px;font-size:14px;color:#374151;line-height:2;">
           <li>Jusqu'à 20 logements</li>

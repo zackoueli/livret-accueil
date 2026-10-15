@@ -265,7 +265,7 @@
     "pro": {
       "name": "Pro",
       "description": "Per gli host che vogliono tutto",
-      "features": ["Fino a 20 alloggi", "5 modelli di libretto a scelta", "Modulo maree e meteo", "Traduzione automatica in 6 lingue", "URL e QR code personalizzabili", "Attività illimitate", "Importazione con IA", "Interfaccia white-label", "Supporto clienti prioritario", "Dati statistici"]
+      "features": ["Fino a 20 alloggi", "5 modelli di libretto a scelta", "Modulo maree e meteo", "Traduzione automatica in 6 lingue", "URL e QR code personalizzabili", "Attività illimitate", "Importazione con IA", "Supporto clienti prioritario", "Dati statistici"]
     },
     "agency": {
       "name": "Agenzia",

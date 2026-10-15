@@ -265,7 +265,7 @@
     "pro": {
       "name": "Pro",
       "description": "Pour les hôtes qui veulent tout",
-      "features": ["Jusqu'à 20 logements", "5 modèles de livret au choix", "Module marée et météo", "Traduction auto pour 6 langues", "URL et QR code personnalisables", "Activités en illimité", "Import IA", "Interface en marque blanche", "Support client prioritaire", "Données analytics"]
+      "features": ["Jusqu'à 20 logements", "5 modèles de livret au choix", "Module marée et météo", "Traduction auto pour 6 langues", "URL et QR code personnalisables", "Activités en illimité", "Import IA", "Support client prioritaire", "Données analytics"]
     },
     "agency": {
       "name": "Agence",
