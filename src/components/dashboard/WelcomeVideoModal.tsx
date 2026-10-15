@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 
-export const WELCOME_VIDEO_ID = "oNjZOIcnFrc";
+export const WELCOME_VIDEO_ID = "P36l1tfmRrM";
 
 export function WelcomeVideoModal({ onClose }: { onClose: () => void }) {
   const t = useTranslations("dashboard");
