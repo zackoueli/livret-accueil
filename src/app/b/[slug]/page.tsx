@@ -43,8 +43,14 @@ export default async function BookletPage({
 
   // Un livret au design réservé aux abonnés ne peut pas être publié par un compte gratuit
   // (l'éditeur bloque, et la fin d'abonnement dépublie) : filet de sécurité côté serveur.
-  const ownerPlan = ((booklet.ownerPlan as string) === "actif" ? "pro" : booklet.ownerPlan ?? "free") as Plan;
+  // Le plan est lu sur le compte du propriétaire : `booklet.ownerPlan` est une copie
+  // dénormalisée qui peut être périmée (plan changé depuis l'admin, livret créé avant, etc.).
+  const owner = booklet.userId ? (await adminDb.collection("users").doc(booklet.userId).get()).data() : undefined;
+  const rawPlan = (owner?.plan ?? booklet.ownerPlan ?? "free") as string;
+  const proTrialExpired = !!owner?.proTrial && !!owner.subscriptionEndDate && owner.subscriptionEndDate * 1000 < Date.now();
+  const ownerPlan = (proTrialExpired ? "free" : rawPlan === "actif" ? "pro" : rawPlan) as Plan;
   if (!planAllowsDesign(ownerPlan, booklet.templateId)) notFound();
+  booklet.ownerPlan = ownerPlan;
 
   // Overrides pour les apercus internes (modale de creation, editeur) : ne modifient
   // jamais le livret stocke, juste le rendu de cette requete.
