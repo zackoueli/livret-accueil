@@ -255,7 +255,7 @@
     "free": {
       "name": "Gratuito",
       "description": "Per scoprire Bunkly",
-      "features": ["1 alloggio incluso", "1 modello di libretto a scelta", "Traduzione manuale", "Moduli di base inclusi", "5 attività a scelta (manualmente)", "Slug personalizzato", "Moduli aggiuntivi", "Importazione con IA", "Badge Bunkly visibile"]
+      "features": ["1 alloggio incluso", "1 modello di libretto a scelta", "Traduzione manuale", "Moduli di base inclusi", "5 attività a scelta (manualmente)", "Slug personalizzato", "Moduli aggiuntivi", "Importazione con IA"]
     },
     "starter": {
       "name": "Starter",

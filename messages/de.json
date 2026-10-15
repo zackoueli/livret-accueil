@@ -255,7 +255,7 @@
     "free": {
       "name": "Kostenlos",
       "description": "Um Bunkly kennenzulernen",
-      "features": ["1 Unterkunft inklusive", "1 Mappen-Vorlage zur Auswahl", "Manuelle Übersetzung", "Basis-Module inklusive", "5 Aktivitäten zur Auswahl (manuell)", "Eigener Slug", "Zusätzliche Module", "KI-Import", "Bunkly-Badge sichtbar"]
+      "features": ["1 Unterkunft inklusive", "1 Mappen-Vorlage zur Auswahl", "Manuelle Übersetzung", "Basis-Module inklusive", "5 Aktivitäten zur Auswahl (manuell)", "Eigener Slug", "Zusätzliche Module", "KI-Import"]
     },
     "starter": {
       "name": "Starter",

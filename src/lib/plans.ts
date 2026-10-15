@@ -9,7 +9,6 @@ export type PlanFeature =
   | "folders"              // dossiers
   | "analytics"            // analytics
   | "qr_custom"            // personnalisation du QR code
-  | "hide_bunkly_badge"    // masquer badge Bunkly
   | "white_label";         // white-label complet
 
 export const PLAN_FEATURES: Record<Plan, PlanFeature[]> = {
@@ -29,7 +28,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeature[]> = {
     "folders",
     "analytics",
     "qr_custom",
-    "hide_bunkly_badge",
     "white_label",
   ],
   agency: [
@@ -41,7 +39,6 @@ export const PLAN_FEATURES: Record<Plan, PlanFeature[]> = {
     "folders",
     "analytics",
     "qr_custom",
-    "hide_bunkly_badge",
     "white_label",
   ],
 };
@@ -112,7 +109,6 @@ export const PLANS_CONFIG = [
       { label: "Slug personnalisé", included: false },
       { label: "Modules supplémentaires", included: false },
       { label: "Import IA", included: false },
-      { label: "Badge Bunkly visible", included: false, negative: true },
     ],
   },
   {

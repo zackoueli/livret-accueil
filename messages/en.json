@@ -255,7 +255,7 @@
     "free": {
       "name": "Free",
       "description": "To discover Bunkly",
-      "features": ["1 property included", "1 book template to choose from", "Manual translation", "Basic modules included", "5 activities of your choice (manual)", "Custom slug", "Extra modules", "AI import", "Bunkly badge visible"]
+      "features": ["1 property included", "1 book template to choose from", "Manual translation", "Basic modules included", "5 activities of your choice (manual)", "Custom slug", "Extra modules", "AI import"]
     },
     "starter": {
       "name": "Starter",

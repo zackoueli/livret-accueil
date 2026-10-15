@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
-import { Booklet, BookletModule, BookletService, ServiceChoiceItem, SupportedLang, SUPPORTED_LANGS, Plan } from "@/types";
+import { Booklet, BookletModule, BookletService, ServiceChoiceItem, SupportedLang, SUPPORTED_LANGS } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
@@ -290,9 +290,8 @@ function CleanMenu({ open, active, showServices, onSelect, onClose }: {
   );
 }
 
-function BunklyCredit({ ownerPlan }: { ownerPlan?: Plan }) {
+function BunklyCredit() {
   const tr = useT();
-  if (ownerPlan === "pro" || ownerPlan === "agency") return null;
   return (
     <div style={{ textAlign: "center", padding: "28px 16px 16px" }}>
       <a href="https://bunkly.co" target="_blank" rel="noopener noreferrer"
@@ -490,7 +489,7 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </div>
       )}
 
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -639,7 +638,7 @@ function PageStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         { key: "other",   label: tr("green") },
       ]} />
 
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -926,7 +925,7 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </div>
       )}
 
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -1014,7 +1013,7 @@ function PageSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </FieldCard>
       )}
 
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -1185,7 +1184,7 @@ function PageServices({ booklet }: { booklet: Booklet }) {
         </div>
       )}
 
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -1277,7 +1276,7 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
         </div>
       )}
 
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }

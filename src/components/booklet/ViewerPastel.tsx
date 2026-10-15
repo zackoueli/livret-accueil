@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, createContext, useContext, Suspense } from "react";
-import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, Plan, BookletService, ServiceChoiceItem } from "@/types";
+import { Booklet, BookletModule, SupportedLang, SUPPORTED_LANGS, BookletService, ServiceChoiceItem } from "@/types";
 import { t, I18nKey } from "@/lib/i18n";
 import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/modules";
 import { geocodableAddress } from "@/lib/geoAddress";
@@ -451,14 +451,13 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
         </div>
       )}
 
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
 
-function BunklyCredit({ ownerPlan }: { ownerPlan?: Plan }) {
+function BunklyCredit() {
   const tr = useT();
-  if (ownerPlan === "pro" || ownerPlan === "agency") return null;
   return (
     <div style={{ textAlign: "center", padding: "20px 0 8px" }}>
       <a href="https://bunkly.co" target="_blank" rel="noopener noreferrer"
@@ -719,7 +718,7 @@ function PageArea({ booklet, onSelectAct }: { booklet: Booklet; onSelectAct: (a:
           </div>
         )}
       </div>
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -989,7 +988,7 @@ function PageCheckout({ booklet }: { booklet: Booklet }) {
           <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{linkify(g(checkout, "thank_you"))}</p>
         )}
       </div>
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -1035,7 +1034,7 @@ function PageLogement({ booklet }: { booklet: Booklet }) {
         <InfoBlock label={tr("linen")} value={g(kitchen, "linen")} />
         <InfoBlock label={tr("waste")} value={g(kitchen, "trash")} />
       </div>
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
@@ -1069,7 +1068,7 @@ function PageRules({ booklet, onSelectCard }: { booklet: Booklet; onSelectCard: 
           <PastelCard key={c.id} tint={c.tint} icon={c.icon} title={c.label} onClick={() => onSelectCard(c.id)} />
         ))}
       </div>
-      <BunklyCredit ownerPlan={booklet.ownerPlan} />
+      <BunklyCredit />
     </div>
   );
 }
