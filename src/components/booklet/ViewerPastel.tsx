@@ -1084,7 +1084,7 @@ function PastelTabBar({ active, onSelect }: { active: PastelTab; onSelect: (t: P
   const tr = useT();
   const sideTabs = [
     { id: "logement" as PastelTab, label: tr("le_logement"), icon: Home },
-    { id: "rules"    as PastelTab, label: "Règles",          icon: ScrollText },
+    { id: "rules"    as PastelTab, label: tr("nav_rules"),    icon: ScrollText },
   ];
   const rightTabs = [
     { id: "area"     as PastelTab, label: tr("nav_area"),     icon: MapPin },
