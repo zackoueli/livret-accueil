@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { X, Languages, Loader2, Check, AlertCircle, Pencil, ChevronDown, ChevronUp } from "lucide-react";
-import { Booklet, SupportedLang, SUPPORTED_LANGS, BookletTranslations } from "@/types";
+import { Booklet, BookletService, SupportedLang, SUPPORTED_LANGS, BookletTranslations } from "@/types";
 import { saveBookletTranslations } from "@/lib/booklets";
+import { getBookletServices } from "@/lib/services";
+import { serviceTranslatableFields, serviceTranslationKey } from "@/lib/bookletLang";
 import { useAuthStore } from "@/store/authStore";
 import { usePlan } from "@/hooks/usePlan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
@@ -57,6 +59,15 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
     setEditData(booklet.translations ?? {});
   }, [booklet.translations]);
 
+  // Services payants du livret : traduits avec le reste (nom, description, unité, choix)
+  const [services, setServices] = useState<BookletService[]>([]);
+  useEffect(() => {
+    if (!user) return;
+    getBookletServices(booklet.id, user.uid)
+      .then(list => setServices(list.filter(s => s.enabled)))
+      .catch(e => console.error("[TranslateModal] services load error:", e));
+  }, [booklet.id, user]);
+
   const toggleLang = (code: SupportedLang) => {
     if (code === sourceLang) return;
     setSelected(prev => {
@@ -93,6 +104,11 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
         }
         if (booklet.title) entries.push({ moduleId: "_meta_", field: "title", text: booklet.title });
         if (booklet.description) entries.push({ moduleId: "_meta_", field: "description", text: booklet.description });
+        for (const service of services) {
+          for (const [field, text] of Object.entries(serviceTranslatableFields(service))) {
+            entries.push({ moduleId: serviceTranslationKey(service.id), field, text });
+          }
+        }
 
         const res = await fetch("/api/translate", {
           method: "POST",
@@ -100,7 +116,7 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
             "Content-Type": "application/json",
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
-          body: JSON.stringify({ texts: entries.map(e => e.text), targetLang: lang }),
+          body: JSON.stringify({ texts: entries.map(e => e.text), targetLang: lang, sourceLang }),
         });
 
         if (res.status === 429) {
@@ -341,6 +357,42 @@ export function TranslateModal({ booklet, onClose, onTranslated }: Props) {
                             <textarea
                               value={modTranslations[field] ?? ""}
                               onChange={e => updateField(editLang, mod.id, field, e.target.value)}
+                              rows={2}
+                              placeholder={t("translationPlaceholder")}
+                              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+              {editLang && services.map(service => {
+                const key = serviceTranslationKey(service.id);
+                const modTranslations = editData[editLang]?.[key] ?? {};
+                const fields = Object.entries(serviceTranslatableFields(service));
+                if (fields.length === 0) return null;
+                const isExpanded = expandedModule === key;
+                return (
+                  <div key={key} className="border border-gray-200 rounded-2xl overflow-hidden">
+                    <button
+                      onClick={() => setExpandedModule(isExpanded ? null : key)}
+                      className="w-full flex items-center justify-between px-4 py-3 bg-gray-50 hover:bg-gray-100 transition-colors text-left">
+                      <span className="text-sm font-semibold text-gray-700">{service.emoji ? `${service.emoji} ` : ""}{service.name}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400">{t("fieldsShort", { count: fields.length })}</span>
+                        {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
+                      </div>
+                    </button>
+                    {isExpanded && (
+                      <div className="divide-y divide-gray-100">
+                        {fields.map(([field, original]) => (
+                          <div key={field} className="px-4 py-3 space-y-1.5">
+                            <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2 leading-relaxed line-clamp-2">{original}</p>
+                            <textarea
+                              value={modTranslations[field] ?? ""}
+                              onChange={e => updateField(editLang, key, field, e.target.value)}
                               rows={2}
                               placeholder={t("translationPlaceholder")}
                               className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-orange-400 focus:border-transparent resize-none"

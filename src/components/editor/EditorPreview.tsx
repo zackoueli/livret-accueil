@@ -59,7 +59,8 @@ export function EditorPreview() {
     );
   }
 
-  const url = `/b/${booklet.slug}`;
+  // Aperçu dans la langue de rédaction, quelle que soit la langue du navigateur de l'hôte
+  const url = `/b/${booklet.slug}?lang=${booklet.defaultLang ?? "fr"}`;
 
   return (
     <aside className="w-full lg:w-80 bg-gray-100 border-l border-gray-200 flex flex-col shrink-0 sticky top-0 h-screen">

@@ -8,6 +8,7 @@ import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
 import { linkify } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
+import { InitialLangCtx } from "./langContext";
 import {
   Copy, Check, MapPin, Clock, Users, Phone, Mail, Navigation,
   Star, ChevronRight, ChevronDown, Globe, QrCode, Menu, X, Minus, Plus,
@@ -1100,7 +1101,7 @@ function CleanAddonsBanner() {
 function PageServices({ booklet }: { booklet: Booklet }) {
   const tr = useT();
   const accent = useAccent();
-  const { services, purchasable } = useAddonServices(booklet);
+  const { services, purchasable } = useAddonServices(booklet, useContext(LangCtx));
   const { buy, purchasing } = useAddonPurchase(booklet.id);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [choiceQuantities, setChoiceQuantities] = useState<Record<string, Record<string, number>>>({});
@@ -1321,7 +1322,8 @@ function LangSelector({ booklet, lang, onSelect }: { booklet: Booklet; lang: Sup
 function CleanContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   const [page, setPage] = useState<CleanPage>("home");
   const [menuOpen, setMenuOpen] = useState(false);
-  const [lang, setLang] = useState<SupportedLang>(rawBooklet.defaultLang ?? "fr");
+  const initialLang = useContext(InitialLangCtx);
+  const [lang, setLang] = useState<SupportedLang>(initialLang ?? rawBooklet.defaultLang ?? "fr");
   const booklet = useTranslatedBooklet(rawBooklet, lang);
   const accent = booklet.accentColor || C.label;
   const showServices = Boolean(booklet.addonsPurchasable);

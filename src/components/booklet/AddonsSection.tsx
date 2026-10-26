@@ -1,16 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Booklet, BookletService } from "@/types";
+import { Booklet, BookletService, SupportedLang } from "@/types";
+import { translateService } from "@/lib/bookletLang";
 import { computeServiceTotal, ServiceSelection } from "@/lib/serviceOptions";
 
 export { computeServiceTotal };
 export type { ServiceSelection };
 
-export function useAddonServices(booklet: Booklet) {
+export function useAddonServices(booklet: Booklet, lang?: SupportedLang) {
   const [services, setServices] = useState<BookletService[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -37,7 +38,13 @@ export function useAddonServices(booklet: Booklet) {
     })();
   }, [booklet.id, booklet.addonsPurchasable]);
 
-  return { services, loading, purchasable: Boolean(booklet.addonsPurchasable) };
+  // Nom, description, unité et choix traduits dans la langue affichée (repli : langue de rédaction)
+  const translated = useMemo(
+    () => (lang ? services.map((s) => translateService(s, booklet, lang)) : services),
+    [services, booklet, lang]
+  );
+
+  return { services: translated, loading, purchasable: Boolean(booklet.addonsPurchasable) };
 }
 
 export function useAddonPurchase(bookletId: string) {

@@ -15,7 +15,7 @@ function currentMonth() {
 }
 
 export async function POST(request: NextRequest) {
-  const { texts, targetLang } = await request.json();
+  const { texts, targetLang, sourceLang } = await request.json();
 
   if (!texts || !targetLang) {
     return Response.json({ error: "Missing parameters" }, { status: 400 });
@@ -76,7 +76,8 @@ export async function POST(request: NextRequest) {
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ q: arr, target: targetLang, source: "fr", format: "text" }),
+      // Langue de rédaction du livret (défaut historique : fr)
+      body: JSON.stringify({ q: arr, target: targetLang, source: SUPPORTED_LANGS.includes(sourceLang) ? sourceLang : "fr", format: "text" }),
     }
   );
 

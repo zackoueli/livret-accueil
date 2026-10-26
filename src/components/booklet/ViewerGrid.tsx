@@ -8,6 +8,7 @@ import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
 import { linkify, shortLinks } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
+import { InitialLangCtx } from "./langContext";
 import {
   Wifi, Key, Thermometer, Wind, Tv, ScrollText, UtensilsCrossed,
   Sparkles, Shield, Phone, Star, MapPin, Clock, Navigation,
@@ -899,7 +900,7 @@ function AddonChoicesPicker({ choices, quantities, onChange }: {
 
 function AddonsGridSection({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const tr = useT();
-  const { services, purchasable } = useAddonServices(booklet);
+  const { services, purchasable } = useAddonServices(booklet, useContext(LangCtx));
   const { buy, purchasing } = useAddonPurchase(booklet.id);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [choiceQuantities, setChoiceQuantities] = useState<Record<string, Record<string, number>>>({});
@@ -1288,7 +1289,8 @@ function LangSelector({ booklet, lang, onSelect }: {
 function GridContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet; onTabChange?: (tab: string) => void }) {
   const [tab, setTab] = useState<GridTab>("home");
   const [drawer, setDrawer] = useState<string | null>(null);
-  const [lang, setLang] = useState<SupportedLang>(rawBooklet.defaultLang ?? "fr");
+  const initialLang = useContext(InitialLangCtx);
+  const [lang, setLang] = useState<SupportedLang>(initialLang ?? rawBooklet.defaultLang ?? "fr");
   const booklet = useTranslatedBooklet(rawBooklet, lang);
   const accent = booklet.accentColor || C.blue;
   const showServices = !!useMod(booklet, "addons") && !!booklet.addonsPurchasable;

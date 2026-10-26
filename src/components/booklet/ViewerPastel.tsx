@@ -8,6 +8,7 @@ import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
 import { linkify, shortLinks } from "./linkify";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
+import { InitialLangCtx } from "./langContext";
 import {
   Wifi, Key, ScrollText,
   Shield, Phone, Star, MapPin, Clock, Navigation,
@@ -798,7 +799,7 @@ function AddonChoicesPicker({ choices, quantities, onChange }: {
 
 function AddonsPastelSection({ booklet }: { booklet: Booklet }) {
   const tr = useT();
-  const { services, purchasable } = useAddonServices(booklet);
+  const { services, purchasable } = useAddonServices(booklet, useContext(LangCtx));
   const { buy, purchasing } = useAddonPurchase(booklet.id);
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const [choiceQuantities, setChoiceQuantities] = useState<Record<string, Record<string, number>>>({});
@@ -1192,7 +1193,8 @@ function PastelContent({ booklet: rawBooklet, onTabChange }: { booklet: Booklet;
   const [sheet, setSheet] = useState<string | null>(null);
   const [ruleSheet, setRuleSheet] = useState<string | null>(null);
   const [selectedAct, setSelectedAct] = useState<Activity | null>(null);
-  const [lang, setLang] = useState<SupportedLang>(rawBooklet.defaultLang ?? "fr");
+  const initialLang = useContext(InitialLangCtx);
+  const [lang, setLang] = useState<SupportedLang>(initialLang ?? rawBooklet.defaultLang ?? "fr");
   const booklet = useTranslatedBooklet(rawBooklet, lang);
 
   const rules = useMod(booklet, "rules");

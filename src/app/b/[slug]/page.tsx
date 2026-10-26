@@ -4,6 +4,8 @@ import { Booklet, Plan } from "@/types";
 import { planAllowsDesign } from "@/lib/plans";
 import { BookletViewer } from "@/components/booklet/BookletViewer";
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { pickBookletLang } from "@/lib/bookletLang";
 
 export const dynamic = "force-dynamic";
 
@@ -24,10 +26,10 @@ export default async function BookletPage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ templateOverride?: string; accentOverride?: string }>;
+  searchParams: Promise<{ templateOverride?: string; accentOverride?: string; lang?: string }>;
 }) {
   const { slug } = await params;
-  const { templateOverride, accentOverride } = await searchParams;
+  const { templateOverride, accentOverride, lang } = await searchParams;
 
   const snap = await adminDb
     .collection("booklets")
@@ -63,5 +65,8 @@ export default async function BookletPage({
       }
     : booklet;
 
-  return <BookletViewer booklet={effectiveBooklet} />;
+  // Ouverture dans la langue du navigateur du voyageur si le livret y est traduit
+  const initialLang = pickBookletLang(booklet, (await headers()).get("accept-language"), lang);
+
+  return <BookletViewer booklet={effectiveBooklet} initialLang={initialLang} />;
 }
