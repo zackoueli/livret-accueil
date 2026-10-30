@@ -255,17 +255,17 @@
     "free": {
       "name": "Free",
       "description": "To discover Bunkly",
-      "features": ["1 property included", "1 book template to choose from", "Manual translation", "Basic modules included", "5 activities of your choice (manual)", "Custom slug", "Extra modules", "AI import"]
+      "features": ["1 property included", "1 book template to choose from", "Manual translation", "Basic modules included", "5 activities of your choice (manual)", "5 photos per booklet", "Custom slug", "Extra modules", "AI import"]
     },
     "starter": {
       "name": "Starter",
       "description": "For serious hosts",
-      "features": ["Up to 5 properties", "3 book templates to choose from", "Auto-translation into 3 languages", "URL with custom slug", "Extra modules included", "15 additional activities", "AI import", "Tides & weather", "Analytics"]
+      "features": ["Up to 5 properties", "3 book templates to choose from", "Auto-translation into 3 languages", "URL with custom slug", "Extra modules included", "15 additional activities", "20 photos per booklet", "AI import", "Tides & weather", "Analytics"]
     },
     "pro": {
       "name": "Pro",
       "description": "For hosts who want it all",
-      "features": ["Up to 20 properties", "5 book templates to choose from", "Tides & weather module", "Auto-translation into 6 languages", "Customizable URL and QR code", "Unlimited activities", "AI import", "Priority customer support", "Analytics data"]
+      "features": ["Up to 20 properties", "5 book templates to choose from", "Tides & weather module", "Auto-translation into 6 languages", "Customizable URL and QR code", "Unlimited activities", "20 photos per booklet", "AI import", "Priority customer support", "Analytics data"]
     },
     "agency": {
       "name": "Agency",
@@ -289,6 +289,10 @@
     "welcomeVideoTitle": "Welcome to Bunkly 👋",
     "welcomeVideoSub": "Learn in a few minutes how to create your welcome book.",
     "welcomeVideoCta": "Let's go",
+    "trialTitle": "🎁 Free Pro subscription for 14 days",
+    "trialBanner": "Enjoy every Pro feature until {date}.",
+    "trialNotice": "When the trial ends, your booklets won't be deleted: they will simply be unpublished and no longer visible to your guests until you subscribe.",
+    "trialCta": "See plans",
     "allBooklets": "All books",
     "newFolder": "New folder",
     "expiringSoon": "Your subscription expires in {days, plural, one {# day} other {# days}}",
@@ -434,6 +438,17 @@
     "dropPhoto": "Drag a photo or click",
     "photoFormats10": "JPG, PNG, WebP · max 10 MB",
     "deletePhoto": "Delete",
+    "modulePhotos": "Module photos",
+    "modulePhotosHint": "A photo can say more than a long text: parking spot, storage, meter…",
+    "photosUsed": "{used} / {limit} photos used in this booklet",
+    "addPhotos": "Add photos",
+    "uploadingPhoto": "Uploading…",
+    "photoAdded": "Photo added!",
+    "imageOnly": "Images only",
+    "photoTooBig": "Image too large (max 10 MB)",
+    "photoLimitReached": "Limit of {limit} photos reached for this booklet",
+    "photoLimitUpgrade": "Upgrade to a paid plan to add up to 20 photos.",
+    "uploadError": "Upload error",
     "placesSearch": "🔍 Automatic search",
     "placesPlaceholder": "E.g.: Skydiving Perpignan...",
     "searchBtn": "Search",

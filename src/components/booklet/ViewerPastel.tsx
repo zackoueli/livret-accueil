@@ -7,6 +7,7 @@ import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/m
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
 import { linkify, shortLinks } from "./linkify";
+import { ModulePhotos, hasPhotos } from "./ModulePhotos";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import { InitialLangCtx } from "./langContext";
 import {
@@ -128,8 +129,8 @@ function PastelCard({ tint, icon, title, tag, onClick, children }: {
 
 // ─── Feuille (sheet) plein écran pastel ───────────────────────────────────────
 
-function Sheet({ open, onClose, tint, icon, title, children }: {
-  open: boolean; onClose: () => void; tint: string; icon: React.ReactNode; title: string; children: React.ReactNode;
+function Sheet({ open, onClose, tint, icon, title, photos, children }: {
+  open: boolean; onClose: () => void; tint: string; icon: React.ReactNode; title: string; photos?: BookletModule; children: React.ReactNode;
 }) {
   if (!open) return null;
   return (
@@ -162,6 +163,7 @@ function Sheet({ open, onClose, tint, icon, title, children }: {
         {/* Contenu */}
         <div style={{ flex: 1, overflowY: "auto", touchAction: "pan-y", padding: "14px 18px", paddingBottom: "max(24px, env(safe-area-inset-bottom))" }}>
           {children}
+          <ModulePhotos mod={photos} radius={16} style={{ marginTop: 12 }} />
         </div>
       </div>
     </div>
@@ -364,7 +366,7 @@ function PageHome({ booklet, setSheet }: { booklet: Booklet; setSheet: (id: stri
   // Logement & Règles ont leur propre onglet — l'accueil garde les essentiels + modules annexes
   const cards = [
     { id: "horaires",  label: tr("schedule"),      icon: <Clock size={18} color={C.ink} />,           tint: C.green,  show: !!(checkinTime || checkoutTime || g(arrival, "checkin_process") || g(arrival, "early_checkin")), order: moduleOrder("arrival") },
-    { id: "access",    label: tr("access_keys"),   icon: <Key size={18} color={C.ink} />,             tint: C.yellow, show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking")), order: moduleOrder("arrival") - 0.1 },
+    { id: "access",    label: tr("access_keys"),   icon: <Key size={18} color={C.ink} />,             tint: C.yellow, show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking") || hasPhotos(arrival)), order: moduleOrder("arrival") - 0.1 },
     { id: "wifi",      label: tr("wifi"),           icon: <Wifi size={18} color={C.ink} />,            tint: C.blue,   show: !!(wifiName || wifiPass || g(accommodation, "wifi_info")), order: moduleOrder("accommodation") },
     { id: "safety",    label: tr("nav_safety"),     icon: <Shield size={18} color={C.ink} />,          tint: C.pink,   show: !!safety,                         order: moduleOrder("safety") },
     { id: "contact",   label: tr("contact"),        icon: <Phone size={18} color={C.ink} />,           tint: C.blue,   show: !!contact,                        order: moduleOrder("contact") },
@@ -534,7 +536,7 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
         <InfoBlock label={tr("wifi")} value={g(accommodation, "wifi_info")} />
       </Sheet>
 
-      <Sheet open={sheet === "access"} onClose={onClose} tint={C.yellow} icon={<Key size={18} color={C.ink} />} title={tr("access_keys")}>
+      <Sheet open={sheet === "access"} onClose={onClose} tint={C.yellow} icon={<Key size={18} color={C.ink} />} title={tr("access_keys")} photos={arrival}>
         {accessCode && (
           <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
             {accessCode.split("").map((char, i) => (
@@ -546,7 +548,7 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
         <InfoBlock label={tr("parking")} value={g(arrival, "parking")} />
       </Sheet>
 
-      <Sheet open={sheet === "safety"} onClose={onClose} tint={C.pink} icon={<Shield size={18} color={C.ink} />} title={tr("safety")}>
+      <Sheet open={sheet === "safety"} onClose={onClose} tint={C.pink} icon={<Shield size={18} color={C.ink} />} title={tr("safety")} photos={safety}>
         {g(safety, "emergency") && (
           <div style={{ background: "#FBE4DC", borderRadius: 18, padding: "14px 16px", marginBottom: 10, border: `1px solid ${C.red}30` }}>
             <p style={{ margin: "0 0 6px", fontSize: 10.5, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("emergency_numbers")}</p>
@@ -580,32 +582,32 @@ function HomeSheets({ booklet, sheet, onClose }: { booklet: Booklet; sheet: stri
         <InfoBlock label={tr("maintenance")} value={g(contact, "maintenance")} />
       </Sheet>
 
-      <Sheet open={sheet === "pool"} onClose={onClose} tint={C.blue} icon={<Waves size={18} color={C.ink} />} title={tr("pool")}>
+      <Sheet open={sheet === "pool"} onClose={onClose} tint={C.blue} icon={<Waves size={18} color={C.ink} />} title={tr("pool")} photos={pool}>
         <InfoBlock label={tr("schedule")} value={g(pool, "hours")} />
         <InfoBlock label={tr("pool_rules")} value={g(pool, "rules")} />
         <InfoBlock label={tr("pool_equip")} value={g(pool, "equipment")} />
         <InfoBlock label={tr("pool_maintenance")} value={g(pool, "maintenance")} />
       </Sheet>
 
-      <Sheet open={sheet === "baby"} onClose={onClose} tint={C.pink} icon={<Baby size={18} color={C.ink} />} title={tr("baby")}>
+      <Sheet open={sheet === "baby"} onClose={onClose} tint={C.pink} icon={<Baby size={18} color={C.ink} />} title={tr("baby")} photos={baby}>
         <InfoBlock label={tr("baby_equip")} value={g(baby, "available")} />
         <InfoBlock label={tr("baby_safety")} value={g(baby, "safety")} />
         <InfoBlock label={tr("baby_rental")} value={g(baby, "rental")} />
       </Sheet>
 
-      <Sheet open={sheet === "pets"} onClose={onClose} tint={C.peach} icon={<Dog size={18} color={C.ink} />} title={tr("pets")}>
+      <Sheet open={sheet === "pets"} onClose={onClose} tint={C.peach} icon={<Dog size={18} color={C.ink} />} title={tr("pets")} photos={petsModule}>
         <InfoBlock label={tr("pets_rules")} value={g(petsModule, "rules")} />
         <InfoBlock label={tr("pets_zones")} value={g(petsModule, "zones")} />
         <InfoBlock label={tr("pets_places")} value={g(petsModule, "nearby")} />
       </Sheet>
 
-      <Sheet open={sheet === "coworking"} onClose={onClose} tint={C.lilac} icon={<Briefcase size={18} color={C.ink} />} title={tr("coworking")}>
+      <Sheet open={sheet === "coworking"} onClose={onClose} tint={C.lilac} icon={<Briefcase size={18} color={C.ink} />} title={tr("coworking")} photos={coworking}>
         <InfoBlock label={tr("workspace")} value={g(coworking, "desk")} />
         <InfoBlock label={tr("wifi_dedicated")} value={g(coworking, "wifi_pro")} />
         <InfoBlock label={tr("screens")} value={g(coworking, "screens")} />
       </Sheet>
 
-      <Sheet open={sheet === "transport"} onClose={onClose} tint={C.yellow} icon={<Bus size={18} color={C.ink} />} title={tr("transport")}>
+      <Sheet open={sheet === "transport"} onClose={onClose} tint={C.yellow} icon={<Bus size={18} color={C.ink} />} title={tr("transport")} photos={transport}>
         <InfoBlock label={tr("public_transport")} value={g(transport, "public")} />
         <InfoBlock label={tr("taxi")} value={g(transport, "taxi")} />
         <InfoBlock label={tr("bikes")} value={g(transport, "bike")} />
@@ -985,6 +987,8 @@ function PageCheckout({ booklet }: { booklet: Booklet }) {
           );
         })()}
 
+        <ModulePhotos mod={checkout} radius={16} />
+
         {g(checkout, "thank_you") && (
           <p style={{ textAlign: "center", margin: "8px 0 0", fontSize: 13, color: C.sub, fontStyle: "italic", lineHeight: 1.7 }}>{linkify(g(checkout, "thank_you"))}</p>
         )}
@@ -1030,10 +1034,12 @@ function PageLogement({ booklet }: { booklet: Booklet }) {
         <InfoBlock label={tr("appliances")} value={g(accommodation, "appliances")} />
         <InfoBlock label={tr("mailbox")} value={g(accommodation, "checkin_code")} />
         <InfoBlock label={tr("other")} value={g(accommodation, "other")} />
+        <ModulePhotos mod={accommodation} radius={16} style={{ marginBottom: 14 }} />
         <InfoBlock label={tr("kitchen_equip")} value={g(kitchen, "equipment")} />
         <InfoBlock label={tr("cleaning")} value={g(kitchen, "cleaning")} />
         <InfoBlock label={tr("linen")} value={g(kitchen, "linen")} />
         <InfoBlock label={tr("waste")} value={g(kitchen, "trash")} />
+        <ModulePhotos mod={kitchen} radius={16} style={{ marginBottom: 14 }} />
       </div>
       <BunklyCredit />
     </div>
@@ -1068,6 +1074,7 @@ function PageRules({ booklet, onSelectCard }: { booklet: Booklet; onSelectCard: 
         {cards.map(c => (
           <PastelCard key={c.id} tint={c.tint} icon={c.icon} title={c.label} onClick={() => onSelectCard(c.id)} />
         ))}
+        <ModulePhotos mod={rules} radius={16} />
       </div>
       <BunklyCredit />
     </div>

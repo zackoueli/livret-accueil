@@ -1,4 +1,4 @@
-import { Plan } from "@/types";
+import { ModuleType, Plan } from "@/types";
 
 export type PlanFeature =
   | "template_grid"        // choix de plusieurs modèles
@@ -82,6 +82,24 @@ export const PLAN_ACTIVITY_LIMIT: Record<Plan, number | null> = {
   agency: null,
 };
 
+// Nombre maximum de photos (tous modules confondus) par livret
+export const PLAN_PHOTO_LIMIT: Record<Plan, number> = {
+  free: 5,
+  starter: 20,
+  pro: 20,
+  agency: 20,
+};
+
+// Modules dans lesquels l'hôte peut ajouter des photos
+export const PHOTO_MODULES: ModuleType[] = [
+  "arrival", "accommodation", "rules", "kitchen", "safety", "checkout",
+  "baby", "pets", "pool", "coworking", "transport", "accessibility", "eco", "practical",
+];
+
+export function countBookletPhotos(modules: { images?: string[] }[]): number {
+  return modules.reduce((n, m) => n + (m.images?.length ?? 0), 0);
+}
+
 // Commission plateforme (%) sur chaque vente de service payant, selon le plan de l'hôte
 export const PLAN_COMMISSION: Record<Plan, number> = {
   free: 20,
@@ -103,6 +121,7 @@ export const PLANS_CONFIG = [
       { label: "Traduction manuelle", included: true },
       { label: "Modules de base inclus", included: true },
       { label: "5 activités au choix (manuellement)", included: true },
+      { label: "5 photos par livret", included: true },
       { label: "Slug personnalisé", included: false },
       { label: "Modules supplémentaires", included: false },
       { label: "Import IA", included: false },
@@ -123,6 +142,7 @@ export const PLANS_CONFIG = [
       { label: "Lien URL avec slug personnalisé", included: true },
       { label: "Modules supplémentaires inclus", included: true },
       { label: "15 activités supplémentaires", included: true },
+      { label: "20 photos par livret", included: true },
       { label: "Import IA", included: false },
       { label: "Marée & météo", included: false },
       { label: "Analytics", included: false },
@@ -142,6 +162,7 @@ export const PLANS_CONFIG = [
       { label: "Traduction auto pour 6 langues", included: true },
       { label: "URL et QR code personnalisables", included: true },
       { label: "Activités en illimité", included: true },
+      { label: "20 photos par livret", included: true },
       { label: "Import IA", included: true },
       { label: "Support client prioritaire", included: true },
       { label: "Données analytics", included: true },

@@ -255,17 +255,17 @@
     "free": {
       "name": "Kostenlos",
       "description": "Um Bunkly kennenzulernen",
-      "features": ["1 Unterkunft inklusive", "1 Mappen-Vorlage zur Auswahl", "Manuelle Übersetzung", "Basis-Module inklusive", "5 Aktivitäten zur Auswahl (manuell)", "Eigener Slug", "Zusätzliche Module", "KI-Import"]
+      "features": ["1 Unterkunft inklusive", "1 Mappen-Vorlage zur Auswahl", "Manuelle Übersetzung", "Basis-Module inklusive", "5 Aktivitäten zur Auswahl (manuell)", "5 Fotos pro Mappe", "Eigener Slug", "Zusätzliche Module", "KI-Import"]
     },
     "starter": {
       "name": "Starter",
       "description": "Für engagierte Gastgeber",
-      "features": ["Bis zu 5 Unterkünfte", "3 Mappen-Vorlagen zur Auswahl", "Auto-Übersetzung in 3 Sprachen", "URL mit eigenem Slug", "Zusätzliche Module inklusive", "15 zusätzliche Aktivitäten", "KI-Import", "Gezeiten & Wetter", "Statistiken"]
+      "features": ["Bis zu 5 Unterkünfte", "3 Mappen-Vorlagen zur Auswahl", "Auto-Übersetzung in 3 Sprachen", "URL mit eigenem Slug", "Zusätzliche Module inklusive", "15 zusätzliche Aktivitäten", "20 Fotos pro Mappe", "KI-Import", "Gezeiten & Wetter", "Statistiken"]
     },
     "pro": {
       "name": "Pro",
       "description": "Für Gastgeber, die alles wollen",
-      "features": ["Bis zu 20 Unterkünfte", "5 Mappen-Vorlagen zur Auswahl", "Gezeiten- & Wetter-Modul", "Auto-Übersetzung in 6 Sprachen", "Anpassbare URL und QR-Code", "Unbegrenzte Aktivitäten", "KI-Import", "Bevorzugter Kundensupport", "Statistik-Daten"]
+      "features": ["Bis zu 20 Unterkünfte", "5 Mappen-Vorlagen zur Auswahl", "Gezeiten- & Wetter-Modul", "Auto-Übersetzung in 6 Sprachen", "Anpassbare URL und QR-Code", "Unbegrenzte Aktivitäten", "20 Fotos pro Mappe", "KI-Import", "Bevorzugter Kundensupport", "Statistik-Daten"]
     },
     "agency": {
       "name": "Agentur",
@@ -289,6 +289,10 @@
     "welcomeVideoTitle": "Willkommen bei Bunkly 👋",
     "welcomeVideoSub": "Erfahren Sie in wenigen Minuten, wie Sie Ihre Willkommensmappe erstellen.",
     "welcomeVideoCta": "Los geht's",
+    "trialTitle": "🎁 Pro-Abo 14 Tage gratis",
+    "trialBanner": "Nutzen Sie alle Pro-Funktionen bis zum {date}.",
+    "trialNotice": "Nach Ende des Tests werden Ihre Mappen nicht gelöscht: Sie werden lediglich depubliziert und sind für Ihre Gäste nicht mehr sichtbar, bis Sie ein Abo abschließen.",
+    "trialCta": "Tarife ansehen",
     "allBooklets": "Alle Mappen",
     "newFolder": "Neuer Ordner",
     "expiringSoon": "Ihr Abonnement läuft in {days, plural, one {# Tag} other {# Tagen}} ab",
@@ -434,6 +438,17 @@
     "dropPhoto": "Foto hierher ziehen oder klicken",
     "photoFormats10": "JPG, PNG, WebP · max. 10 MB",
     "deletePhoto": "Löschen",
+    "modulePhotos": "Fotos des Moduls",
+    "modulePhotosHint": "Ein Foto sagt oft mehr als ein langer Text: Parkplatz, Stauraum, Zähler…",
+    "photosUsed": "{used} / {limit} Fotos in dieser Mappe verwendet",
+    "addPhotos": "Fotos hinzufügen",
+    "uploadingPhoto": "Wird hochgeladen…",
+    "photoAdded": "Foto hinzugefügt!",
+    "imageOnly": "Nur Bilder",
+    "photoTooBig": "Bild zu groß (max. 10 MB)",
+    "photoLimitReached": "Limit von {limit} Fotos für diese Mappe erreicht",
+    "photoLimitUpgrade": "Wechseln Sie zu einem kostenpflichtigen Tarif, um bis zu 20 Fotos hinzuzufügen.",
+    "uploadError": "Fehler beim Hochladen",
     "placesSearch": "🔍 Automatische Suche",
     "placesPlaceholder": "z. B.: Fallschirmsprung Perpignan...",
     "searchBtn": "Suchen",

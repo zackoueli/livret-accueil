@@ -255,17 +255,17 @@
     "free": {
       "name": "Gratis",
       "description": "Para descubrir Bunkly",
-      "features": ["1 alojamiento incluido", "1 plantilla de libro a elegir", "Traducción manual", "Módulos básicos incluidos", "5 actividades a elegir (manualmente)", "Slug personalizado", "Módulos adicionales", "Importación con IA"]
+      "features": ["1 alojamiento incluido", "1 plantilla de libro a elegir", "Traducción manual", "Módulos básicos incluidos", "5 actividades a elegir (manualmente)", "5 fotos por libro", "Slug personalizado", "Módulos adicionales", "Importación con IA"]
     },
     "starter": {
       "name": "Starter",
       "description": "Para anfitriones serios",
-      "features": ["Hasta 5 alojamientos", "3 plantillas de libro a elegir", "Traducción automática a 3 idiomas", "URL con slug personalizado", "Módulos adicionales incluidos", "15 actividades adicionales", "Importación con IA", "Mareas y meteo", "Analíticas"]
+      "features": ["Hasta 5 alojamientos", "3 plantillas de libro a elegir", "Traducción automática a 3 idiomas", "URL con slug personalizado", "Módulos adicionales incluidos", "15 actividades adicionales", "20 fotos por libro", "Importación con IA", "Mareas y meteo", "Analíticas"]
     },
     "pro": {
       "name": "Pro",
       "description": "Para anfitriones que lo quieren todo",
-      "features": ["Hasta 20 alojamientos", "5 plantillas de libro a elegir", "Módulo de mareas y meteo", "Traducción automática a 6 idiomas", "URL y código QR personalizables", "Actividades ilimitadas", "Importación con IA", "Soporte prioritario", "Datos de analíticas"]
+      "features": ["Hasta 20 alojamientos", "5 plantillas de libro a elegir", "Módulo de mareas y meteo", "Traducción automática a 6 idiomas", "URL y código QR personalizables", "Actividades ilimitadas", "20 fotos por libro", "Importación con IA", "Soporte prioritario", "Datos de analíticas"]
     },
     "agency": {
       "name": "Agencia",
@@ -289,6 +289,10 @@
     "welcomeVideoTitle": "Bienvenido a Bunkly 👋",
     "welcomeVideoSub": "Descubre en unos minutos cómo crear tu libro de bienvenida.",
     "welcomeVideoCta": "¡Vamos!",
+    "trialTitle": "🎁 Suscripción Pro gratis durante 14 días",
+    "trialBanner": "Disfruta de todas las funciones Pro hasta el {date}.",
+    "trialNotice": "Al terminar la prueba, tus libros no se eliminarán: simplemente se despublicarán y dejarán de ser visibles para tus huéspedes hasta que te suscribas.",
+    "trialCta": "Ver planes",
     "allBooklets": "Todos los libros",
     "newFolder": "Nueva carpeta",
     "expiringSoon": "Tu suscripción expira en {days, plural, one {# día} other {# días}}",
@@ -434,6 +438,17 @@
     "dropPhoto": "Arrastra una foto o haz clic",
     "photoFormats10": "JPG, PNG, WebP · máx. 10 MB",
     "deletePhoto": "Eliminar",
+    "modulePhotos": "Fotos del módulo",
+    "modulePhotosHint": "A veces una foto explica mejor que un texto largo: plaza de aparcamiento, almacenaje, contador…",
+    "photosUsed": "{used} / {limit} fotos usadas en este libro",
+    "addPhotos": "Añadir fotos",
+    "uploadingPhoto": "Subiendo…",
+    "photoAdded": "¡Foto añadida!",
+    "imageOnly": "Solo imágenes",
+    "photoTooBig": "Imagen demasiado pesada (máx. 10 MB)",
+    "photoLimitReached": "Límite de {limit} fotos alcanzado para este libro",
+    "photoLimitUpgrade": "Pásate a un plan de pago para añadir hasta 20 fotos.",
+    "uploadError": "Error al subir",
     "placesSearch": "🔍 Búsqueda automática",
     "placesPlaceholder": "Ej.: Paracaidismo Perpiñán...",
     "searchBtn": "Buscar",

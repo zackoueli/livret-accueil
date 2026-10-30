@@ -15,6 +15,8 @@ import { CSS } from "@dnd-kit/utilities";
 import { usePlan } from "@/hooks/usePlan";
 import { UpgradeModal } from "@/components/ui/UpgradeModal";
 import { AddonServiceEditor } from "./AddonServiceEditor";
+import { ModulePhotoUploader } from "./ModulePhotoUploader";
+import { PHOTO_MODULES } from "@/lib/plans";
 
 // ── Composant upload photo générique ─────────────────────────────────────────
 
@@ -735,6 +737,10 @@ export function EditorForm() {
             </div>
             );
           })}
+
+          {PHOTO_MODULES.includes(activeModule.type) && (
+            <ModulePhotoUploader bookletId={booklet.id} moduleId={activeModule.id} />
+          )}
         </div>
 
       </div>

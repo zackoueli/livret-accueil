@@ -7,6 +7,7 @@ import { formatTime, parseActivities, parseReviewLinks, Activity } from "@/lib/m
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
 import { linkify } from "./linkify";
+import { ModulePhotos, hasPhotos } from "./ModulePhotos";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import { InitialLangCtx } from "./langContext";
 import {
@@ -112,7 +113,7 @@ function haloBackground(accent: string) {
 // ─── Composants de base : style "fiche" ─────────────────────────────────────
 
 // Carte-fiche : titre de section en haut, contenu aéré, pas de filet interne.
-function FieldCard({ title, count, children }: { title?: string; count?: string; children: React.ReactNode }) {
+function FieldCard({ title, count, photos, children }: { title?: string; count?: string; photos?: BookletModule; children?: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 26 }}>
       {title && (
@@ -123,6 +124,7 @@ function FieldCard({ title, count, children }: { title?: string; count?: string;
       )}
       <div style={{ background: C.card, borderRadius: RADIUS, boxShadow: SHADOW, padding: "8px 20px 20px", overflow: "hidden" }}>
         {children}
+        <ModulePhotos mod={photos} radius={12} style={{ marginTop: 12 }} />
       </div>
     </div>
   );
@@ -323,9 +325,9 @@ function DisclosureList({ mod, rows }: { mod: BookletModule | undefined; rows: {
 function OptionalCard({ mod, title, rows }: {
   mod: BookletModule | undefined; title: string; rows: { key: string; label: string }[];
 }) {
-  if (!mod || !rows.some(r => g(mod, r.key))) return null;
+  if (!mod || (!rows.some(r => g(mod, r.key)) && !hasPhotos(mod))) return null;
   return (
-    <FieldCard title={title}>
+    <FieldCard title={title} photos={mod}>
       <DisclosureList mod={mod} rows={rows} />
     </FieldCard>
   );
@@ -441,8 +443,8 @@ function PageHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </FieldCard>
       )}
 
-      {(keyLocation || parking) && (
-        <FieldCard title={tr("access_keys")}>
+      {(keyLocation || parking || hasPhotos(arrival)) && (
+        <FieldCard title={tr("access_keys")} photos={arrival}>
           <Field label={tr("key_location")} value={keyLocation} />
           {keyLocation && parking && <Div />}
           <Field label={tr("parking")} value={parking} />
@@ -573,20 +575,20 @@ function PageStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </FieldCard>
       )}
 
-      {hasEquip && (
-        <FieldCard title={tr("accommodation")}>
+      {(hasEquip || hasPhotos(accommodation)) && (
+        <FieldCard title={tr("accommodation")} photos={accommodation}>
           <DisclosureList mod={accommodation} rows={equipRows} />
         </FieldCard>
       )}
 
-      {hasRules && (
-        <FieldCard title={tr("rules")}>
+      {(hasRules || hasPhotos(rules)) && (
+        <FieldCard title={tr("rules")} photos={rules}>
           <DisclosureList mod={rules} rows={ruleRows} />
         </FieldCard>
       )}
 
-      {hasKitchen && (
-        <FieldCard title={tr("kitchen")}>
+      {(hasKitchen || hasPhotos(kitchen)) && (
+        <FieldCard title={tr("kitchen")} photos={kitchen}>
           <DisclosureList mod={kitchen} rows={kitchenRows} />
         </FieldCard>
       )}
@@ -882,8 +884,8 @@ function PageArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </div>
       )}
 
-      {(g(neighborhood, "transport") || hasTransportRows) && (
-        <FieldCard title={tr("transport")}>
+      {(g(neighborhood, "transport") || hasTransportRows || hasPhotos(transport)) && (
+        <FieldCard title={tr("transport")} photos={transport}>
           {g(neighborhood, "transport") && (
             <>
               <p style={{ margin: "14px 0", fontSize: 14.5, color: C.label, lineHeight: 1.7, opacity: 0.9, whiteSpace: "pre-line" }}>{linkify(g(neighborhood, "transport"))}</p>
@@ -999,8 +1001,8 @@ function PageSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
         </div>
       )}
 
-      {hasSafetyRows && (
-        <FieldCard title={tr("security")}>
+      {(hasSafetyRows || hasPhotos(safety)) && (
+        <FieldCard title={tr("security")} photos={safety}>
           <DisclosureList mod={safety} rows={safetyRows} />
         </FieldCard>
       )}
@@ -1241,8 +1243,8 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
         </FieldCard>
       )}
 
-      {g(checkout, "keys_return") && (
-        <FieldCard title={tr("key_return")}>
+      {(g(checkout, "keys_return") || hasPhotos(checkout)) && (
+        <FieldCard title={tr("key_return")} photos={checkout}>
           <Field label={tr("key_return")} value={g(checkout, "keys_return")} />
         </FieldCard>
       )}

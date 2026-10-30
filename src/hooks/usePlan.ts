@@ -9,6 +9,7 @@ import {
   PLAN_TRANSLATION_LANGS,
   PLAN_ACTIVITY_LIMIT,
   PLAN_COMMISSION,
+  PLAN_PHOTO_LIMIT,
   PlanFeature,
 } from "@/lib/plans";
 import { Plan } from "@/types";
@@ -33,6 +34,7 @@ export function usePlan() {
     translationLangLimit: PLAN_TRANSLATION_LANGS[plan],
     activityLimit: PLAN_ACTIVITY_LIMIT[plan],
     commissionRate: PLAN_COMMISSION[plan],
+    photoLimit: PLAN_PHOTO_LIMIT[plan],
     isFree: plan === "free",
     isStarter: plan === "starter",
     isPro: plan === "pro",

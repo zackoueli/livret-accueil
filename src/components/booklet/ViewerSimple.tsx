@@ -7,6 +7,7 @@ import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity 
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
 import { linkify, shortLinks } from "./linkify";
+import { ModulePhotos, hasPhotos } from "./ModulePhotos";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import { InitialLangCtx } from "./langContext";
 import {
@@ -379,29 +380,6 @@ function TabWithHero({ booklet, accent, children }: { booklet: Booklet; accent: 
   );
 }
 
-// ─── PhotoGallery ─────────────────────────────────────────────────────────────
-
-function PhotoGallery({ images }: { images: string[] }) {
-  const [active, setActive] = useState<string | null>(null);
-  if (!images.length) return null;
-  return (
-    <>
-      <div style={{ display: "flex", gap: 8, overflowX: "auto", scrollbarWidth: "none", touchAction: "pan-x" }}>
-        {images.map((url, i) => (
-          <div key={i} onClick={() => setActive(url)} style={{ flexShrink: 0, width: 110, height: 78, borderRadius: 14, overflow: "hidden", cursor: "pointer" }}>
-            <img src={url} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-          </div>
-        ))}
-      </div>
-      {active && (
-        <div onClick={() => setActive(null)} style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.94)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
-          <img src={active} alt="" style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: 16 }} />
-        </div>
-      )}
-    </>
-  );
-}
-
 // ─── TAB ACCUEIL ──────────────────────────────────────────────────────────────
 
 function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
@@ -410,9 +388,10 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
   const accommodation = useMod(booklet, "accommodation");
   const contact       = useMod(booklet, "contact");
   const addonsModule  = useMod(booklet, "addons");
+  const checkoutModule = useMod(booklet, "checkout");
 
   const checkinTime  = g(arrival, "checkin_time");
-  const checkoutTime = g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
+  const checkoutTime = g(arrival, "checkout_time") || g(checkoutModule, "checkout_time");
   const accessCode   = g(arrival, "access_code");
   const keyLocation  = g(arrival, "key_location");
   const earlyCheckin = g(arrival, "early_checkin");
@@ -637,10 +616,10 @@ function TabHome({ booklet, accent }: { booklet: Booklet; accent: string }) {
           </div>
         )}
 
-        {(arrival?.images?.length ?? 0) > 0 && (
+        {hasPhotos(arrival) && (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("photos")}</SectionTitle>
-            <PhotoGallery images={arrival!.images!} />
+            <ModulePhotos mod={arrival} />
           </div>
         )}
         <BunklyCredit accent={accent} />
@@ -721,9 +700,10 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
       )}
 
       {/* Équipements */}
-      {equipRows.length > 0 && (
+      {(equipRows.length > 0 || hasPhotos(accommodation)) && (
         <div style={{ marginBottom: 28 }}>
           <SectionTitle>{tr("accommodation")}</SectionTitle>
+          {equipRows.length > 0 && (
           <Card>
             {equipRows.map((r, i) => {
               const isOpen = expandedEquip === r.key;
@@ -752,6 +732,8 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
               );
             })}
           </Card>
+          )}
+          <ModulePhotos mod={accommodation} style={{ marginTop: equipRows.length ? 10 : 0 }} />
         </div>
       )}
 
@@ -765,15 +747,18 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "parties",    icon: <PartyPopper size={18} color="#8B5CF6" />,  color: "#8B5CF6", label: tr("parties") },
           { key: "other",      icon: <Info size={18} color="#6B7280" />,         color: "#6B7280", label: tr("other") },
         ].filter(r => g(rules, r.key));
-        if (!ruleRows.length) return null;
+        if (!ruleRows.length && !hasPhotos(rules)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("rules")}</SectionTitle>
+            {ruleRows.length > 0 && (
             <Card>
               {ruleRows.map((r, i) => (
                 <ExpandableRow key={r.key} icon={<IconBox color={r.color}>{r.icon}</IconBox>} title={r.label} content={g(rules, r.key)} accent={accent} last={i === ruleRows.length - 1} />
               ))}
             </Card>
+            )}
+            <ModulePhotos mod={rules} style={{ marginTop: ruleRows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -787,15 +772,18 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "cleaning",          icon: <Sparkles size={18} color="#8B5CF6" />,        color: "#8B5CF6", label: tr("cleaning") },
           { key: "checkout_cleaning", icon: <Sparkles size={18} color="#EF4444" />,        color: "#EF4444", label: tr("checkout_cleaning") },
         ].filter(f => g(kitchen, f.key));
-        if (!kitchenRows.length) return null;
+        if (!kitchenRows.length && !hasPhotos(kitchen)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("kitchen")}</SectionTitle>
+            {kitchenRows.length > 0 && (
             <Card>
               {kitchenRows.map((f, i) => (
                 <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(kitchen, f.key)} accent={accent} last={i === kitchenRows.length - 1} />
               ))}
             </Card>
+            )}
+            <ModulePhotos mod={kitchen} style={{ marginTop: kitchenRows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -807,11 +795,12 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "safety",    icon: <Shield size={18} color="#10B981" />,       color: "#10B981", label: tr("baby_safety") },
           { key: "rental",    icon: <ShoppingBag size={18} color="#3B82F6" />,  color: "#3B82F6", label: tr("baby_rental") },
         ].filter(f => g(baby, f.key));
-        if (!rows.length) return null;
+        if (!rows.length && !hasPhotos(baby)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("baby")}</SectionTitle>
-            <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(baby, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
+            {rows.length > 0 && <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(baby, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>}
+            <ModulePhotos mod={baby} style={{ marginTop: rows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -823,11 +812,12 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "zones",  icon: <MapPin size={18} color="#3B82F6" />,     color: "#3B82F6", label: tr("pets_zones") },
           { key: "nearby", icon: <Hospital size={18} color="#10B981" />,   color: "#10B981", label: tr("pets_places") },
         ].filter(f => g(petsModule, f.key));
-        if (!rows.length) return null;
+        if (!rows.length && !hasPhotos(petsModule)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("pets")}</SectionTitle>
-            <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(petsModule, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
+            {rows.length > 0 && <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(petsModule, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>}
+            <ModulePhotos mod={petsModule} style={{ marginTop: rows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -840,11 +830,12 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "equipment",   icon: <Waves size={18} color="#10B981" />,     color: "#10B981", label: tr("pool_equip") },
           { key: "maintenance", icon: <Wrench size={18} color="#6B7280" />,    color: "#6B7280", label: tr("pool_maintenance") },
         ].filter(f => g(pool, f.key));
-        if (!rows.length) return null;
+        if (!rows.length && !hasPhotos(pool)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("pool")}</SectionTitle>
-            <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(pool, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
+            {rows.length > 0 && <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(pool, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>}
+            <ModulePhotos mod={pool} style={{ marginTop: rows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -857,11 +848,12 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "screens",  icon: <Monitor size={18} color="#10B981" />,  color: "#10B981", label: tr("screens") },
           { key: "printing", icon: <Briefcase size={18} color="#F59E0B" />, color: "#F59E0B", label: tr("printing") },
         ].filter(f => g(coworking, f.key));
-        if (!rows.length) return null;
+        if (!rows.length && !hasPhotos(coworking)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("coworking")}</SectionTitle>
-            <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(coworking, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
+            {rows.length > 0 && <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(coworking, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>}
+            <ModulePhotos mod={coworking} style={{ marginTop: rows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -874,11 +866,12 @@ function TabStay({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "bathroom",  icon: <Waves size={18} color="#8B5CF6" />,         color: "#8B5CF6", label: tr("bathroom") },
           { key: "equipment", icon: <Dumbbell size={18} color="#6B7280" />,      color: "#6B7280", label: tr("pmr_equip") },
         ].filter(f => g(accessibility, f.key));
-        if (!rows.length) return null;
+        if (!rows.length && !hasPhotos(accessibility)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("accessibility")}</SectionTitle>
-            <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(accessibility, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
+            {rows.length > 0 && <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(accessibility, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>}
+            <ModulePhotos mod={accessibility} style={{ marginTop: rows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -1153,13 +1146,15 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(transport, f.key)} accent={accent} last={i === arr.length - 1} />
               ))}
             </Card>
+            <ModulePhotos mod={transport} style={{ marginTop: 10 }} />
           </div>
         )}
 
         {/* Infos pratiques */}
-        {practical && Object.entries(practical.content).filter(([, v]) => v).length > 0 && (
+        {practical && (Object.entries(practical.content).filter(([, v]) => v).length > 0 || hasPhotos(practical)) && (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("practical")}</SectionTitle>
+            {Object.values(practical.content).some(Boolean) && (
             <Card>
               {[
                 { key: "pharmacy",    icon: <Pill size={18} color="#EF4444" />,        color: "#EF4444", label: tr("pharmacy") },
@@ -1171,6 +1166,8 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
                 <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(practical, f.key)} accent={accent} last={i === arr.length - 1} />
               ))}
             </Card>
+            )}
+            <ModulePhotos mod={practical} style={{ marginTop: Object.values(practical.content).some(Boolean) ? 10 : 0 }} />
           </div>
         )}
 
@@ -1198,11 +1195,12 @@ function TabArea({ booklet, accent }: { booklet: Booklet; accent: string }) {
             { key: "water",   icon: <Droplets size={18} color="#3B82F6" />, color: "#3B82F6", label: tr("water") },
             { key: "other",   icon: <Leaf size={18} color="#10B981" />,    color: "#10B981", label: tr("green") },
           ].filter(f => g(eco, f.key));
-          if (!rows.length) return null;
+          if (!rows.length && !hasPhotos(eco)) return null;
           return (
             <div style={{ marginBottom: 28 }}>
               <SectionTitle>{tr("eco")}</SectionTitle>
-              <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(eco, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
+              {rows.length > 0 && <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(eco, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>}
+              <ModulePhotos mod={eco} style={{ marginTop: rows.length ? 10 : 0 }} />
             </div>
           );
         })()}
@@ -1283,11 +1281,12 @@ function TabSafety({ booklet, accent }: { booklet: Booklet; accent: string }) {
           { key: "water_shutoff",     icon: <Droplets size={18} color="#3B82F6" />, color: "#3B82F6", label: tr("water_shutoff") },
           { key: "hospital",          icon: <Hospital size={18} color="#10B981" />, color: "#10B981", label: tr("hospital") },
         ].filter(f => g(safety, f.key));
-        if (!rows.length) return null;
+        if (!rows.length && !hasPhotos(safety)) return null;
         return (
           <div style={{ marginBottom: 28 }}>
             <SectionTitle>{tr("security")}</SectionTitle>
-            <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(safety, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>
+            {rows.length > 0 && <Card>{rows.map((f, i) => <ExpandableRow key={f.key} icon={<IconBox color={f.color}>{f.icon}</IconBox>} title={f.label} content={g(safety, f.key)} accent={accent} last={i === rows.length - 1} />)}</Card>}
+            <ModulePhotos mod={safety} style={{ marginTop: rows.length ? 10 : 0 }} />
           </div>
         );
       })()}
@@ -1537,6 +1536,12 @@ function TabCheckout({ booklet, accent }: { booklet: Booklet; accent: string }) 
               </div>
             </div>
           </Card>
+        </div>
+      )}
+
+      {hasPhotos(checkout) && (
+        <div style={{ marginBottom: 28 }}>
+          <ModulePhotos mod={checkout} />
         </div>
       )}
 

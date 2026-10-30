@@ -255,17 +255,17 @@
     "free": {
       "name": "Gratuito",
       "description": "Per scoprire Bunkly",
-      "features": ["1 alloggio incluso", "1 modello di libretto a scelta", "Traduzione manuale", "Moduli di base inclusi", "5 attività a scelta (manualmente)", "Slug personalizzato", "Moduli aggiuntivi", "Importazione con IA"]
+      "features": ["1 alloggio incluso", "1 modello di libretto a scelta", "Traduzione manuale", "Moduli di base inclusi", "5 attività a scelta (manualmente)", "5 foto per libretto", "Slug personalizzato", "Moduli aggiuntivi", "Importazione con IA"]
     },
     "starter": {
       "name": "Starter",
       "description": "Per gli host seri",
-      "features": ["Fino a 5 alloggi", "3 modelli di libretto a scelta", "Traduzione automatica in 3 lingue", "URL con slug personalizzato", "Moduli aggiuntivi inclusi", "15 attività aggiuntive", "Importazione con IA", "Maree e meteo", "Statistiche"]
+      "features": ["Fino a 5 alloggi", "3 modelli di libretto a scelta", "Traduzione automatica in 3 lingue", "URL con slug personalizzato", "Moduli aggiuntivi inclusi", "15 attività aggiuntive", "20 foto per libretto", "Importazione con IA", "Maree e meteo", "Statistiche"]
     },
     "pro": {
       "name": "Pro",
       "description": "Per gli host che vogliono tutto",
-      "features": ["Fino a 20 alloggi", "5 modelli di libretto a scelta", "Modulo maree e meteo", "Traduzione automatica in 6 lingue", "URL e QR code personalizzabili", "Attività illimitate", "Importazione con IA", "Supporto clienti prioritario", "Dati statistici"]
+      "features": ["Fino a 20 alloggi", "5 modelli di libretto a scelta", "Modulo maree e meteo", "Traduzione automatica in 6 lingue", "URL e QR code personalizzabili", "Attività illimitate", "20 foto per libretto", "Importazione con IA", "Supporto clienti prioritario", "Dati statistici"]
     },
     "agency": {
       "name": "Agenzia",
@@ -289,6 +289,10 @@
     "welcomeVideoTitle": "Benvenuto su Bunkly 👋",
     "welcomeVideoSub": "Scopri in pochi minuti come creare il tuo libretto di benvenuto.",
     "welcomeVideoCta": "Iniziamo",
+    "trialTitle": "🎁 Abbonamento Pro gratuito per 14 giorni",
+    "trialBanner": "Approfitta di tutte le funzioni Pro fino al {date}.",
+    "trialNotice": "Alla fine della prova i tuoi libretti non verranno eliminati: saranno semplicemente non pubblicati e non più visibili ai tuoi ospiti finché non ti abboni.",
+    "trialCta": "Vedi i piani",
     "allBooklets": "Tutti i libretti",
     "newFolder": "Nuova cartella",
     "expiringSoon": "Il tuo abbonamento scade tra {days, plural, one {# giorno} other {# giorni}}",
@@ -434,6 +438,17 @@
     "dropPhoto": "Trascina una foto o clicca",
     "photoFormats10": "JPG, PNG, WebP · max 10 MB",
     "deletePhoto": "Elimina",
+    "modulePhotos": "Foto del modulo",
+    "modulePhotosHint": "A volte una foto spiega meglio di un lungo testo: posto auto, ripostiglio, contatore…",
+    "photosUsed": "{used} / {limit} foto usate in questo libretto",
+    "addPhotos": "Aggiungi foto",
+    "uploadingPhoto": "Caricamento…",
+    "photoAdded": "Foto aggiunta!",
+    "imageOnly": "Solo immagini",
+    "photoTooBig": "Immagine troppo pesante (max 10 MB)",
+    "photoLimitReached": "Limite di {limit} foto raggiunto per questo libretto",
+    "photoLimitUpgrade": "Passa a un piano a pagamento per aggiungere fino a 20 foto.",
+    "uploadError": "Errore di caricamento",
     "placesSearch": "🔍 Ricerca automatica",
     "placesPlaceholder": "Es.: Paracadutismo Perpignano...",
     "searchBtn": "Cerca",

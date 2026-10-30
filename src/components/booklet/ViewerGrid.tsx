@@ -7,6 +7,7 @@ import { formatTime, parseActivities, parseServices, parseReviewLinks, Activity 
 import { geocodableAddress } from "@/lib/geoAddress";
 import { externalHref, displayUrl } from "@/lib/url";
 import { linkify, shortLinks } from "./linkify";
+import { ModulePhotos, hasPhotos } from "./ModulePhotos";
 import { useAddonServices, useAddonPurchase, useAddonPurchaseConfirmation, fmtAddonPrice, computeServiceTotal } from "@/components/booklet/AddonsSection";
 import { InitialLangCtx } from "./langContext";
 import {
@@ -17,7 +18,7 @@ import {
   Flame, Zap, Droplets, Hospital, ConciergeBell, Wrench,
   Pill, Stethoscope, Store, Building2, WashingMachine, Users,
   Mailbox, Volume2, Cigarette, PartyPopper, ShoppingBag,
-  Home, LogOut, QrCode, Sun, Droplet, Minus, Plus, CreditCard, Mail,
+  Home, LogOut, QrCode, Sun, Droplet, Minus, Plus, CreditCard, Mail, Accessibility,
 } from "lucide-react";
 
 // ─── i18n Context ─────────────────────────────────────────────────────────────
@@ -100,16 +101,20 @@ const MODULE_COLORS: Record<string, string> = {
   pets:      "#84CC16",
   coworking: "#8B5CF6",
   transport: "#F59E0B",
+  accessibility: "#3B82F6",
+  eco:       "#10B981",
+  practical: "#6B7280",
 };
 
 // ─── Drawer ───────────────────────────────────────────────────────────────────
 
-function Drawer({ open, onClose, title, icon, color, children }: {
+function Drawer({ open, onClose, title, icon, color, photos, children }: {
   open: boolean;
   onClose: () => void;
   title: string;
   icon: React.ReactNode;
   color: string;
+  photos?: BookletModule;
   children: React.ReactNode;
 }) {
   if (!open) return null;
@@ -141,6 +146,7 @@ function Drawer({ open, onClose, title, icon, color, children }: {
         {/* Content */}
         <div style={{ overflowY: "auto", flex: 1, padding: "16px 20px 32px" }}>
           {children}
+          <ModulePhotos mod={photos} style={{ marginTop: 16 }} />
         </div>
       </div>
     </div>
@@ -324,7 +330,7 @@ function WeatherDrawerContent({ address, cityOverride, note, tr, accent }: { add
       .catch(() => setError(true));
   }, [address, cityOverride]);
 
-  if (!address && !cityOverride) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Renseignez l'adresse du logement pour afficher la météo.</p>;
+  if (!address && !cityOverride) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>{"Renseignez l'adresse du logement pour afficher la météo."}</p>;
   if (error) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>Impossible de charger la météo.</p>;
   if (!data) return <p style={{ color: C.sub, fontSize: 14, textAlign: "center", padding: "20px 0" }}>{tr("weather_loading")}</p>;
 
@@ -393,6 +399,10 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const pool          = useMod(booklet, "pool");
   const coworking     = useMod(booklet, "coworking");
   const transport     = useMod(booklet, "transport");
+  const accessibility = useMod(booklet, "accessibility");
+  const eco           = useMod(booklet, "eco");
+  const practical     = useMod(booklet, "practical");
+  const checkoutModule = useMod(booklet, "checkout");
   const tidesModule   = useMod(booklet, "tides");
   const weatherModule = useMod(booklet, "weather");
 
@@ -400,7 +410,7 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
   const wifiPass = g(accommodation, "wifi_password");
   const accessCode = g(arrival, "access_code");
   const checkinTime = g(arrival, "checkin_time");
-  const checkoutTime = g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
+  const checkoutTime = g(arrival, "checkout_time") || g(checkoutModule, "checkout_time");
   const hostName = g(contact, "host_name");
   const hostPhoto = g(contact, "host_photo");
   const welcomeMsg = g(contact, "welcome_message") || g(arrival, "welcome_message");
@@ -409,10 +419,10 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
 
   const buttons = [
     { id: "wifi",      label: tr("wifi"),             icon: <Wifi size={20} color="#fff" />,            color: MODULE_COLORS.wifi,      show: !!(wifiName || wifiPass || g(accommodation, "wifi_info")),                         order: moduleOrder("accommodation") },
-    { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking")),             order: moduleOrder("arrival") - 0.1 },
+    { id: "access",    label: tr("access_keys"),       icon: <Key size={20} color="#fff" />,             color: MODULE_COLORS.access,    show: !!(accessCode || g(arrival, "key_location") || g(arrival, "parking") || hasPhotos(arrival)),             order: moduleOrder("arrival") - 0.1 },
     { id: "horaires",  label: tr("schedule"),          icon: <Clock size={20} color="#fff" />,           color: C.green,                 show: !!(checkinTime || checkoutTime || g(arrival, "checkin_process") || g(arrival, "early_checkin")), order: moduleOrder("arrival") },
     { id: "rules",     label: tr("rules"),             icon: <ScrollText size={20} color="#fff" />,      color: MODULE_COLORS.rules,     show: !!rules,                                                                           order: moduleOrder("rules") },
-    { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: ["heating", "ac", "tv", "appliances", "checkin_code", "other"].some(k => g(accommodation, k)), order: moduleOrder("accommodation") + 0.1 },
+    { id: "logement",  label: tr("le_logement"),       icon: <Home size={20} color="#fff" />,            color: "#6366F1",               show: ["heating", "ac", "tv", "appliances", "checkin_code", "other"].some(k => g(accommodation, k)) || hasPhotos(accommodation), order: moduleOrder("accommodation") + 0.1 },
     { id: "kitchen",   label: tr("kitchen_equip"),     icon: <UtensilsCrossed size={20} color="#fff" />, color: MODULE_COLORS.kitchen,   show: !!kitchen,                                                                         order: moduleOrder("kitchen") },
     { id: "cleaning",  label: tr("menage_dechets"),    icon: <Sparkles size={20} color="#fff" />,        color: MODULE_COLORS.cleaning,  show: ["cleaning", "linen", "trash"].some(k => g(kitchen, k)),                            order: moduleOrder("kitchen") + 0.1 },
     { id: "safety",    label: tr("nav_safety"),        icon: <Shield size={20} color="#fff" />,          color: MODULE_COLORS.safety,    show: !!safety,                                                                          order: moduleOrder("safety") },
@@ -422,6 +432,9 @@ function PageHome({ booklet, accent, setDrawer }: { booklet: Booklet; accent: st
     { id: "pets",      label: tr("pets"),              icon: <Dog size={20} color="#fff" />,             color: MODULE_COLORS.pets,      show: !!petsModule,                                                                      order: moduleOrder("pets") },
     { id: "coworking", label: tr("coworking"),         icon: <Briefcase size={20} color="#fff" />,       color: MODULE_COLORS.coworking, show: !!coworking,                                                                       order: moduleOrder("coworking") },
     { id: "transport", label: tr("transport"),         icon: <Bus size={20} color="#fff" />,             color: MODULE_COLORS.transport, show: !!transport,                                                                       order: moduleOrder("transport") },
+    { id: "accessibility", label: tr("accessibility"), icon: <Accessibility size={20} color="#fff" />, color: MODULE_COLORS.accessibility, show: ["access", "elevator", "bathroom", "equipment"].some(k => g(accessibility, k)) || hasPhotos(accessibility), order: moduleOrder("accessibility") },
+    { id: "eco",       label: tr("eco"),               icon: <Leaf size={20} color="#fff" />,            color: MODULE_COLORS.eco,       show: ["sorting", "energy", "water", "other"].some(k => g(eco, k)) || hasPhotos(eco), order: moduleOrder("eco") },
+    { id: "practical", label: tr("practical"),         icon: <Info size={20} color="#fff" />,            color: MODULE_COLORS.practical, show: ["pharmacy", "doctor", "supermarket", "laundry", "city_hall"].some(k => g(practical, k)) || hasPhotos(practical), order: moduleOrder("practical") },
     { id: "tides",     label: tr("tides"),             icon: <Waves size={20} color="#fff" />,           color: "#0EA5E9",               show: !!(tidesModule && g(tidesModule, "port_id")),                                      order: moduleOrder("tides") },
     { id: "weather",   label: tr("weather"),           icon: <Sun size={20} color="#fff" />,             color: "#F59E0B",               show: !!weatherModule,                                                                   order: moduleOrder("weather") },
   ].filter(b => b.show).sort((a, b) => a.order - b.order);
@@ -528,6 +541,10 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
   const pool          = useMod(booklet, "pool");
   const coworking     = useMod(booklet, "coworking");
   const transport     = useMod(booklet, "transport");
+  const accessibility = useMod(booklet, "accessibility");
+  const eco           = useMod(booklet, "eco");
+  const practical     = useMod(booklet, "practical");
+  const checkoutModule = useMod(booklet, "checkout");
   const tidesModule   = useMod(booklet, "tides");
   const weatherModule = useMod(booklet, "weather");
 
@@ -536,7 +553,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
   const wifiSecurity = g(accommodation, "wifi_security");
   const accessCode   = g(arrival, "access_code");
   const checkinTime  = g(arrival, "checkin_time");
-  const checkoutTime = g(arrival, "checkout_time") || g(useMod(booklet, "checkout"), "checkout_time");
+  const checkoutTime = g(arrival, "checkout_time") || g(checkoutModule, "checkout_time");
 
   return (
     <>
@@ -584,7 +601,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         )}
       </Drawer>
 
-      <Drawer open={drawer === "access"} onClose={onClose} title={tr("access_keys")} icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access}>
+      <Drawer open={drawer === "access"} onClose={onClose} title={tr("access_keys")} icon={<Key size={20} color={MODULE_COLORS.access} />} color={MODULE_COLORS.access} photos={arrival}>
         {accessCode && (
           <div style={{ marginBottom: 16 }}>
             <p style={{ margin: "0 0 10px", fontSize: 11, fontWeight: 700, color: C.muted, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("access_code")}</p>
@@ -599,7 +616,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <InfoRow icon={<Car size={18} color={C.orange} />} label={tr("parking")} value={g(arrival, "parking")} color={C.orange} last />
       </Drawer>
 
-      <Drawer open={drawer === "rules"} onClose={onClose} title={tr("rules")} icon={<ScrollText size={20} color={MODULE_COLORS.rules} />} color={MODULE_COLORS.rules}>
+      <Drawer open={drawer === "rules"} onClose={onClose} title={tr("rules")} icon={<ScrollText size={20} color={MODULE_COLORS.rules} />} color={MODULE_COLORS.rules} photos={rules}>
         <InfoRow icon={<Users size={18} color={C.blue} />} label={tr("persons")} value={g(rules, "max_guests")} color={C.blue} />
         <InfoRow icon={<Cigarette size={18} color={C.red} />} label={tr("smoking")} value={g(rules, "smoking")} color={C.red} />
         <InfoRow icon={<Dog size={18} color={C.orange} />} label={tr("pets")} value={g(rules, "pets")} color={C.orange} />
@@ -608,7 +625,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <InfoRow icon={<Info size={18} color={C.muted} />} label={tr("other")} value={g(rules, "other")} color={C.muted} last />
       </Drawer>
 
-      <Drawer open={drawer === "logement"} onClose={onClose} title={tr("le_logement")} icon={<Home size={20} color="#6366F1" />} color="#6366F1">
+      <Drawer open={drawer === "logement"} onClose={onClose} title={tr("le_logement")} icon={<Home size={20} color="#6366F1" />} color="#6366F1" photos={accommodation}>
         <InfoRow icon={<Thermometer size={18} color={MODULE_COLORS.heating} />} label={tr("heating")} value={g(accommodation, "heating")} color={MODULE_COLORS.heating} />
         <InfoRow icon={<Wind size={18} color={MODULE_COLORS.ac} />} label={tr("ac")} value={g(accommodation, "ac")} color={MODULE_COLORS.ac} />
         <InfoRow icon={<Tv size={18} color="#8B5CF6" />} label={tr("tv")} value={g(accommodation, "tv")} color="#8B5CF6" />
@@ -617,7 +634,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <InfoRow icon={<Info size={18} color={C.muted} />} label={tr("other")} value={g(accommodation, "other")} color={C.muted} last />
       </Drawer>
 
-      <Drawer open={drawer === "kitchen"} onClose={onClose} title={tr("kitchen_equip")} icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen}>
+      <Drawer open={drawer === "kitchen"} onClose={onClose} title={tr("kitchen_equip")} icon={<UtensilsCrossed size={20} color={MODULE_COLORS.kitchen} />} color={MODULE_COLORS.kitchen} photos={kitchen}>
         <InfoRow icon={<UtensilsCrossed size={18} color={MODULE_COLORS.kitchen} />} label={tr("kitchen_equip")} value={g(kitchen, "equipment")} color={MODULE_COLORS.kitchen} last />
       </Drawer>
 
@@ -627,7 +644,7 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <InfoRow icon={<Trash2Icon size={18} color={C.green} />} label={tr("waste")} value={g(kitchen, "trash")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "safety"} onClose={onClose} title={tr("safety")} icon={<Shield size={20} color={MODULE_COLORS.safety} />} color={MODULE_COLORS.safety}>
+      <Drawer open={drawer === "safety"} onClose={onClose} title={tr("safety")} icon={<Shield size={20} color={MODULE_COLORS.safety} />} color={MODULE_COLORS.safety} photos={safety}>
         {g(safety, "emergency") && (
           <div style={{ background: "#FFF5F5", borderRadius: 16, padding: "14px 16px", marginBottom: 12, border: "1px solid #FEE2E2" }}>
             <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: C.red, textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("emergency_numbers")}</p>
@@ -659,36 +676,58 @@ function HomeDrawers({ booklet, accent, drawer, onClose }: { booklet: Booklet; a
         <InfoRow icon={<Wrench size={18} color={C.orange} />} label={tr("maintenance")} value={g(contact, "maintenance")} color={C.orange} last />
       </Drawer>
 
-      <Drawer open={drawer === "pool"} onClose={onClose} title={tr("pool")} icon={<Waves size={20} color={MODULE_COLORS.pool} />} color={MODULE_COLORS.pool}>
+      <Drawer open={drawer === "pool"} onClose={onClose} title={tr("pool")} icon={<Waves size={20} color={MODULE_COLORS.pool} />} color={MODULE_COLORS.pool} photos={pool}>
         <InfoRow icon={<Clock size={18} color={C.blue} />} label={tr("schedule")} value={g(pool, "hours")} color={C.blue} />
         <InfoRow icon={<Shield size={18} color={C.red} />} label={tr("pool_rules")} value={g(pool, "rules")} color={C.red} />
         <InfoRow icon={<Waves size={18} color={C.green} />} label={tr("pool_equip")} value={g(pool, "equipment")} color={C.green} />
         <InfoRow icon={<Wrench size={18} color={C.muted} />} label={tr("pool_maintenance")} value={g(pool, "maintenance")} color={C.muted} last />
       </Drawer>
 
-      <Drawer open={drawer === "baby"} onClose={onClose} title={tr("baby")} icon={<Baby size={20} color={MODULE_COLORS.baby} />} color={MODULE_COLORS.baby}>
+      <Drawer open={drawer === "baby"} onClose={onClose} title={tr("baby")} icon={<Baby size={20} color={MODULE_COLORS.baby} />} color={MODULE_COLORS.baby} photos={baby}>
         <InfoRow icon={<Baby size={18} color={MODULE_COLORS.baby} />} label={tr("baby_equip")} value={g(baby, "available")} color={MODULE_COLORS.baby} />
         <InfoRow icon={<Shield size={18} color={C.green} />} label={tr("baby_safety")} value={g(baby, "safety")} color={C.green} />
         <InfoRow icon={<ShoppingBag size={18} color={C.blue} />} label={tr("baby_rental")} value={g(baby, "rental")} color={C.blue} last />
       </Drawer>
 
-      <Drawer open={drawer === "pets"} onClose={onClose} title={tr("pets")} icon={<Dog size={20} color={MODULE_COLORS.pets} />} color={MODULE_COLORS.pets}>
+      <Drawer open={drawer === "pets"} onClose={onClose} title={tr("pets")} icon={<Dog size={20} color={MODULE_COLORS.pets} />} color={MODULE_COLORS.pets} photos={petsModule}>
         <InfoRow icon={<Dog size={18} color={MODULE_COLORS.pets} />} label={tr("pets_rules")} value={g(petsModule, "rules")} color={MODULE_COLORS.pets} />
         <InfoRow icon={<MapPin size={18} color={C.blue} />} label={tr("pets_zones")} value={g(petsModule, "zones")} color={C.blue} />
         <InfoRow icon={<Hospital size={18} color={C.green} />} label={tr("pets_places")} value={g(petsModule, "nearby")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "coworking"} onClose={onClose} title={tr("coworking")} icon={<Briefcase size={20} color={MODULE_COLORS.coworking} />} color={MODULE_COLORS.coworking}>
+      <Drawer open={drawer === "coworking"} onClose={onClose} title={tr("coworking")} icon={<Briefcase size={20} color={MODULE_COLORS.coworking} />} color={MODULE_COLORS.coworking} photos={coworking}>
         <InfoRow icon={<Briefcase size={18} color={MODULE_COLORS.coworking} />} label={tr("workspace")} value={g(coworking, "desk")} color={MODULE_COLORS.coworking} />
         <InfoRow icon={<Wifi size={18} color={C.blue} />} label={tr("wifi_dedicated")} value={g(coworking, "wifi_pro")} color={C.blue} />
         <InfoRow icon={<Tv size={18} color={C.green} />} label={tr("screens")} value={g(coworking, "screens")} color={C.green} last />
       </Drawer>
 
-      <Drawer open={drawer === "transport"} onClose={onClose} title={tr("transport")} icon={<Bus size={20} color={MODULE_COLORS.transport} />} color={MODULE_COLORS.transport}>
+      <Drawer open={drawer === "transport"} onClose={onClose} title={tr("transport")} icon={<Bus size={20} color={MODULE_COLORS.transport} />} color={MODULE_COLORS.transport} photos={transport}>
         <InfoRow icon={<Bus size={18} color={C.blue} />} label={tr("public_transport")} value={g(transport, "public")} color={C.blue} />
         <InfoRow icon={<Car size={18} color={C.orange} />} label={tr("taxi")} value={g(transport, "taxi")} color={C.orange} />
         <InfoRow icon={<Bike size={18} color={C.green} />} label={tr("bikes")} value={g(transport, "bike")} color={C.green} />
         <InfoRow icon={<Plane size={18} color="#8B5CF6" />} label={tr("airport")} value={g(transport, "airport")} color="#8B5CF6" last />
+      </Drawer>
+
+      <Drawer open={drawer === "accessibility"} onClose={onClose} title={tr("accessibility")} icon={<Accessibility size={20} color={MODULE_COLORS.accessibility} />} color={MODULE_COLORS.accessibility} photos={accessibility}>
+        <InfoRow icon={<Accessibility size={18} color={C.blue} />} label={tr("access")} value={g(accessibility, "access")} color={C.blue} />
+        <InfoRow icon={<Building2 size={18} color={C.green} />} label={tr("elevator")} value={g(accessibility, "elevator")} color={C.green} />
+        <InfoRow icon={<Waves size={18} color="#8B5CF6" />} label={tr("bathroom")} value={g(accessibility, "bathroom")} color="#8B5CF6" />
+        <InfoRow icon={<Wrench size={18} color={C.muted} />} label={tr("pmr_equip")} value={g(accessibility, "equipment")} color={C.muted} last />
+      </Drawer>
+
+      <Drawer open={drawer === "eco"} onClose={onClose} title={tr("eco")} icon={<Leaf size={20} color={MODULE_COLORS.eco} />} color={MODULE_COLORS.eco} photos={eco}>
+        <InfoRow icon={<Trash2Icon size={18} color={C.green} />} label={tr("waste")} value={g(eco, "sorting")} color={C.green} />
+        <InfoRow icon={<Zap size={18} color={C.orange} />} label={tr("energy")} value={g(eco, "energy")} color={C.orange} />
+        <InfoRow icon={<Droplets size={18} color={C.blue} />} label={tr("water")} value={g(eco, "water")} color={C.blue} />
+        <InfoRow icon={<Leaf size={18} color={C.green} />} label={tr("green")} value={g(eco, "other")} color={C.green} last />
+      </Drawer>
+
+      <Drawer open={drawer === "practical"} onClose={onClose} title={tr("practical")} icon={<Info size={20} color={MODULE_COLORS.practical} />} color={MODULE_COLORS.practical} photos={practical}>
+        <InfoRow icon={<Pill size={18} color={C.red} />} label={tr("pharmacy")} value={g(practical, "pharmacy")} color={C.red} />
+        <InfoRow icon={<Stethoscope size={18} color={C.blue} />} label={tr("doctor")} value={g(practical, "doctor")} color={C.blue} />
+        <InfoRow icon={<Store size={18} color={C.green} />} label={tr("supermarket")} value={g(practical, "supermarket")} color={C.green} />
+        <InfoRow icon={<WashingMachine size={18} color="#8B5CF6" />} label={tr("laundry")} value={g(practical, "laundry")} color="#8B5CF6" />
+        <InfoRow icon={<Building2 size={18} color={C.muted} />} label={tr("city_hall")} value={g(practical, "city_hall")} color={C.muted} last />
       </Drawer>
 
       <Drawer open={drawer === "tides"} onClose={onClose} title={tr("tides")} icon={<Waves size={20} color="#0EA5E9" />} color="#0EA5E9">
@@ -1111,6 +1150,12 @@ function PageCheckout({ booklet, accent }: { booklet: Booklet; accent: string })
                 <p style={{ margin: "0 0 3px", fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.55)", textTransform: "uppercase", letterSpacing: 0.7 }}>{tr("key_return")}</p>
                 <p style={{ margin: 0, fontSize: 13, color: "rgba(255,255,255,0.85)", lineHeight: 1.6 }}>{linkify(g(checkout, "keys_return"))}</p>
               </div>
+            </div>
+          )}
+
+          {hasPhotos(checkout) && (
+            <div style={{ ...GLASS_CARD, padding: 10 }}>
+              <ModulePhotos mod={checkout} radius={12} />
             </div>
           )}
 

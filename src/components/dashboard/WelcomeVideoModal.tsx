@@ -5,7 +5,8 @@ import { X } from "lucide-react";
 
 export const WELCOME_VIDEO_ID = "P36l1tfmRrM";
 
-export function WelcomeVideoModal({ onClose }: { onClose: () => void }) {
+// trialEndLabel : date de fin de l'essai Pro offert, si l'utilisateur en profite
+export function WelcomeVideoModal({ onClose, trialEndLabel }: { onClose: () => void; trialEndLabel?: string }) {
   const t = useTranslations("dashboard");
 
   return (
@@ -21,6 +22,13 @@ export function WelcomeVideoModal({ onClose }: { onClose: () => void }) {
             <X className="w-4 h-4 text-gray-500" />
           </button>
         </div>
+        {trialEndLabel && (
+          <div className="mx-6 mb-4 rounded-2xl bg-indigo-50 border border-indigo-100 px-4 py-3">
+            <p className="text-sm font-semibold text-indigo-900">{t("trialTitle")}</p>
+            <p className="text-xs text-indigo-800 mt-0.5">{t("trialBanner", { date: trialEndLabel })}</p>
+            <p className="text-xs text-indigo-700/80 mt-1 leading-relaxed">{t("trialNotice")}</p>
+          </div>
+        )}
         <div className="px-6">
           <div className="relative w-full overflow-hidden rounded-2xl bg-black" style={{ aspectRatio: "16 / 9" }}>
             <iframe

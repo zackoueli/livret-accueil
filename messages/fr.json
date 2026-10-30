@@ -255,17 +255,17 @@
     "free": {
       "name": "Gratuit",
       "description": "Pour découvrir Bunkly",
-      "features": ["1 logement inclus", "1 modèle de livret au choix", "Traduction manuelle", "Modules de base inclus", "5 activités au choix (manuellement)", "Slug personnalisé", "Modules supplémentaires", "Import IA"]
+      "features": ["1 logement inclus", "1 modèle de livret au choix", "Traduction manuelle", "Modules de base inclus", "5 activités au choix (manuellement)", "5 photos par livret", "Slug personnalisé", "Modules supplémentaires", "Import IA"]
     },
     "starter": {
       "name": "Starter",
       "description": "Pour les hôtes sérieux",
-      "features": ["Jusqu'à 5 logements", "3 modèles de livret au choix", "Traduction auto pour 3 langues", "Lien URL avec slug personnalisé", "Modules supplémentaires inclus", "15 activités supplémentaires", "Import IA", "Marée & météo", "Analytics"]
+      "features": ["Jusqu'à 5 logements", "3 modèles de livret au choix", "Traduction auto pour 3 langues", "Lien URL avec slug personnalisé", "Modules supplémentaires inclus", "15 activités supplémentaires", "20 photos par livret", "Import IA", "Marée & météo", "Analytics"]
     },
     "pro": {
       "name": "Pro",
       "description": "Pour les hôtes qui veulent tout",
-      "features": ["Jusqu'à 20 logements", "5 modèles de livret au choix", "Module marée et météo", "Traduction auto pour 6 langues", "URL et QR code personnalisables", "Activités en illimité", "Import IA", "Support client prioritaire", "Données analytics"]
+      "features": ["Jusqu'à 20 logements", "5 modèles de livret au choix", "Module marée et météo", "Traduction auto pour 6 langues", "URL et QR code personnalisables", "Activités en illimité", "20 photos par livret", "Import IA", "Support client prioritaire", "Données analytics"]
     },
     "agency": {
       "name": "Agence",
@@ -289,6 +289,10 @@
     "welcomeVideoTitle": "Bienvenue sur Bunkly 👋",
     "welcomeVideoSub": "Découvrez en quelques minutes comment créer votre livret d'accueil.",
     "welcomeVideoCta": "C'est parti",
+    "trialTitle": "🎁 Abonnement Pro offert pendant 14 jours",
+    "trialBanner": "Profitez de toutes les fonctionnalités Pro jusqu'au {date}.",
+    "trialNotice": "À la fin de l'essai, vos livrets ne seront pas supprimés : ils seront simplement dépubliés et ne seront plus visibles par vos voyageurs tant que vous n'aurez pas souscrit d'abonnement.",
+    "trialCta": "Voir les offres",
     "allBooklets": "Tous les livrets",
     "newFolder": "Nouveau dossier",
     "expiringSoon": "Votre abonnement expire dans {days, plural, one {# jour} other {# jours}}",
@@ -434,6 +438,17 @@
     "dropPhoto": "Glisser une photo ou cliquer",
     "photoFormats10": "JPG, PNG, WebP · max 10 Mo",
     "deletePhoto": "Supprimer",
+    "modulePhotos": "Photos du module",
+    "modulePhotosHint": "Une photo vaut parfois mieux qu'un long texte : place de parking, rangement, compteur…",
+    "photosUsed": "{used} / {limit} photos utilisées dans ce livret",
+    "addPhotos": "Ajouter des photos",
+    "uploadingPhoto": "Envoi…",
+    "photoAdded": "Photo ajoutée !",
+    "imageOnly": "Images uniquement",
+    "photoTooBig": "Image trop lourde (max 10 Mo)",
+    "photoLimitReached": "Limite de {limit} photos atteinte pour ce livret",
+    "photoLimitUpgrade": "Passez à une offre payante pour ajouter jusqu'à 20 photos.",
+    "uploadError": "Erreur d'envoi",
     "placesSearch": "🔍 Recherche automatique",
     "placesPlaceholder": "Ex : Saut en parachute Perpignan...",
     "searchBtn": "Chercher",

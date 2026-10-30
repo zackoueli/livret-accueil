@@ -119,7 +119,6 @@ function DashboardPageInner() {
   const [loadingBooklets, setLoadingBooklets] = useState(true);
   const [creating, setCreating] = useState(false);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
-  const duplicatingRef = useRef(false);
   const [showNewModal, setShowNewModal] = useState(false);
   const [shareBooklet, setShareBooklet] = useState<Booklet | null>(null);
   const [analyticsBooklet, setAnalyticsBooklet] = useState<Booklet | null>(null);
@@ -132,10 +131,17 @@ function DashboardPageInner() {
 
   // Bandeau expiration
   const subscriptionEndDate = profile?.subscriptionEndDate;
+  // Heure figée au montage : Date.now() pendant le rendu rendrait le composant impur
+  const [now] = useState(() => Date.now());
   const daysUntilExpiry = subscriptionEndDate
-    ? Math.ceil((subscriptionEndDate * 1000 - Date.now()) / (1000 * 60 * 60 * 24))
+    ? Math.ceil((subscriptionEndDate * 1000 - now) / (1000 * 60 * 60 * 24))
     : null;
-  const isExpiringSoon = !isFree && daysUntilExpiry !== null && daysUntilExpiry <= 7 && daysUntilExpiry > 0;
+  // Essai Pro de 14 jours offert à l'inscription : bandeau dédié (remplace celui d'expiration)
+  const isProTrial = !isFree && !!profile?.proTrial && daysUntilExpiry !== null && daysUntilExpiry > 0;
+  const trialEndLabel = isProTrial && subscriptionEndDate
+    ? new Date(subscriptionEndDate * 1000).toLocaleDateString(locale, { day: "numeric", month: "long" })
+    : "";
+  const isExpiringSoon = !isFree && !isProTrial && daysUntilExpiry !== null && daysUntilExpiry <= 7 && daysUntilExpiry > 0;
   const isExpired = profile?.subscriptionStatus === "canceled" && isFree;
   const [upgradeReason, setUpgradeReason] = useState<string | undefined>();
   const [showUpgrade, setShowUpgrade] = useState(false);
@@ -204,8 +210,8 @@ function DashboardPageInner() {
   };
 
   const handleDuplicate = async (booklet: Booklet) => {
-    if (duplicatingRef.current) return;
-    duplicatingRef.current = true;
+    // Pas de double duplication : prompt() bloque la page, puis duplicatingId prend le relais
+    if (duplicatingId) return;
     try {
       const title = prompt(t("duplicatePrompt"), `${booklet.title} ${t("copySuffix")}`);
       if (!title) return;
@@ -219,7 +225,6 @@ function DashboardPageInner() {
       toast.error(t("duplicateError"));
     } finally {
       setDuplicatingId(null);
-      duplicatingRef.current = false;
     }
   };
 
@@ -352,6 +357,26 @@ function DashboardPageInner() {
       </header>
 
       <main className="max-w-7xl mx-auto px-5 py-10">
+
+        {/* Bandeau essai Pro offert */}
+        {isProTrial && (
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-indigo-50 border border-indigo-200 rounded-2xl px-5 py-4 mb-6">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-indigo-100 flex items-center justify-center shrink-0">
+                <Gift className="w-4 h-4 text-indigo-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-indigo-900 text-sm">{t("trialTitle")}</p>
+                <p className="text-xs text-indigo-800 mt-0.5">{t("trialBanner", { date: trialEndLabel })}</p>
+                <p className="text-xs text-indigo-700/80 mt-1 leading-relaxed">{t("trialNotice")}</p>
+              </div>
+            </div>
+            <button onClick={() => setShowUpgrade(true)}
+              className="shrink-0 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors">
+              {t("trialCta")}
+            </button>
+          </div>
+        )}
 
         {/* Bandeau expiration imminente */}
         {isExpiringSoon && (
@@ -604,7 +629,7 @@ function DashboardPageInner() {
 
       {/* Vidéo de présentation */}
       {(showWelcomeVideo || autoWelcomeVideo) && (
-        <WelcomeVideoModal onClose={closeWelcomeVideo} />
+        <WelcomeVideoModal onClose={closeWelcomeVideo} trialEndLabel={trialEndLabel} />
       )}
 
       {/* Folder modal */}
