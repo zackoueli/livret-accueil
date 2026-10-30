@@ -291,7 +291,7 @@
     "welcomeVideoCta": "Let's go",
     "trialTitle": "🎁 Free Pro subscription for 14 days",
     "trialBanner": "Enjoy every Pro feature until {date}.",
-    "trialNotice": "When the trial ends, your booklets won't be deleted: they will simply be unpublished and no longer visible to your guests until you subscribe.",
+    "trialNotice": "When the trial ends, you'll only have access to one booklet. Your other booklets won't be deleted: they just can't be published without a subscription, and some features will no longer be available.",
     "trialCta": "See plans",
     "allBooklets": "All books",
     "newFolder": "New folder",

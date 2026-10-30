@@ -291,7 +291,7 @@
     "welcomeVideoCta": "C'est parti",
     "trialTitle": "🎁 Abonnement Pro offert pendant 14 jours",
     "trialBanner": "Profitez de toutes les fonctionnalités Pro jusqu'au {date}.",
-    "trialNotice": "À la fin de l'essai, vos livrets ne seront pas supprimés : ils seront simplement dépubliés et ne seront plus visibles par vos voyageurs tant que vous n'aurez pas souscrit d'abonnement.",
+    "trialNotice": "À la fin de l'essai, vous n'aurez plus accès qu'à un seul livret. Vos autres livrets ne seront pas supprimés : ils ne pourront simplement plus être publiés sans abonnement, et certaines fonctionnalités ne seront plus disponibles.",
     "trialCta": "Voir les offres",
     "allBooklets": "Tous les livrets",
     "newFolder": "Nouveau dossier",

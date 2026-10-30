@@ -291,7 +291,7 @@
     "welcomeVideoCta": "¡Vamos!",
     "trialTitle": "🎁 Suscripción Pro gratis durante 14 días",
     "trialBanner": "Disfruta de todas las funciones Pro hasta el {date}.",
-    "trialNotice": "Al terminar la prueba, tus libros no se eliminarán: simplemente se despublicarán y dejarán de ser visibles para tus huéspedes hasta que te suscribas.",
+    "trialNotice": "Al terminar la prueba, solo tendrás acceso a un libro. Tus otros libros no se eliminarán: simplemente no podrán publicarse sin suscripción, y algunas funciones dejarán de estar disponibles.",
     "trialCta": "Ver planes",
     "allBooklets": "Todos los libros",
     "newFolder": "Nueva carpeta",
